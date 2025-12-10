@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container glass-container animate-fade-in" style="max-width: 400px;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">Login</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+        <p>Don't have an account? <a href="{% url 'register' %}" style="color: #667eea;">Create one</a></p>
+    </div>
+</div>
+
+<style>
+    /* Quick fixes for default Django form rendering */
+    p {
+        margin-bottom: 1rem;
+    }
+
+    input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    ul.errorlist {
+        color: #ff6b6b;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}

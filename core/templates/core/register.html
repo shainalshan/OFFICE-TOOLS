@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container glass-container animate-fade-in" style="max-width: 400px;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">Create Account</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn-primary">Sign Up</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+        <p>Already have an account? <a href="{% url 'login' %}" style="color: #667eea;">Login</a></p>
+    </div>
+</div>
+
+<style>
+    p {
+        margin-bottom: 1rem;
+    }
+
+    input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    ul.errorlist {
+        color: #ff6b6b;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .helptext {
+        font-size: 0.8rem;
+        color: #aaa;
+        display: block;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}

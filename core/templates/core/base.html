@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Office Tools Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+    <div class="main-container">
+        <header class="glass-container">
+            <a href="{% url 'home' %}" class="logo">✨ Office Portal</a>
+            <nav style="display: flex; gap: 1rem; align-items: center;">
+                {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <a href="{% url 'admin_dashboard' %}" style="color: #667eea; text-decoration: none;">Admin Panel</a>
+                {% endif %}
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">{{ user.username }}</span>
+                <a href="{% url 'logout' %}"
+                    style="color: #ff6b6b; text-decoration: none; font-size: 0.9rem;">Logout</a>
+                {% else %}
+                <a href="{% url 'login' %}" style="color: var(--text-primary); text-decoration: none;">Login</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        {% if messages %}
+        <div style="margin-bottom: 2rem;">
+            {% for message in messages %}
+            <div class="glass-container"
+                style="padding: 1rem; color: #667eea; text-align: center; margin-bottom: 0.5rem;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

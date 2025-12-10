@@ -1,0 +1,10 @@
+from django import forms
+from .models import Ticket
+
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ['issue', 'priority']
+        widgets = {
+            'issue': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe your issue here...'}),
+        }

@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <h1 style="text-align: center; margin-bottom: 2rem;">Select a Tool</h1>
+
+    <div class="tools-grid">
+        {% for tool in tools %}
+        {% if tool.slug == 'signature' %}
+        <a href="{% url 'create_signature' %}" class="tool-card glass-container">
+            <div class="tool-icon">✍️</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'ticketing' %}
+        <a href="{% url 'my_tickets' %}" class="tool-card glass-container">
+            <div class="tool-icon">🎫</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% else %}
+        <!-- Fallback for generic/future tools -->
+        <div class="tool-card glass-container" style="opacity: 0.7; cursor: not-allowed;">
+            <div class="tool-icon">🔧</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }} (Not Configured)</div>
+        </div>
+        {% endif %}
+        {% empty %}
+        {% if user.is_superuser %}
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">
+            <p>No tools are active. Go to Admin to create tools.</p>
+        </div>
+        {% else %}
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">
+            <p>You don't have access to any tools yet.</p>
+            <p>Please contact the administrator.</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

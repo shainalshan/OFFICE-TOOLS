@@ -1,0 +1,129 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin:0;">Admin Dashboard</h1>
+        <a href="{% url 'admin_ticket_panel' %}" class="btn-primary" target="_blank"
+            style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">
+            🎫 Manage Tickets
+        </a>
+    </div>
+
+    <!-- Pending Approvals -->
+    <section style="margin-bottom: 3rem;">
+        <h2 style="color: #fbbf24; margin-bottom: 1rem;">🕒 Pending Approvals</h2>
+        <div id="pending-users-container" class="glass-container" style="padding: 0;">
+            <!-- Populated by Django initially, updated by JS -->
+            {% include 'core/partials/pending_users_table.html' %}
+        </div>
+    </section>
+
+    <!-- User Management -->
+    <section>
+        <h2 style="color: #667eea; margin-bottom: 1rem;">👥 User Permissions</h2>
+        <div class="glass-container" style="padding: 1rem;">
+            {% for user in active_users %}
+            <div
+                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: bold; font-size: 1.1rem;">{{ user.username }}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">{{ user.email }}</div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <!-- Tools -->
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% for tool in all_tools %}
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
+                            <input type="hidden" name="action" value="assign_tool">
+
+                            {% if tool in user.tool_access.tools.all %}
+                            <button type="submit" class="tool-btn active" title="Click to remove access">
+                                ✅ {{ tool.name }}
+                            </button>
+                            {% else %}
+                            <button type="submit" class="tool-btn" title="Click to grant access">
+                                ⬜ {{ tool.name }}
+                            </button>
+                            {% endif %}
+                        </form>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div
+                        style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1rem; display: flex; gap: 0.5rem;">
+                        <form method="post" style="display: inline;"
+                            onsubmit="let p = prompt('Enter new password (or leave blank for \'temp1234\'):'); if (p === null) return false; this.custom_password.value = p; return true;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="custom_password" value="">
+                            <button type="submit" name="action" value="reset_password"
+                                style="background: #fbbf24; color: black; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                🔑 Reset
+                            </button>
+                        </form>
+                        <form method="post" style="display: inline;"
+                            onsubmit="return confirm('Are you sure you want to suspend this user?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit" name="action" value="suspend"
+                                style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                Suspend
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No active users.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+    .tool-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .tool-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tool-btn.active {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: #10b981;
+        color: #10b981;
+    }
+</style>
+
+<script>
+    function checkNewUsers() {
+        console.log("Checking for new users...");
+        fetch("{% url 'check_pending_users' %}")
+            .then(response => response.text())
+            .then(html => {
+                const container = document.getElementById('pending-users-container');
+                // Only update if content changed significantly (simple check) or just replace always
+                // For simplicity, we just replace the inner HTML of the table part
+                container.innerHTML = html;
+            })
+            .catch(error => console.error('Error polling:', error));
+    }
+
+    // Poll every 5 seconds
+    setInterval(checkNewUsers, 5000);
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin:0;">My Tickets</h1>
+        <a href="{% url 'create_ticket' %}" class="btn-primary"
+            style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem;">+ New Ticket</a>
+    </div>
+
+    {% for ticket in tickets %}
+    <div class="ticket-card priority-{{ ticket.priority }}">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <span style="font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_id }}</span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
+                    {{ ticket.created_at|date:"M d, H:i" }}
+                </span>
+            </div>
+            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        </div>
+
+        <p style="margin: 0; color: var(--text-secondary);">
+            {{ ticket.issue }}
+        </p>
+
+        {% if ticket.status == 'COMPLETED' %}
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: #4ade80;">
+            ✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="glass-container" style="text-align: center; padding: 3rem;">
+        <p style="color: var(--text-secondary);">No active tickets.</p>
+        <p style="font-size: 0.9rem; opacity: 0.7;">Completed tickets disappear after 24 hours.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
