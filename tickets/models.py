@@ -24,6 +24,7 @@ class Ticket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    resolution = models.TextField(blank=True, null=True, help_text="Admin resolution notes")
 
     def save(self, *args, **kwargs):
         if not self.ticket_id:

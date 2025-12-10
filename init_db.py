@@ -21,15 +21,33 @@ tools_data = [
         'is_active': False
     },
     {
-        'name': 'PDF Converter',
-        'slug': 'pdf',
-        'description': 'Coming Soon',
-        'is_active': False
-    },
-    {
         'name': 'Ticketing System',
         'slug': 'ticketing',
         'description': 'Report issues and track status',
+        'is_active': True
+    },
+    {
+        'name': 'Office News',
+        'slug': 'news',
+        'description': 'Latest company updates',
+        'is_active': True
+    },
+    {
+        'name': 'Group Chat',
+        'slug': 'chat',
+        'description': 'Team communication',
+        'is_active': True
+    },
+    {
+        'name': 'PDF to Word',
+        'slug': 'pdf-to-word',
+        'description': 'Convert documents easily',
+        'is_active': True
+    },
+    {
+        'name': 'Asset Management',
+        'slug': 'assets',
+        'description': 'Track company devices and inventory',
         'is_active': True
     }
 ]

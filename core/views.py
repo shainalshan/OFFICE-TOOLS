@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from .models import Tool, UserToolAccess, User
 from .forms import RegistrationForm
+from .decorators import check_tool_access
 
 def home(request):
     if not request.user.is_authenticated:
@@ -62,6 +63,28 @@ def admin_dashboard(request):
 
     if request.method == 'POST':
         action = request.POST.get('action')
+
+        if action == 'create_user':
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+            else:
+                user = User.objects.create_user(username=username, email=email, password=password)
+                user.is_active = True # Auto-activate since admin created it
+                user.save()
+                
+                # Auto-assign ticketing logic
+                access, _ = UserToolAccess.objects.get_or_create(user=user)
+                ticketing = Tool.objects.filter(slug='ticketing').first()
+                if ticketing:
+                    access.tools.add(ticketing)
+                
+                messages.success(request, f'User {username} created successfully.')
+            return redirect('admin_dashboard')
+
         user_id = request.POST.get('user_id')
         user = get_object_or_404(User, id=user_id)
         
@@ -116,7 +139,7 @@ def admin_dashboard(request):
             else:
                 access.tools.add(tool)
                 messages.success(request, f'Assigned {tool.name} to {user.username}.')
-            
+
         return redirect('admin_dashboard')
 
     return render(request, 'core/admin_dashboard.html', {
@@ -124,3 +147,18 @@ def admin_dashboard(request):
         'active_users': active_users,
         'all_tools': all_tools
     })
+
+@login_required
+@check_tool_access('news')
+def office_news(request):
+    return render(request, 'core/tool_placeholder.html', {'tool_name': 'Office News'})
+
+@login_required
+@check_tool_access('chat')
+def group_chat(request):
+    return render(request, 'core/tool_placeholder.html', {'tool_name': 'Group Chat'})
+
+@login_required
+@check_tool_access('pdf-to-word')
+def pdf_to_word(request):
+    return render(request, 'core/tool_placeholder.html', {'tool_name': 'PDF to Word Converter'})

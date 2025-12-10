@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Office Tools Portal{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1.2">
 </head>
 
 <body>
@@ -40,6 +40,54 @@
 
         {% block content %}{% endblock %}
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Request permission
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
+            // Poll for notifications
+            setInterval(checkNotifications, 30000); // 30 seconds
+        });
+
+        async function checkNotifications() {
+            if (Notification.permission !== "granted") return;
+
+            try {
+                const response = await fetch('/news/api/latest/');
+                const data = await response.json();
+
+                if (data.id) {
+                    const lastId = localStorage.getItem('latest_news_id');
+
+                    // If new (ID > saved) AND it is a notification type (or important news)
+                    if (!lastId || data.id > parseInt(lastId)) {
+
+                        // Only notify if it is specifically a NOTIFICATION type as per requirement
+                        // Or if the user wants all news? The prompt said "if it is notification or news... popup"
+                        // So we notify for everything returned by the API (which is just the latest active item)
+
+                        if (data.type === 'NOTIFICATION' || data.type === 'NEWS' || data.type === 'EVENT') {
+                            const notification = new Notification(data.title, {
+                                body: "New update from Office Portal",
+                                icon: "/static/images/logo.png" // Optional placeholder
+                            });
+
+                            notification.onclick = function () {
+                                window.open('/news/', '_blank');
+                            };
+                        }
+
+                        // Update storage
+                        localStorage.setItem('latest_news_id', data.id);
+                    }
+                }
+            } catch (e) {
+                console.error("Error polling news:", e);
+            }
+        }
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,181 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header Stats -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="margin-bottom: 0.5rem;">📦 Asset Management</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Inventory overview for {{ current_tab|title }}
+            location.</p>
+
+        <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <!-- OS Stats -->
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #60a5fa;">{{ mac_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Mac</div>
+            </div>
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #38bdf8;">{{ windows_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Windows</div>
+            </div>
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #a78bfa;">{{ phone_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Phones</div>
+            </div>
+
+            <!-- Inventory Stats -->
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #4ade80;">{{ laptops_remaining }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Available</div>
+            </div>
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #ef4444;">{{ damaged_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Damaged</div>
+            </div>
+            <div class="glass-container" style="padding: 1.5rem; text-align: center;">
+                <div style="font-size: 2rem; color: #fbbf24;">{{ replacements_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Replacements</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions & Tabs Container -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0px;">
+        <!-- Tabs -->
+        <div style="display: flex; gap: 2px;">
+            <a href="?tab=DUBAI" class="excel-tab {% if current_tab == 'DUBAI' %}active{% endif %}">DUBAI DEVICE
+                LIST</a>
+            <a href="?tab=INDIA" class="excel-tab {% if current_tab == 'INDIA' %}active{% endif %}">INDIA DEVICE
+                LIST</a>
+            <a href="?tab=PAKISTAN" class="excel-tab {% if current_tab == 'PAKISTAN' %}active{% endif %}">PAKISTAN
+                DEVICE LIST</a>
+            <a href="#" class="excel-tab">STAFF LIST</a>
+        </div>
+
+        <div style="margin-bottom: 0.5rem;">
+            <a href="{% url 'admin:assets_asset_add' %}" target="_blank" class="btn-primary"
+                style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #10b981;">➕ Add</a>
+            <a href="{% url 'admin:assets_asset_changelist' %}" target="_blank" class="btn-primary"
+                style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #64748b;">🔧 Admin</a>
+        </div>
+    </div>
+
+    <!-- Excel-like Table -->
+    <div class="glass-container" style="overflow-x: auto; padding: 0; border-top-left-radius: 0;">
+        <table
+            style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <thead style="background: #0f766e; color: white;">
+                <tr>
+                    <th class="excel-th">MNI</th>
+                    <th class="excel-th">Staff in Possession</th>
+                    <th class="excel-th">Device Type</th>
+                    <th class="excel-th">Brand</th>
+                    <th class="excel-th">Detail</th>
+                    <th class="excel-th">Serial Number/Device ID</th>
+                    <th class="excel-th">Status</th>
+                    <th class="excel-th">SIGNED</th>
+                    <th class="excel-th">Date Issued</th>
+                    <th class="excel-th">Status/Remarks</th>
+                </tr>
+            </thead>
+            <tbody style="background: white; color: black;">
+                {% for asset in assets %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td class="excel-td" style="color: #64748b;">{{ asset.mni }}</td>
+                    <td class="excel-td" style="font-weight: 500;">
+                        {% if asset.assigned_to %}
+                        {{ asset.assigned_to.username }}
+                        {% elif asset.assigned_to_email %}
+                        {{ asset.assigned_to_email }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="excel-td">{{ asset.get_device_type_display }}</td>
+                    <td class="excel-td">{{ asset.brand }}</td>
+                    <td class="excel-td">{{ asset.model_detail }}</td>
+                    <td class="excel-td" style="font-family: monospace;">{{ asset.serial_number }}</td>
+                    <td class="excel-td">
+                        <span class="status-cell status-{{ asset.status }}">{{ asset.get_status_display }}</span>
+                    </td>
+                    <td class="excel-td" style="text-align: center;">
+                        {% if asset.is_signed %}
+                        <span style="color: #10b981; font-weight: bold;">####</span>
+                        {% else %}
+                        <span style="color: #cbd5e1;">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="excel-td">
+                        {% if asset.date_issued %}{{ asset.date_issued|date:"d-M-Y" }}{% else %}-{% endif %}
+                    </td>
+                    <td class="excel-td" style="color: #475569;">{{ asset.remarks|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" style="padding: 2rem; text-align: center; color: #64748b;">No assets logic for {{
+                        current_tab }}.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .excel-tab {
+        background: rgba(255, 255, 255, 0.05);
+        /* Dark background inactive */
+        color: var(--text-secondary);
+        padding: 0.5rem 1.5rem;
+        text-decoration: none;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: none;
+        transition: all 0.2s;
+    }
+
+    .excel-tab.active {
+        background: #0f766e;
+        /* Match header */
+        color: white;
+        border-color: #0f766e;
+    }
+
+    .excel-tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .excel-th {
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+        font-weight: 600;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        white-space: nowrap;
+    }
+
+    .excel-td {
+        padding: 0.5rem 0.8rem;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    /* Excel Status Styles within White Table */
+    .status-cell {
+        font-weight: 500;
+    }
+
+    .status-IN_STORE {
+        color: #16a34a;
+    }
+
+    .status-IN_USE {
+        color: #2563eb;
+    }
+
+    .status-DAMAGED {
+        color: #dc2626;
+    }
+</style>
+{% endblock %}

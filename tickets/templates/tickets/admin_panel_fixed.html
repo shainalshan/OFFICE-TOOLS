@@ -43,7 +43,9 @@
                     <th style="padding: 1rem;">Priority</th>
                     <th style="padding: 1rem;">Issue</th>
                     <th style="padding: 1rem;">Status</th>
+                    <th style="padding: 1rem;">Resolution</th>
                     <th style="padding: 1rem;">Created</th>
+                    <th style="padding: 1rem;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,28 +57,37 @@
                         <span class="dot-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
                     </td>
                     <td style="padding: 1rem; max-width: 300px;">{{ ticket.issue|truncatechars:50 }}</td>
-                    <td style="padding: 1rem;">
-                        <!-- Status Changer Form -->
-                        <form method="post" style="display: flex; gap: 0.5rem;">
-                            {% csrf_token %}
-                            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-                            <select name="new_status" onchange="this.form.submit()"
+
+                    <!-- Form spans multiple columns -->
+                    <form method="post" style="display: contents;">
+                        {% csrf_token %}
+                        <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+
+                        <td style="padding: 1rem;">
+                            <select name="new_status"
                                 style="padding: 0.25rem; font-size: 0.8rem; width: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="PENDING" {% if ticket.status=='PENDING' %}selected{% endif %}>Pending
-                                </option>
-                                <option value="IN_PROGRESS" {% if ticket.status=='IN_PROGRESS' %}selected{% endif %}>In
-                                    Progress</option>
-                                <option value="COMPLETED" {% if ticket.status=='COMPLETED' %}selected{% endif %}>
-                                    Completed</option>
+                                <option value="PENDING" {% if ticket.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                <option value="COMPLETED" {% if ticket.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
                             </select>
-                        </form>
-                    </td>
-                    <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">{{
-                        ticket.created_at|date:"M d H:i" }}</td>
+                        </td>
+
+                        <td style="padding: 1rem;">
+                             <textarea name="resolution" rows="1" placeholder="Add comment..."
+                                style="width: 150px; padding: 0.25rem; font-size: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; resize: vertical;">{{ ticket.resolution|default:'' }}</textarea>
+                        </td>
+
+                        <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">{{ ticket.created_at|date:"M d H:i" }}</td>
+
+                        <td style="padding: 1rem;">
+                            <button type="submit" class="btn-primary"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto;">💾</button>
+                        </td>
+                    </form>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No tickets
+                    <td colspan="8" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No tickets
                         found.</td>
                 </tr>
                 {% endfor %}

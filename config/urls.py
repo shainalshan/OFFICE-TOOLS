@@ -16,11 +16,17 @@ urlpatterns = [
     path('signature/', signature_views.create_signature, name='create_signature'),
     path('signature/success/', signature_views.signature_success, name='signature_success'),
     path('signature/download/', signature_views.download_signature, name='download_signature'),
-    
     # Ticketing
-    path('tickets/new/', ticket_views.create_ticket, name='create_ticket'),
-    path('tickets/', ticket_views.my_tickets, name='my_tickets'),
-    path('tickets/admin-panel/', ticket_views.admin_ticket_panel, name='admin_ticket_panel'),
-    path('ticketing-system/', ticket_views.admin_ticket_panel, name='standalone_ticket_manage'),
-    path('tickets/reports/', ticket_views.ticket_reports, name='ticket_reports'),
+    path('tickets/', include('tickets.urls')),
+    
+    # Tools
+    path('news/', include('news.urls')),
+    path('assets/', include('assets.urls')),
+    path('monitor/', include('monitor.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,88 +2,159 @@
 
 {% block content %}
 <div class="animate-fade-in">
+    <!-- Header -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 style="margin:0;">Admin Dashboard</h1>
-        <a href="{% url 'admin_ticket_panel' %}" class="btn-primary" target="_blank"
-            style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">
-            🎫 Manage Tickets
+        <!-- Global Actions or Status could go here -->
+    </div>
+
+    <!-- MAIN MENU -->
+    <div id="admin-menu" class="tools-grid">
+        <!-- Create User Card -->
+        <div class="tool-card" onclick="showSection('create-user-section')">
+            <div class="tool-icon">➕</div>
+            <div class="tool-title">Create New User</div>
+            <div class="tool-desc">Add new accounts to the system</div>
+        </div>
+
+        <!-- User Permissions Card -->
+        <div class="tool-card" onclick="showSection('user-permissions-section')">
+            <div class="tool-icon">👥</div>
+            <div class="tool-title">User Permissions</div>
+            <div class="tool-desc">Manage access and active users</div>
+        </div>
+
+        <!-- Pending Approvals Card -->
+        <div class="tool-card" onclick="showSection('pending-approvals-section')">
+            <div class="tool-icon">🕒</div>
+            <div class="tool-title">Pending Approvals</div>
+            <div class="tool-desc">Approve or reject registration requests</div>
+        </div>
+
+        <!-- Manage Tickets Card -->
+        <a href="{% url 'admin_ticket_panel' %}" class="tool-card" target="_blank" style="text-decoration: none;">
+            <div class="tool-icon">🎫</div>
+            <div class="tool-title">Manage Tickets</div>
+            <div class="tool-desc">Open ticketing system in new tab</div>
         </a>
     </div>
 
-    <!-- Pending Approvals -->
-    <section style="margin-bottom: 3rem;">
-        <h2 style="color: #fbbf24; margin-bottom: 1rem;">🕒 Pending Approvals</h2>
-        <div id="pending-users-container" class="glass-container" style="padding: 0;">
-            <!-- Populated by Django initially, updated by JS -->
-            {% include 'core/partials/pending_users_table.html' %}
-        </div>
-    </section>
+    <!-- CREATE USER SECTION -->
+    <div id="create-user-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #4ade80; margin-bottom: 1rem;">➕ Create New User</h2>
+            <div class="glass-container" style="padding: 1.5rem;">
+                <form method="post"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_user">
 
-    <!-- User Management -->
-    <section>
-        <h2 style="color: #667eea; margin-bottom: 1rem;">👥 User Permissions</h2>
-        <div class="glass-container" style="padding: 1rem;">
-            {% for user in active_users %}
-            <div
-                style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-weight: bold; font-size: 1.1rem;">{{ user.username }}</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">{{ user.email }}</div>
-                </div>
-
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <!-- Tools -->
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        {% for tool in all_tools %}
-                        <form method="post" style="display: inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                            <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
-                            <input type="hidden" name="action" value="assign_tool">
-
-                            {% if tool in user.tool_access.tools.all %}
-                            <button type="submit" class="tool-btn active" title="Click to remove access">
-                                ✅ {{ tool.name }}
-                            </button>
-                            {% else %}
-                            <button type="submit" class="tool-btn" title="Click to grant access">
-                                ⬜ {{ tool.name }}
-                            </button>
-                            {% endif %}
-                        </form>
-                        {% endfor %}
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Username</label>
+                        <input type="text" name="username" required placeholder="username">
                     </div>
 
-                    <!-- Actions -->
-                    <div
-                        style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1rem; display: flex; gap: 0.5rem;">
-                        <form method="post" style="display: inline;"
-                            onsubmit="let p = prompt('Enter new password (or leave blank for \'temp1234\'):'); if (p === null) return false; this.custom_password.value = p; return true;">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                            <input type="hidden" name="custom_password" value="">
-                            <button type="submit" name="action" value="reset_password"
-                                style="background: #fbbf24; color: black; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                🔑 Reset
-                            </button>
-                        </form>
-                        <form method="post" style="display: inline;"
-                            onsubmit="return confirm('Are you sure you want to suspend this user?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                            <button type="submit" name="action" value="suspend"
-                                style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                Suspend
-                            </button>
-                        </form>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Email</label>
+                        <input type="email" name="email" required placeholder="user@example.com">
                     </div>
-                </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Password</label>
+                        <input type="password" name="password" required placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin: 0; 
+display: flex; align-items: center; justify-content: center;">Create Account</button>
+                </form>
             </div>
-            {% empty %}
-            <p>No active users.</p>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
+    </div>
+
+    <!-- PENDING APPROVALS SECTION -->
+    <div id="pending-approvals-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #fbbf24; margin-bottom: 1rem;">🕒 Pending Approvals</h2>
+            <div id="pending-users-container" class="glass-container" style="padding: 0;">
+                <!-- Populated by Django initially, updated by JS -->
+                {% include 'core/partials/pending_users_table.html' %}
+            </div>
+        </section>
+    </div>
+
+    <!-- USER PERMISSIONS SECTION -->
+    <div id="user-permissions-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #667eea; margin-bottom: 1rem;">👥 User Permissions</h2>
+            <div class="glass-container" style="padding: 1rem;">
+                {% for user in active_users %}
+                <div
+                    style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">{{ user.username }}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">{{ user.email }}</div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <!-- Tools -->
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            {% for tool in all_tools %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
+                                <input type="hidden" name="action" value="assign_tool">
+
+                                {% if tool in user.tool_access.tools.all %}
+                                <button type="submit" class="tool-btn active" title="Click to remove access">
+                                    ✅ {{ tool.name }}
+                                </button>
+                                {% else %}
+                                <button type="submit" class="tool-btn" title="Click to grant access">
+                                    ⬜ {{ tool.name }}
+                                </button>
+                                {% endif %}
+                            </form>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Actions -->
+                        <div
+                            style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1rem; display: flex; gap: 0.5rem;">
+                            <form method="post" style="display: inline;"
+                                onsubmit="let p = prompt('Enter new password (or leave blank for \'temp1234\'):'); if (p === null) return false; this.custom_password.value = p; return true;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="custom_password" value="">
+                                <button type="submit" name="action" value="reset_password"
+                                    style="background: #fbbf24; color: black; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    🔑 Reset
+                                </button>
+                            </form>
+                            <form method="post" style="display: inline;"
+                                onsubmit="return confirm('Are you sure you want to suspend this user?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="suspend"
+                                    style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    Suspend
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No active users.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
 </div>
 
 <style>
@@ -110,6 +181,34 @@
 </style>
 
 <script>
+    // Navigation Logic
+    function showSection(sectionId) {
+        document.getElementById('admin-menu').style.display = 'none';
+
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+
+        document.getElementById(sectionId).style.display = 'block';
+        localStorage.setItem('admin_last_section', sectionId);
+    }
+
+    function showMenu() {
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        document.getElementById('admin-menu').style.display = 'grid';
+        localStorage.removeItem('admin_last_section');
+    }
+
+    // Restore state on load (useful after form submit)
+    document.addEventListener('DOMContentLoaded', () => {
+        const lastSection = localStorage.getItem('admin_last_section');
+        if (lastSection) {
+            showSection(lastSection);
+        }
+    });
+
     function checkNewUsers() {
         console.log("Checking for new users...");
         fetch("{% url 'check_pending_users' %}")
@@ -123,7 +222,6 @@
             .catch(error => console.error('Error polling:', error));
     }
 
-    // Poll every 5 seconds
     setInterval(checkNewUsers, 5000);
 </script>
 {% endblock %}

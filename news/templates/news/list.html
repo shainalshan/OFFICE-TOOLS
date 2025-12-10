@@ -1,0 +1,310 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Custom Scrollbar for Chat */
+    .chat-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    /* Message Bubbles */
+    .msg-row {
+        display: flex;
+        margin-bottom: 0.5rem;
+    }
+
+    .msg-row.me {
+        justify-content: flex-end;
+    }
+
+    .msg-row.other {
+        justify-content: flex-start;
+    }
+
+    .msg-bubble {
+        max-width: 60%;
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
+        position: relative;
+        font-size: 0.95rem;
+        word-wrap: break-word;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* WhatsApp Colors */
+    .msg-bubble.me {
+        background-color: #005c4b;
+        /* Dark Green for self in Dark Mode */
+        color: #e9edef;
+        border-top-right-radius: 0;
+    }
+
+    .msg-bubble.other {
+        background-color: #202c33;
+        /* Dark Grey for others */
+        color: #e9edef;
+        border-top-left-radius: 0;
+    }
+
+    .msg-meta {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 2px;
+    }
+
+    .msg-author {
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #d1d7db;
+        /* Name color */
+        margin-bottom: 2px;
+    }
+
+    .msg-bubble.me .msg-author {
+        display: none;
+        /* Hide my own name */
+    }
+
+    /* Input Area */
+    .chat-input-area {
+        background-color: #202c33;
+        padding: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+
+<div class="animate-fade-in"
+    style="height: calc(100vh - 140px); display: flex; flex-direction: column; background: #0b141a; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+
+    <!-- Chat Header -->
+    <div
+        style="background-color: #202c33; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div
+            style="width: 40px; height: 40px; background: #00a884; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            📢
+        </div>
+        <div>
+            <div style="font-weight: bold; color: #e9edef;">Office Updates</div>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 1rem; align-items: center;">
+            <!-- Admin Manage Link -->
+            {% if user.is_superuser %}
+            <a href="{% url 'manage_news' %}"
+                style="text-decoration: none; color: #00a884; font-weight: bold; background: rgba(0,0,0,0.2); padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.8rem;">
+                ⚙️ Manage
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="chat-container" class="chat-container"
+        style="flex: 1; padding: 1rem 2rem; overflow-y: auto; background-color: #0b141a; position: relative;">
+
+        <div style="position: relative; z-index: 1;">
+            {% for item in news %}
+            <div class="msg-row {% if item.created_by == user %}me{% else %}other{% endif %}" id="msg-{{ item.id }}">
+                <div class="msg-bubble {% if item.created_by == user %}me{% else %}other{% endif %}">
+                    <div class="msg-author"
+                        style="color: {% if item.type == 'EVENT' %}#f59e0b{% elif item.type == 'NOTIFICATION' %}#ef4444{% else %}#53bdeb{% endif %};">
+                        {{ item.created_by.username }}
+                    </div>
+
+                    {% if item.title and item.title != "Update" %}
+                    <div style="font-weight: bold; margin-bottom: 0.25rem;">{{ item.title }}</div>
+                    {% endif %}
+
+                    <div style="white-space: pre-wrap;">{{ item.content }}</div>
+
+                    {% if item.attachment %}
+                    {% if item.is_image %}
+                    <div style="margin-top: 0.5rem;">
+                        <img src="{{ item.attachment.url }}"
+                            style="max-width: 100%; border-radius: 8px; cursor: pointer;"
+                            onclick="window.open(this.src, '_blank')">
+                    </div>
+                    {% endif %}
+                    <div
+                        style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2rem;">📎</span>
+                        <a href="{{ item.attachment.url }}" target="_blank"
+                            style="color: #53bdeb; text-decoration: none; font-size: 0.9rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 150px;">
+                            {{ item.attachment.name }}
+                        </a>
+                        <a href="{{ item.attachment.url }}" download
+                            style="margin-left: auto; text-decoration: none; font-size: 1.2rem;" title="Download">
+                            ⬇️
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <div class="msg-meta">
+                        {{ item.created_at|date:"H:i" }}
+                        {% if item.created_by == user %}
+                        <span>✓✓</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; color: #8696a0; padding: 2rem; font-size: 0.9rem;">
+                <div
+                    style="background: #202c33; display: inline-block; padding: 0.5rem 1rem; border-radius: 8px; box-shadow: 0 1px 1px rgba(0,0,0,0.1);">
+                    Messages are end-to-end encrypted. No one outside of this chat can read them.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <form method="post" enctype="multipart/form-data" class="chat-input-area">
+        {% csrf_token %}
+
+        <!-- Reminder -->
+        <label for="id_reminder"
+            style="cursor: pointer; color: #8696a0; font-size: 1.2rem; display: flex; align-items: center;"
+            title="Set Reminder">
+            🔔
+        </label>
+        <input type="datetime-local" name="reminder_datetime" id="id_reminder"
+            style="display: none; background: #2a3942; color: white; border: none; border-radius: 4px; padding: 2px;"
+            onchange="this.style.display = 'block';">
+
+        <!-- Attachment -->
+        <label for="id_attachment"
+            style="cursor: pointer; color: #8696a0; font-size: 1.5rem; display: flex; align-items: center;"
+            title="Attach File">
+            📎
+        </label>
+        <input type="file" name="attachment" id="id_attachment" style="display: none;"
+            onchange="document.getElementById('file-indicator').style.display = 'block';">
+        <span id="file-indicator"
+            style="display: none; width: 8px; height: 8px; background: #00a884; border-radius: 50%;"></span>
+
+        <input type="hidden" name="title" value="Update">
+
+        <input type="text" name="content" placeholder="Type a message" required autocomplete="off"
+            style="flex: 1; background: #2a3942; border: none; padding: 0.75rem 1rem; border-radius: 8px; color: #e9edef; font-size: 1rem; outline: none;">
+
+        <!-- Send Button -->
+        </button>
+    </form>
+</div>
+
+<script>
+    // Store latest ID
+    // List is descending (newest first), so first item has max ID.
+    // If list is empty, 0.
+    let lastMsgId = {% if news.first %}{ { news.first.id } } {% else %} 0{% endif %};
+    const currentUser = "{{ user.username }}";
+
+    // Request Notification Permission on first interaction
+    document.body.addEventListener('click', () => {
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }, { once: true });
+
+    async function syncChat() {
+        try {
+            const response = await fetch(`/news/api/messages/?since_id=${lastMsgId}&t=${new Date().getTime()}`);
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (data.messages.length > 0) {
+                const msgWrapper = document.querySelector('#chat-container > div:last-child');
+
+                data.messages.forEach(msg => {
+                    lastMsgId = Math.max(lastMsgId, msg.id);
+
+                    // Prevent duplicate if already exists (paranoia check)
+                    if (document.getElementById(`msg-${msg.id}`)) return;
+
+                    const isMe = msg.is_me;
+                    const rowClass = isMe ? 'me' : 'other';
+                    const bubbleClass = isMe ? 'me' : 'other';
+                    const authorColor = msg.type === 'EVENT' ? '#f59e0b' : (msg.type === 'NOTIFICATION' ? '#ef4444' :
+                        '#53bdeb');
+
+                    let attachmentHtml = '';
+                    if (msg.attachment_url) {
+                        let imgHtml = '';
+                        if (msg.is_image) {
+                            imgHtml = `
+            <div style="margin-top: 0.5rem;">
+                <img src="${msg.attachment_url}" style="max-width: 100%; border-radius: 8px; cursor: pointer;"
+                    onclick="window.open(this.src, '_blank')" onload="container.scrollTop = container.scrollHeight;">
+            </div>`;
+                        }
+
+                        attachmentHtml = `
+            ${imgHtml}
+            <div
+                style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.2rem;">📎</span>
+                <a href="${msg.attachment_url}" target="_blank"
+                    style="color: #53bdeb; text-decoration: none; font-size: 0.9rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 150px;">
+                    Attachment
+                </a>
+                <a href="${msg.attachment_url}" download
+                    style="margin-left: auto; text-decoration: none; font-size: 1.2rem;" title="Download">
+                    ⬇️
+                </a>
+            </div>`;
+                    }
+
+                    let titleHtml = '';
+                    if (msg.title && msg.title !== 'Update') {
+                        titleHtml = `<div style="font-weight: bold; margin-bottom: 0.25rem;">${msg.title}</div>`;
+                    }
+
+                    const html = `
+            <div class="msg-row ${rowClass}" id="msg-${msg.id}">
+                <div class="msg-bubble ${bubbleClass}">
+                    <div class="msg-author" style="color: ${authorColor};">
+                        ${msg.author}
+                    </div>
+
+                    ${titleHtml}
+                    <div style="white-space: pre-wrap;">${msg.content}</div>
+                    ${attachmentHtml}
+
+                    <div class="msg-meta">
+                        ${msg.created_at}
+                        ${isMe ? '<span>✓✓</span>' : ''}
+                    </div>
+                </div>
+            </div>`;
+
+                    // Prepend HTML (Newest at top)
+                    msgWrapper.insertAdjacentHTML('afterbegin', html);
+                });
+            }
+        } catch (e) {
+            console.error("Sync error:", e);
+        }
+    }
+
+    // Poll every 1.5 seconds
+    setInterval(syncChat, 1500);
+</script>
+{% endblock %}
