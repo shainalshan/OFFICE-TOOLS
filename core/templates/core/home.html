@@ -36,6 +36,12 @@
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
+        {% elif tool.slug == 'contact-numbers' %}
+        <a href="{% url 'contact_home' %}" class="tool-card glass-container">
+            <div class="tool-icon">📱</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
         {% else %}
         <!-- Fallback for generic/future tools -->
         <div class="tool-card glass-container" style="opacity: 0.7; cursor: not-allowed;">

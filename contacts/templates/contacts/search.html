@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0;">🔎 Search Directory</h1>
+        <a href="{% url 'contact_home' %}" class="btn-primary"
+            style="background: #475569; text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">
+            ← Back
+        </a>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="glass-container" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by name, designation, or number..."
+                autofocus
+                style="flex: 1; padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: white; font-size: 1.3rem;">
+            <button type="submit" class="btn-primary"
+                style="padding: 0.8rem 1.5rem; font-size: 0.9rem; white-space: nowrap; width: auto;">Search</button>
+        </form>
+
+        <!-- Quick Filters -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="?q=Director" class="filter-chip">Directors</a>
+            <a href="?q=HR" class="filter-chip">HR</a>
+            <a href="?q=Talent" class="filter-chip">Talent Acquisition</a>
+            <a href="?q=IT" class="filter-chip">IT</a>
+            <a href="?q=Manager" class="filter-chip">Managers</a>
+        </div>
+    </div>
+
+    <style>
+        .filter-chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+
+    <!-- Results List -->
+    <div class="glass-container" style="padding: 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                    <th style="padding: 1rem; text-align: left;">Name / Details</th>
+                    <th style="padding: 1rem; text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem;">
+                        <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.2rem;">{{ contact.name }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #cbd5e1;">
+                            {% if contact.designation %}🏢 {{ contact.designation }}<br>{% endif %}
+                            {% if contact.email %}✉️ {{ contact.email }}<br>{% endif %}
+                            📞 {{ contact.phone_number }}
+                        </div>
+                    </td>
+                    <td style="padding: 1rem; text-align: right; vertical-align: middle;">
+                        <a href="tel:{{ contact.phone_number }}"
+                            style="background: #10b981; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                            📞 Call
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                        {% if query %}
+                        No contacts found matching "{{ query }}"
+                        {% else %}
+                        No contacts available.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not query and contacts %}
+        <div
+            style="padding: 1rem; text-align: center; font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.1);">
+            Showing top 20 contacts. Use search to find specific people.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

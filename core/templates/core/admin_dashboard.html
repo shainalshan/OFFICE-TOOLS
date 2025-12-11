@@ -31,12 +31,171 @@
             <div class="tool-desc">Approve or reject registration requests</div>
         </div>
 
+        <!-- Manage Contacts Card -->
+        <div class="tool-card" onclick="showSection('manage-contacts-section')">
+            <div class="tool-icon">📒</div>
+            <div class="tool-title">Manage Contacts</div>
+            <div class="tool-desc">Add or remove company contacts (VCF)</div>
+        </div>
+
         <!-- Manage Tickets Card -->
         <a href="{% url 'admin_ticket_panel' %}" class="tool-card" target="_blank" style="text-decoration: none;">
             <div class="tool-icon">🎫</div>
             <div class="tool-title">Manage Tickets</div>
             <div class="tool-desc">Open ticketing system in new tab</div>
         </a>
+
+        <!-- Notification Settings Card -->
+        <div class="tool-card" onclick="showSection('notification-settings-section')">
+            <div class="tool-icon">🔔</div>
+            <div class="tool-title">Notifications</div>
+            <div class="tool-desc">Manage alerts and subscribers</div>
+        </div>
+
+        <!-- Recovery Card -->
+        <div class="tool-card" onclick="showSection('recovery-section')">
+            <div class="tool-icon">♻️</div>
+            <div class="tool-title">Recovery</div>
+            <div class="tool-desc">View logs and restore deleted items</div>
+        </div>
+    </div>
+
+    <!-- RECOVERY SECTION -->
+    <div id="recovery-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #34d399; margin-bottom: 1rem;">♻️ Audit Logs & Recovery</h2>
+
+            <div class="glass-container" style="padding: 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                            <th style="padding: 1rem; text-align: left;">Time</th>
+                            <th style="padding: 1rem; text-align: left;">User</th>
+                            <th style="padding: 1rem; text-align: left;">Action</th>
+                            <th style="padding: 1rem; text-align: left;">Item</th>
+                            <th style="padding: 1rem; text-align: right;">Restore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">{{
+                                log.timestamp|date:"M d, H:i" }}</td>
+                            <td style="padding: 1rem;">{{ log.user.username|default:"System" }}</td>
+                            <td style="padding: 1rem;">
+                                <span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+                                    {% if log.action == 'CREATE' %}background: rgba(16, 185, 129, 0.2); color: #34d399;
+                                    {% elif log.action == 'DELETE' %}background: rgba(239, 68, 68, 0.2); color: #f87171;
+                                    {% else %}background: rgba(59, 130, 246, 0.2); color: #60a5fa;{% endif %}">
+                                    {{ log.action }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem;">
+                                {{ log.object_repr }}
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ log.model_name }}</div>
+                            </td>
+                            <td style="padding: 1rem; text-align: right;">
+                                {% if log.action == 'DELETE' %}
+                                <a href="{% url 'restore_item' log.id %}"
+                                    onclick="return confirm('Attempt to restore {{ log.object_repr }}?');"
+                                    style="background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; text-decoration: none; font-size: 0.9rem;">
+                                    ↩️ Restore
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No
+                                logs found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- NOTIFICATION SETTINGS SECTION -->
+    <div id="notification-settings-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #6366f1; margin-bottom: 1rem;">🔔 Notification Settings</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                {% for setting in notification_settings %}
+                <div class="glass-container" style="padding: 1.5rem;">
+                    <h3
+                        style="margin-top: 0; color: #e2e8f0; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        {{ setting.get_event_type_display }}
+                    </h3>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                        {% for sub in setting.subscribers.all %}
+                        <div
+                            style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.9rem; color: #a5b4fc; display: flex; align-items: center; gap: 0.5rem;">
+                            {{ sub.username }}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove_subscriber">
+                                <input type="hidden" name="event_type" value="{{ setting.event_type }}">
+                                <input type="hidden" name="sub_user_id" value="{{ sub.id }}">
+                                <button type="submit"
+                                    style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1;">&times;</button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <span style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">No
+                            subscribers</span>
+                        {% endfor %}
+                    </div>
+
+                    <button
+                        onclick="openAddSubscriber('{{ setting.event_type }}', '{{ setting.get_event_type_display }}')"
+                        style="width: 100%; background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.3); color: var(--text-secondary); padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        + Add Subscriber
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- ADD SUBSCRIBER MODAL -->
+    <div id="add-subscriber-modal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="glass-container" style="padding: 2rem; width: 100%; max-width: 500px; position: relative;">
+            <button type="button" onclick="document.getElementById('add-subscriber-modal').style.display = 'none'"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+
+            <h2 style="color: #6366f1; margin-top: 0; margin-bottom: 0.5rem;">Add Subscriber</h2>
+            <p id="modal-event-title"
+                style="color: var(--text-secondary); margin-top: 0; margin-bottom: 1.5rem; font-size: 0.9rem;"></p>
+
+            <div style="margin-bottom: 1.5rem;">
+                <input type="text" id="user-search-input" placeholder="Search user by name..."
+                    style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px;"
+                    onkeyup="searchUsers(this.value)">
+            </div>
+
+            <div id="user-results"
+                style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Results populated by JS -->
+                <div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing to search...
+                </div>
+            </div>
+
+            <!-- Hidden form to submit -->
+            <form id="add-subscriber-form" method="post" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_subscriber">
+                <input type="hidden" name="event_type" id="modal-event-type">
+                <input type="hidden" name="sub_user_id" id="modal-sub-user-id">
+            </form>
+        </div>
     </div>
 
     <!-- CREATE USER SECTION -->
@@ -57,6 +216,21 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Full Name</label>
+                        <input type="text" name="full_name" placeholder="John Doe">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Mobile Number</label>
+                        <input type="text" name="mobile_number" placeholder="+1234567890">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">WhatsApp Number</label>
+                        <input type="text" name="whatsapp_number" placeholder="+1234567890">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                         <label style="color: var(--text-secondary); font-size: 0.9rem;">Email</label>
                         <input type="email" name="email" required placeholder="user@example.com">
                     </div>
@@ -72,6 +246,48 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
             </div>
         </section>
     </div>
+
+    <!-- EDIT USER SECTION -->
+    <div id="edit-user-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #60a5fa; margin-bottom: 1rem;">✏️ Edit User Details</h2>
+            <div class="glass-container" style="padding: 1.5rem;">
+                <form method="post"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_user">
+                    <input type="hidden" name="user_id" id="edit_user_id">
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Username</label>
+                        <input type="text" id="edit_username" disabled style="opacity: 0.7; cursor: not-allowed;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Full Name</label>
+                        <input type="text" name="full_name" id="edit_full_name" placeholder="John Doe">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Mobile Number</label>
+                        <input type="text" name="mobile_number" id="edit_mobile_number" placeholder="+1234567890">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">WhatsApp Number</label>
+                        <input type="text" name="whatsapp_number" id="edit_whatsapp_number" placeholder="+1234567890">
+                    </div>
+
+                    <button type="submit" class="btn-primary"
+                        style="margin: 0; display: flex; align-items: center; justify-content: center;">Update
+                        User</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
 
     <!-- PENDING APPROVALS SECTION -->
     <div id="pending-approvals-section" style="display: none;">
@@ -92,36 +308,53 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
             style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
         <section>
             <h2 style="color: #667eea; margin-bottom: 1rem;">👥 User Permissions</h2>
-            <div class="glass-container" style="padding: 1rem;">
-                {% for user in active_users %}
-                <div
-                    style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
+
+            <!-- Search Bar -->
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="permission-search" placeholder="Search users..."
+                    onkeyup="filterUserPermissions()"
+                    style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+            </div>
+
+            <div id="user-permissions-list" class="glass-container"
+                style="padding: 1rem; max-height: 70vh; overflow-y: auto;">
+                {% for user in managed_users %}
+                <div class="user-permission-item"
+                    data-search="{{ user.username|lower }} {{ user.email|lower }} {{ user.first_name|lower }}"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1rem 0; display: flex; justify-content: space-between; align-items: center; {% if not user.is_active %}opacity: 0.75; background: rgba(255,0,0,0.05);{% endif %}">
                     <div>
-                        <div style="font-weight: bold; font-size: 1.1rem;">{{ user.username }}</div>
+                        <div
+                            style="font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            {{ user.username }}
+                            {% if not user.is_active %}
+                            <span
+                                style="font-size: 0.7rem; background: #ef4444; color: white; padding: 0.1rem 0.4rem; border-radius: 4px;">SUSPENDED</span>
+                            {% endif %}
+                        </div>
                         <div style="font-size: 0.9rem; color: var(--text-secondary);">{{ user.email }}</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.2rem;">
+                            {% if user.profile.mobile_number %}📞 {{ user.profile.mobile_number }}{% endif %}
+                            {% if user.profile.whatsapp_number %} | 💬 {{ user.profile.whatsapp_number }}{% endif %}
+                        </div>
                     </div>
 
                     <div style="display: flex; gap: 1rem; align-items: center;">
                         <!-- Tools -->
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;"
+                            id="tools-{{ user.id }}">
                             {% for tool in all_tools %}
-                            <form method="post" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ user.id }}">
-                                <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
-                                <input type="hidden" name="action" value="assign_tool">
-
-                                {% if tool in user.tool_access.tools.all %}
-                                <button type="submit" class="tool-btn active" title="Click to remove access">
-                                    ✅ {{ tool.name }}
-                                </button>
-                                {% else %}
-                                <button type="submit" class="tool-btn" title="Click to grant access">
-                                    ⬜ {{ tool.name }}
-                                </button>
-                                {% endif %}
-                            </form>
+                            <button type="button" onclick="toggleLocal(this)" data-slug="{{ tool.slug }}"
+                                class="tool-btn {% if tool in user.tool_access.tools.all %}active{% endif %}"
+                                title="Click to toggle (Save required)">
+                                {% if tool in user.tool_access.tools.all %}✅{% else %}⬜{% endif %} {{ tool.name }}
+                            </button>
                             {% endfor %}
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="button" onclick="saveUserTools('{{ user.id }}')"
+                                style="background: #10b981; border: none; padding: 0.5rem 1rem; color: white; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
+                                💾 Save Changes
+                            </button>
                         </div>
 
                         <!-- Actions -->
@@ -137,15 +370,52 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                                     🔑 Reset
                                 </button>
                             </form>
+
+                            {% if user.is_active %}
                             <form method="post" style="display: inline;"
-                                onsubmit="return confirm('Are you sure you want to suspend this user?');">
+                                onsubmit="return confirm('Suspend user {{ user.username }}? They will not be able to login.');">
                                 {% csrf_token %}
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
                                 <button type="submit" name="action" value="suspend"
                                     style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                    Suspend
+                                    ⛔ Suspend
                                 </button>
                             </form>
+                            {% else %}
+                            <form method="post" style="display: inline;"
+                                onsubmit="return confirm('Reactivate user {{ user.username }}?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="reactivate"
+                                    style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    ✅ Activate
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            <!-- Delete Button -->
+                            <form method="post" style="display: inline;"
+                                onsubmit="return confirm('⚠️ WARNING: This will PERMANENTLY DELETE user {{ user.username }} and all their data.\n\nAre you sure you want to proceed?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="delete_user"
+                                    style="background: #7f1d1d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 0.5rem;"
+                                    title="Permanently Delete User">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Edit Button -->
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); padding-left: 1rem;">
+                            <button data-userid="{{ user.id }}" data-username="{{ user.username }}"
+                                data-fullname="{{ user.first_name }}"
+                                data-mobile="{{ user.profile.mobile_number|default:'' }}"
+                                data-whatsapp="{{ user.profile.whatsapp_number|default:'' }}"
+                                onclick="openEditUser(this)"
+                                style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                ✏️ Edit
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -154,6 +424,146 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                 {% endfor %}
             </div>
         </section>
+    </div>
+
+    <!-- MANAGE CONTACTS SECTION -->
+    <div id="manage-contacts-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="color: #fca5a5; margin: 0;">📒 Manage Company Contacts</h2>
+                <a href="{% url 'download_vcf' %}" download="company_contacts.zip" class="btn-primary"
+                    style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem;">
+                    ⬇️ Download ZIP
+                </a>
+            </div>
+
+            <!-- Add Contact Form -->
+            <div class="glass-container" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; color: #cbd5e1;">Add New Contact</h3>
+                <form method="post"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: end;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_contact">
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.8rem;">Name</label>
+                        <input type="text" name="name" required placeholder="Alice Smith">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.8rem;">Phone</label>
+                        <input type="text" name="phone_number" required placeholder="+1234567890">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.8rem;">Email</label>
+                        <input type="email" name="email" placeholder="alice@company.com">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.8rem;">Designation</label>
+                        <input type="text" name="designation" placeholder="Manager">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin: 0;">Add Contact</button>
+                </form>
+            </div>
+
+            <!-- Contacts List -->
+            <div class="glass-container" style="padding: 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                            <th style="padding: 1rem; text-align: left;">Name</th>
+                            <th style="padding: 1rem; text-align: left;">Phone</th>
+                            <th style="padding: 1rem; text-align: left;">Details</th>
+                            <th style="padding: 1rem; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in all_contacts %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem; font-weight: bold;">{{ contact.name }}</td>
+                            <td style="padding: 1rem;">{{ contact.phone_number }}</td>
+                            <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                                {% if contact.designation %}{{ contact.designation }}<br>{% endif %}
+                                {% if contact.email %}{{ contact.email }}{% endif %}
+                            </td>
+                            <td style="padding: 1rem; text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                    <button data-id="{{ contact.id }}" data-name="{{ contact.name }}"
+                                        data-phone="{{ contact.phone_number }}"
+                                        data-email="{{ contact.email|default:'' }}"
+                                        data-designation="{{ contact.designation|default:'' }}"
+                                        onclick="openEditContact(this)"
+                                        style="background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                                        ✏️
+                                    </button>
+
+                                    <form method="post" style="display: inline;"
+                                        onsubmit="return confirm('Delete contact {{ contact.name }}?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_contact">
+                                        <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                                        <button type="submit"
+                                            style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No
+                                contacts found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- EDIT CONTACT MODAL -->
+    <div id="edit-contact-modal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="glass-container" style="padding: 2rem; width: 100%; max-width: 500px; position: relative;">
+            <button type="button" onclick="document.getElementById('edit-contact-modal').style.display = 'none'"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+
+            <h2 style="color: #60a5fa; margin-top: 0; margin-bottom: 1.5rem;">✏️ Edit Contact</h2>
+
+            <form method="post" style="display: flex; flex-direction: column; gap: 1rem;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_contact">
+                <input type="hidden" name="contact_id" id="edit_contact_id">
+
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.9rem;">Name</label>
+                    <input type="text" name="name" id="edit_contact_name" required>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.9rem;">Phone</label>
+                    <input type="text" name="phone_number" id="edit_contact_phone" required>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.9rem;">Email</label>
+                    <input type="email" name="email" id="edit_contact_email">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.9rem;">Designation</label>
+                    <input type="text" name="designation" id="edit_contact_designation">
+                </div>
+
+                <button type="submit" class="btn-primary">Update Contact</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -185,7 +595,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     function showSection(sectionId) {
         document.getElementById('admin-menu').style.display = 'none';
 
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section'].forEach(id => {
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section'].forEach(id => {
             document.getElementById(id).style.display = 'none';
         });
 
@@ -194,11 +604,170 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     }
 
     function showMenu() {
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section'].forEach(id => {
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'recovery-section'].forEach(id => {
             document.getElementById(id).style.display = 'none';
         });
         document.getElementById('admin-menu').style.display = 'grid';
         localStorage.removeItem('admin_last_section');
+    }
+
+    function openEditUser(btn) {
+        document.getElementById('edit_user_id').value = btn.dataset.userid;
+        document.getElementById('edit_username').value = btn.dataset.username;
+        document.getElementById('edit_full_name').value = btn.dataset.fullname;
+        document.getElementById('edit_mobile_number').value = btn.dataset.mobile;
+        document.getElementById('edit_whatsapp_number').value = btn.dataset.whatsapp;
+
+        showSection('edit-user-section');
+    }
+
+    function openEditContact(btn) {
+        document.getElementById('edit_contact_id').value = btn.dataset.id;
+        document.getElementById('edit_contact_name').value = btn.dataset.name;
+        document.getElementById('edit_contact_phone').value = btn.dataset.phone;
+        document.getElementById('edit_contact_email').value = btn.dataset.email;
+        document.getElementById('edit_contact_designation').value = btn.dataset.designation;
+
+        document.getElementById('edit-contact-modal').style.display = 'flex';
+    }
+
+    // --- Notification Logic ---
+    function openAddSubscriber(eventType, eventTitle) {
+        document.getElementById('modal-event-type').value = eventType;
+        document.getElementById('modal-event-title').innerText = "For: " + eventTitle;
+        document.getElementById('user-search-input').value = '';
+        document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing to search...</div>';
+        document.getElementById('add-subscriber-modal').style.display = 'flex';
+        document.getElementById('user-search-input').focus();
+    }
+
+    // --- Permission Search Logic ---
+    function filterUserPermissions() {
+        const input = document.getElementById('permission-search');
+        const filter = input.value.toLowerCase();
+        const list = document.getElementById('user-permissions-list');
+        const items = list.getElementsByClassName('user-permission-item');
+
+        for (let i = 0; i < items.length; i++) {
+            const searchData = items[i].getAttribute('data-search');
+            if (searchData.includes(filter)) {
+                items[i].style.display = "flex";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    }
+
+    let searchTimeout;
+    function searchUsers(query) {
+        clearTimeout(searchTimeout);
+        console.log("Searching for:", query); // Debug
+
+        if (query.length < 1) { // Changed to 1 to allow broader search if needed, or keep 2
+            document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Type to search...</div>';
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            const searchUrl = "{% url 'search_users_notification' %}";
+            console.log("Fetching:", searchUrl + `?q=${encodeURIComponent(query)}`);
+
+            fetch(searchUrl + `?q=${encodeURIComponent(query)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Network response was not ok");
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("Search Results:", data); // Debug
+                    const container = document.getElementById('user-results');
+                    container.innerHTML = '';
+
+                    if (!data.users || data.users.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">No users found.</div>';
+                        return;
+                    }
+
+                    data.users.forEach(user => {
+                        const div = document.createElement('div');
+                        div.style.cssText = "padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;";
+                        div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.1)';
+                        div.onmouseout = () => div.style.background = 'rgba(255,255,255,0.05)';
+                        div.innerHTML = `
+                            <div>
+                                <div style='font-weight: bold;'>${user.username}</div>
+                                <div style='font-size: 0.8rem; color: var(--text-secondary);'>${user.email}</div>
+                            </div>
+                            <span style='color: #6366f1; font-size: 1.2rem;'>+</span>
+                        `;
+                        div.onclick = () => selectUserForSub(user.id);
+                        container.appendChild(div);
+                    });
+                })
+                .catch(err => {
+                    console.error("Search failed:", err);
+                    document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: #ef4444; padding: 1rem;">Error searching users.</div>';
+                });
+        }, 300);
+    }
+
+    function selectUserForSub(userId) {
+        document.getElementById('modal-sub-user-id').value = userId;
+        document.getElementById('add-subscriber-form').submit();
+    }
+
+    function toggleLocal(btn) {
+        if (btn.classList.contains('active')) {
+            btn.classList.remove('active');
+            btn.innerHTML = '⬜ ' + btn.innerText.substring(2);
+        } else {
+            btn.classList.add('active');
+            btn.innerHTML = '✅ ' + btn.innerText.substring(2);
+        }
+    }
+
+    function saveUserTools(userId) {
+        const container = document.getElementById('tools-' + userId);
+        const buttons = container.getElementsByClassName('active');
+        const toolSlugs = [];
+
+        for (let btn of buttons) {
+            toolSlugs.push(btn.getAttribute('data-slug'));
+        }
+
+        // Show loading state
+        const saveBtn = event.target;
+        const originalText = saveBtn.innerText;
+        saveBtn.innerText = "Saving...";
+        saveBtn.disabled = true;
+
+        fetch("{% url 'set_user_tools' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                tool_slugs: toolSlugs
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+
+                if (data.status === 'success') {
+                    alert('Success: ' + data.message);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+                alert('Failed to save permissions.');
+            });
     }
 
     // Restore state on load (useful after form submit)

@@ -52,6 +52,22 @@ def create_signature(request):
             # Store in session
             request.session['generated_signature'] = compressed_html
             request.session['signature_name'] = name
+            
+            # --- NOTIFICATION SYSTEM START ---
+            try:
+                from core.models import NotificationEventSetting, SystemNotification
+                setting = NotificationEventSetting.objects.get(event_type='SIG_CREATED')
+                recipients = setting.subscribers.all()
+                for user in recipients:
+                    SystemNotification.objects.create(
+                        recipient=user,
+                        title="New Signature Created",
+                        message=f"A new email signature was generated for {name} ({designation}).",
+                        link="#" 
+                    )
+            except Exception as e:
+                print(f"Notification Error: {e}") # Non-blocking
+            # --- NOTIFICATION SYSTEM END ---
 
             return redirect('signature_success')
 

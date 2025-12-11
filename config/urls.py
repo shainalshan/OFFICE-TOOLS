@@ -23,6 +23,14 @@ urlpatterns = [
     path('news/', include('news.urls')),
     path('assets/', include('assets.urls')),
     path('monitor/', include('monitor.urls')),
+    path('contacts/', include('contacts.urls')),
+
+    # APIs
+    path('api/notifications/search-users/', core_views.search_users_notification, name='search_users_notification'),
+    path('api/notifications/list/', core_views.list_notifications, name='list_notifications'),
+    path('api/notifications/check/', core_views.check_notifications, name='check_notifications'),
+    path('api/tools/set/', core_views.set_user_tools, name='set_user_tools'),
+    path('restore/<int:log_id>/', core_views.restore_item, name='restore_item'),
 ]
 
 from django.conf import settings

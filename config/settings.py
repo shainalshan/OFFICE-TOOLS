@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'assets',
     'news',
     'monitor',
+    'contacts', # core contact app
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.CurrentUserMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

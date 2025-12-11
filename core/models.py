@@ -16,3 +16,55 @@ class UserToolAccess(models.Model):
 
     def __str__(self):
         return f"Access for {self.user.username}"
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    mobile_number = models.CharField(max_length=20, blank=True)
+    whatsapp_number = models.CharField(max_length=20, blank=True)
+
+    def __str__(self):
+        return f"Profile for {self.user.username}"
+
+class NotificationEventSetting(models.Model):
+    EVENT_TYPES = [
+        ('USER_ADDED', 'New User Added'),
+        ('ASSET_UPDATE', 'Asset Added/Updated'),
+        ('SIG_CREATED', 'Email Signature Created'),
+    ]
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, unique=True)
+    subscribers = models.ManyToManyField(User, related_name='notification_subscriptions', blank=True)
+
+    def __str__(self):
+        return self.get_event_type_display()
+
+class SystemNotification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    link = models.CharField(max_length=200, blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"To {self.recipient.username}: {self.title}"
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = [
+        ('CREATE', 'Created'),
+        ('UPDATE', 'Updated'),
+        ('DELETE', 'Deleted'),
+    ]
+
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=50)
+    object_id = models.CharField(max_length=50, null=True, blank=True)
+    object_repr = models.CharField(max_length=200) # Text representation e.g. "User: john_doe"
+    data = models.JSONField(null=True, blank=True) # Snapshot for restore
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True) # Who did it
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.action} {self.model_name} - {self.timestamp}"
+
+    class Meta:
+        ordering = ['-timestamp']

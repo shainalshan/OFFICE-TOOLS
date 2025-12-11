@@ -1,0 +1,65 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <h1 style="margin-bottom: 2rem;">Contact Numbers</h1>
+
+    <div class="glass-container"
+        style="padding: 3rem; display: flex; flex-direction: column; gap: 2rem; align-items: center;">
+        <div style="font-size: 4rem;">📱</div>
+        <p style="font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6;">
+            Download the company directory to your phone.<br>
+            Checking for updates? Just download again to refresh.
+        </p>
+
+        <div id="qrcode" style="margin: 1rem 0; padding: 1rem; background: white; border-radius: 10px;"></div>
+
+        <p style="font-size: 0.9rem; opacity: 0.9; margin-top: 0.5rem; color: #fca5a5;">
+            📷 <strong>Scan with Phone</strong> to Download
+        </p>
+
+        <a href="{% url 'download_vcf' %}" download="company_contacts.zip" class="btn-primary"
+            style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; font-size: 1.1rem;">
+            <span>⬇️</span> Download ZIP
+        </a>
+
+        <!-- Search Form -->
+        <!-- Search Form -->
+        <form action="{% url 'search_contacts' %}" method="get"
+            style="width: 100%; margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" name="q" placeholder="Search contacts..."
+                style="flex: 1; padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-size: 1.2rem;">
+            <button type="submit" class="btn-primary"
+                style="padding: 0.8rem 1.5rem; font-size: 1rem; background: #6366f1; white-space: nowrap; width: auto;">🔎</button>
+        </form>
+
+        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">
+            Compatible with iOS and Android (VCF 3.0)
+        </p>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'home' %}" style="color: var(--text-secondary); text-decoration: none;">&larr; Back to
+            Dashboard</a>
+    </div>
+</div>
+
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const downloadUrl = window.location.origin + "{% url 'download_vcf' %}";
+        console.log("Generating QR for:", downloadUrl);
+
+        // QR Code points to the same force-download URL
+        new QRCode(document.getElementById("qrcode"), {
+            text: downloadUrl,
+            width: 150,
+            height: 150,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
+</script>
+{% endblock %}

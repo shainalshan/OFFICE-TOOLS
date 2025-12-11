@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Office Tools Portal{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1.3">
 </head>
 
 <body>
@@ -18,6 +18,24 @@
                 {% if user.is_superuser %}
                 <a href="{% url 'admin_dashboard' %}" style="color: #667eea; text-decoration: none;">Admin Panel</a>
                 {% endif %}
+
+                <!-- Notification Bell -->
+                <div style="position: relative; cursor: pointer;" onclick="toggleNotifications()">
+                    <span style="font-size: 1.2rem;">🔔</span>
+                    <span id="notification-badge"
+                        style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2);">0</span>
+
+                    <!-- Dropdown -->
+                    <div id="notification-dropdown"
+                        style="display: none; position: absolute; top: 100%; right: 0; width: 300px; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 100; margin-top: 0.5rem; max-height: 400px; overflow-y: auto;">
+                        <div id="notification-list" style="padding: 0.5rem;">
+                            <div
+                                style="text-align: center; color: var(--text-secondary); padding: 1rem; font-size: 0.9rem;">
+                                Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">{{ user.username }}</span>
                 <a href="{% url 'logout' %}"
                     style="color: #ff6b6b; text-decoration: none; font-size: 0.9rem;">Logout</a>
@@ -30,8 +48,11 @@
         {% if messages %}
         <div style="margin-bottom: 2rem;">
             {% for message in messages %}
-            <div class="glass-container"
-                style="padding: 1rem; color: #667eea; text-align: center; margin-bottom: 0.5rem;">
+            <div class="glass-container {% if message.tags %}{{ message.tags }}{% endif %}" style="padding: 1rem; text-align: center; margin-bottom: 0.5rem; border: 1px solid; 
+                {% if message.tags == 'success' %}background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: #059669;
+                {% elif message.tags == 'error' %}background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: #b91c1c;
+                {% elif message.tags == 'warning' %}background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: #d97706;
+                {% else %}color: #667eea; border-color: rgba(255,255,255,0.1);{% endif %}">
                 {{ message }}
             </div>
             {% endfor %}
@@ -40,53 +61,118 @@
 
         {% block content %}{% endblock %}
     </div>
+
     <script>
+        // --- Globals ---
+        let lastUnreadCount = 0;
+
+        // --- Notification Logic ---
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            const isHidden = dropdown.style.display === 'none';
+            dropdown.style.display = isHidden ? 'block' : 'none';
+
+            if (isHidden) {
+                fetchNotifications();
+            }
+        }
+
+        function fetchNotifications() {
+            fetch('/api/notifications/list/')
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('notification-list');
+                    const badge = document.getElementById('notification-badge');
+                    list.innerHTML = '';
+
+                    if (data.notifications.length === 0) {
+                        list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem; font-size: 0.9rem;">No notifications</div>';
+                        badge.style.display = 'none';
+                        return;
+                    }
+
+                    // Update Badge
+                    const unreadCount = data.notifications.filter(n => !n.is_read).length;
+                    if (unreadCount > 0) {
+                        badge.innerText = unreadCount;
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    // Sync global count
+                    lastUnreadCount = unreadCount;
+
+                    data.notifications.forEach(n => {
+                        const item = document.createElement('div');
+                        item.style.cssText = `padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: ${n.is_read ? 'transparent' : 'rgba(99, 102, 241, 0.1)'}`;
+                        item.onmouseover = () => item.style.background = 'rgba(255,255,255,0.05)';
+                        item.onclick = () => {
+                            if (n.link) window.location.href = n.link;
+                        };
+
+                        item.innerHTML = `
+                            <div style="font-weight: 500; font-size: 0.9rem; color: #f1f5f9; margin-bottom: 0.2rem;">${n.title}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">${n.message}</div>
+                            <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.4rem; text-align: right;">${n.created_at}</div>
+                        `;
+                        list.appendChild(item);
+                    });
+                });
+        }
+
+        function checkBellNotifications() {
+            fetch('/api/notifications/check/')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+
+                    if (data.unread_count > 0) {
+                        // Badge Logic
+                        if (badge) {
+                            badge.innerText = data.unread_count;
+                            badge.style.display = 'block';
+                        }
+
+                        // Browser Popup Logic
+                        if (data.unread_count > lastUnreadCount) {
+                            showBrowserNotification(`You have ${data.unread_count} new notifications!`);
+                        }
+                    } else {
+                        if (badge) badge.style.display = 'none';
+                    }
+
+                    lastUnreadCount = data.unread_count;
+                })
+                .catch(err => console.log('Notification check failed', err));
+        }
+
+        function showBrowserNotification(message) {
+            if (Notification.permission === "granted") {
+                const notification = new Notification("Office Portal", {
+                    body: message,
+                    icon: "{% static 'images/logo.png' %}"
+                });
+                notification.onclick = () => {
+                    window.focus();
+                    toggleNotifications();
+                };
+            }
+        }
+
+        // --- Init ---
         document.addEventListener('DOMContentLoaded', function () {
-            // Request permission
+            // Permission request
             if (Notification.permission !== "granted" && Notification.permission !== "denied") {
                 Notification.requestPermission();
             }
 
-            // Poll for notifications
-            setInterval(checkNotifications, 30000); // 30 seconds
+            // Polling (Every 10s for fast feedback)
+            setInterval(checkBellNotifications, 10000);
+
+            // Initial check
+            checkBellNotifications();
         });
-
-        async function checkNotifications() {
-            if (Notification.permission !== "granted") return;
-
-            try {
-                const response = await fetch('/news/api/latest/');
-                const data = await response.json();
-
-                if (data.id) {
-                    const lastId = localStorage.getItem('latest_news_id');
-
-                    // If new (ID > saved) AND it is a notification type (or important news)
-                    if (!lastId || data.id > parseInt(lastId)) {
-
-                        // Only notify if it is specifically a NOTIFICATION type as per requirement
-                        // Or if the user wants all news? The prompt said "if it is notification or news... popup"
-                        // So we notify for everything returned by the API (which is just the latest active item)
-
-                        if (data.type === 'NOTIFICATION' || data.type === 'NEWS' || data.type === 'EVENT') {
-                            const notification = new Notification(data.title, {
-                                body: "New update from Office Portal",
-                                icon: "/static/images/logo.png" // Optional placeholder
-                            });
-
-                            notification.onclick = function () {
-                                window.open('/news/', '_blank');
-                            };
-                        }
-
-                        // Update storage
-                        localStorage.setItem('latest_news_id', data.id);
-                    }
-                }
-            } catch (e) {
-                console.error("Error polling news:", e);
-            }
-        }
     </script>
 </body>
 
