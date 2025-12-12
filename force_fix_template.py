@@ -1,4 +1,6 @@
-{% extends 'core/base.html' %}
+import os
+
+content = """{% extends 'core/base.html' %}
 
 {% block content %}
 <div style='max-width: 1000px; margin: 0 auto; padding-bottom: 4rem;'>
@@ -290,3 +292,8 @@
     });
 </script>
 {% endblock %}
+"""
+
+with open(r'c:\Users\Shalu\.gemini\antigravity\scratch\office_tools_portal\hr\templates\hr\timesheet_view.html', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("SUCCESS: File overwritten.")

@@ -32,22 +32,17 @@ tools_data = [
         'description': 'Latest company updates',
         'is_active': True
     },
-    {
-        'name': 'Group Chat',
-        'slug': 'chat',
-        'description': 'Team communication',
-        'is_active': True
-    },
-    {
-        'name': 'PDF to Word',
-        'slug': 'pdf-to-word',
-        'description': 'Convert documents easily',
-        'is_active': True
-    },
+
     {
         'name': 'Asset Management',
         'slug': 'assets',
         'description': 'Track company devices and inventory',
+        'is_active': True
+    },
+    {
+        'name': 'Image Compressor',
+        'slug': 'image-compressor',
+        'description': 'Compress images to 30-50KB allowed size',
         'is_active': True
     }
 ]

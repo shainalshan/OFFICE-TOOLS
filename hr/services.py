@@ -88,25 +88,12 @@ def generate_timesheet_entries(timesheet):
         existing_entry = TimesheetDailyEntry.objects.filter(timesheet=timesheet, date=current_date).first()
         
         if existing_entry and existing_entry.is_manual_adjustment:
-            # If manually adjusted, DO NOT overwrite status or hours.
-            # We might still want to show punches if they exist, but let's respect the manual override fully for now.
-            # Actually, let's just update punches for reference but keep status and hours.
-            
-            # Find First In / Last Out for display (always good to have real data)
-            first_in = None
-            last_out = None
-            if day_logs:
-                ins = [p for p in day_logs if p.type == 'IN']
-                outs = [p for p in day_logs if p.type == 'OUT']
-                if ins: first_in = ins[0].timestamp.time()
-                if outs: last_out = outs[-1].timestamp.time()
-            
-            existing_entry.first_punch_in = first_in
-            existing_entry.last_punch_out = last_out
-            existing_entry.save()
-            
+            # If manually adjusted, DO NOT overwrite status or hours with punch logs.
+            # We respect the manual override fully.
             current_date += datetime.timedelta(days=1)
             continue
+            
+
 
         # Determine status
         is_weekend = current_date.weekday() >= 5 # 5=Sat, 6=Sun

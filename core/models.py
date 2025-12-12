@@ -30,6 +30,9 @@ class NotificationEventSetting(models.Model):
         ('USER_ADDED', 'New User Added'),
         ('ASSET_UPDATE', 'Asset Added/Updated'),
         ('SIG_CREATED', 'Email Signature Created'),
+        ('TIMESHEET_SUBMITTED', 'Timesheet Submitted'),
+        ('TIMESHEET_REJECTED', 'Timesheet Rejected'),
+        ('TIMESHEET_APPROVED', 'Timesheet Approved'),
     ]
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES, unique=True)
     subscribers = models.ManyToManyField(User, related_name='notification_subscriptions', blank=True)

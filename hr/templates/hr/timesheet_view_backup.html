@@ -1,0 +1,156 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div style='max-width: 1000px; margin: 0 auto; padding-bottom: 4rem;'>
+    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;'>
+        <div>
+            <h1 style='margin: 0; font-size: 1.8rem;'>📅 My Timesheet</h1>
+            <p style='color: var(--text-secondary); margin-top: 0.5rem;'>{{ timesheet.period_start|date:'F Y' }}</p>
+        </div>
+        <div style='display: flex; gap: 1rem;'>
+            <div class='glass-container' style='padding: 0.5rem 1rem; text-align: center;'>
+                <div style='font-size: 0.8rem; color: var(--text-secondary);'>Total Hours</div>
+                <div style='font-size: 1.2rem; font-weight: bold; color: #818cf8;'>{{ total_period_hours|default:'0.00' }}</div>
+            </div>
+            <a href='{% url 'hr_staff_portal' %}' class='btn-secondary'>Back to Punch</a>
+        </div>
+    </div>
+    <div class='glass-container' style='padding: 0;'>
+        <table style='width: 100%; border-collapse: collapse;'>
+            <thead>
+                <tr style='background: rgba(255,255,255,0.05); text-align: left;'>
+                    <th style='padding: 1rem;'>Date</th>
+                    <th style='padding: 1rem;'>Status</th>
+                    <th style='padding: 1rem;'>In</th>
+                    <th style='padding: 1rem;'>Out</th>
+                    <th style='padding: 1rem;'>Hours</th>
+                    <th style='padding: 1rem;'>Notes</th>
+                    <th style='padding: 1rem; text-align: right;'>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr style='border-bottom: 1px solid rgba(255,255,255,0.05); {% if entry.date.weekday >= 5 %}background: rgba(0,0,0,0.2);{% endif %}'>
+                    <td style='padding: 1rem;'>
+                        <span style='font-weight: bold;'>{{ entry.date|date:'d' }}</span>
+                        <span style='color: var(--text-secondary); font-size: 0.9rem;'>{{ entry.date|date:'D' }}</span>
+                    </td>
+                    <td style='padding: 1rem;'>
+                        {% if entry.status == 'PRESENT' %}
+                        <span style='color: #4ade80;'>Present</span>
+                        {% elif entry.status == 'WEEK_OFF' %}
+                        <span style='color: var(--text-secondary);'>Week Off</span>
+                        {% elif entry.status == 'ABSENT' %}
+                        <span style='color: #f87171;'>Absent</span>
+                        {% else %}
+                        <span style='color: #fbbf24;'>{{ entry.get_status_display }}</span>
+                        {% endif %}
+                        
+                        {% if entry.is_manual_adjustment %}
+                        <span title="Manually Edited" style="cursor: help;">📝</span>
+                        {% endif %}
+                    </td>
+                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.first_punch_in|default:'--' }}</td>
+                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.last_punch_out|default:'--' }}</td>
+                    <td style='padding: 1rem; font-weight: bold;'>{% if entry.total_hours > 0 %}{{ entry.total_hours }}h{% else %}--{% endif %}</td>
+                    <td style='padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);'>{{ entry.notes|default:'' }}</td>
+                    <td style='padding: 1rem; text-align: right;'>
+                       <button onclick="openEditModal('{{ entry.id }}', '{{ entry.status }}', '{{ entry.date|date:'M d' }}')" 
+                                style="background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 1.1rem; opacity: 0.7; transition: 0.2s;">
+                            ✏️
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Actions -->
+    <div style='margin-top: 2rem; text-align: right;'>
+        {% if timesheet.status == 'PENDING' %}
+        <form method='post' action='{% url 'hr_submit_timesheet' %}'>
+            {% csrf_token %}
+            <button type='submit' class='btn-primary'>Submit for Approval</button>
+        </form>
+        {% else %}
+        <div style='background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 1rem; border-radius: 8px; color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.3);'>
+            Status: <b>{{ timesheet.get_status_display }}</b>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container" style="width: 90%; max-width: 400px; padding: 2rem;">
+        <h2 style="margin-top: 0;">Edit Entry <span id="modalDate" style="font-weight: normal; font-size: 1rem; color: var(--text-secondary);"></span></h2>
+        
+        <form id="editForm" onsubmit="submitEdit(event)">
+            {% csrf_token %}
+            <input type="hidden" id="editEntryId" name="entry_id">
+            
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Set Status</label>
+            <select id="editStatus" name="status" style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 2rem;">
+                <option value="PRESENT">Present</option>
+                <option value="ABSENT">Absent</option>
+                <option value="WEEK_OFF">Week Off</option>
+                <option value="HOLIDAY">Holiday</option>
+                <option value="SICK_LEAVE">Sick Leave</option>
+                <option value="ANNUAL_LEAVE">Annual Leave</option>
+                <option value="WFH">Work From Home</option>
+            </select>
+            
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="closeEditModal()" class="btn-secondary">Cancel</button>
+                <button type="button" onclick="submitEdit()" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(id, currentStatus, dateStr) {
+        document.getElementById('editEntryId').value = id;
+        document.getElementById('editStatus').value = currentStatus;
+        document.getElementById('modalDate').innerText = `(${dateStr})`;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+    
+    function submitEdit(event) {
+        if(event) event.preventDefault();
+        
+        const formData = new FormData(document.getElementById('editForm'));
+        
+        // Manual FETCH to debug
+        fetch("{% url 'hr_update_entry' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred.');
+        });
+    }
+    
+    // Close on click outside
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+</script>
+{% endblock %}

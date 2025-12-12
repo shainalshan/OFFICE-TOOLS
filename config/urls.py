@@ -25,6 +25,7 @@ urlpatterns = [
     path('assets/', include('assets.urls')),
     path('monitor/', include('monitor.urls')),
     path('contacts/', include('contacts.urls')),
+    path('tools/compressor/', include('image_compressor.urls')),
 
     # APIs
     path('api/notifications/search-users/', core_views.search_users_notification, name='search_users_notification'),
