@@ -61,33 +61,41 @@ def notify_new_user(sender, instance, created, **kwargs):
     if created:
         try:
             setting = NotificationEventSetting.objects.get(event_type='USER_ADDED')
-            recipients = setting.subscribers.all()
-            
-            for user in recipients:
-                SystemNotification.objects.create(
-                    recipient=user,
-                    title="New User Joined",
-                    message=f"New user {instance.username} ({instance.email}) has been added to the system.",
-                    link=f"/dashboard/"
-                )
+            subscribers = set(setting.subscribers.all())
         except NotificationEventSetting.DoesNotExist:
-            pass
+            subscribers = set()
+            
+        # Add all superusers by default
+        superusers = set(User.objects.filter(is_superuser=True))
+        recipients = subscribers | superusers
+        
+        for user in recipients:
+            SystemNotification.objects.create(
+                recipient=user,
+                title="New User Joined",
+                message=f"New user {instance.username} ({instance.email}) has been added to the system.",
+                link=f"/dashboard/"
+            )
 
 # 2. Asset Added/Updated (Legacy Notification)
 @receiver(post_save, sender=Asset)
 def notify_asset_update(sender, instance, created, **kwargs):
     try:
         setting = NotificationEventSetting.objects.get(event_type='ASSET_UPDATE')
-        recipients = setting.subscribers.all()
-        
-        action = "added" if created else "updated"
-        
-        for user in recipients:
-            SystemNotification.objects.create(
-                recipient=user,
-                title=f"Asset {action.title()}",
-                message=f"Asset '{instance.brand} {instance.model_detail}' ({instance.serial_number}) was {action}.",
-                link=f"/assets/?tab={instance.location}"
-            )
+        subscribers = set(setting.subscribers.all())
     except NotificationEventSetting.DoesNotExist:
-        pass
+        subscribers = set()
+        
+    # Add all superusers by default
+    superusers = set(User.objects.filter(is_superuser=True))
+    recipients = subscribers | superusers
+    
+    action = "added" if created else "updated"
+    
+    for user in recipients:
+        SystemNotification.objects.create(
+            recipient=user,
+            title=f"Asset {action.title()}",
+            message=f"Asset '{instance.brand} {instance.model_detail}' ({instance.serial_number}) was {action}.",
+            link=f"/assets/?tab={instance.location}"
+        )

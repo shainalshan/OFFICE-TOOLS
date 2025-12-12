@@ -186,6 +186,38 @@ def admin_dashboard(request):
             messages.warning(request, f'Contact {name} deleted.')
             return redirect('admin_dashboard') 
 
+        # --- NOTIFICATION SETTINGS ACTIONS ---
+        elif action == 'add_subscriber':
+            event_type = request.POST.get('event_type')
+            sub_user_id = request.POST.get('sub_user_id')
+            
+            setting, _ = NotificationEventSetting.objects.get_or_create(event_type=event_type)
+            
+            if not sub_user_id:
+                messages.error(request, 'Please select a user to add.')
+            else:
+                user_to_add = User.objects.filter(id=sub_user_id).first()
+                if user_to_add:
+                    setting.subscribers.add(user_to_add)
+                    messages.success(request, f'Added {user_to_add.username} to {setting.get_event_type_display()}.')
+                else:
+                    messages.error(request, 'User not found.')
+            return redirect('admin_dashboard')
+
+        elif action == 'remove_subscriber':
+            event_type = request.POST.get('event_type')
+            sub_user_id = request.POST.get('sub_user_id')
+            
+            setting = get_object_or_404(NotificationEventSetting, event_type=event_type)
+            user_to_remove = User.objects.filter(id=sub_user_id).first()
+            
+            if user_to_remove:
+                setting.subscribers.remove(user_to_remove)
+                messages.warning(request, f'Removed {user_to_remove.username} from {setting.get_event_type_display()}.')
+            else:
+                messages.error(request, 'User to remove not found.')
+            return redirect('admin_dashboard')
+
         user_id = request.POST.get('user_id')
         user = get_object_or_404(User, id=user_id)
         
@@ -251,28 +283,9 @@ def admin_dashboard(request):
                 access.tools.add(tool)
                 messages.success(request, f'Assigned {tool.name} to {user.username}.')
 
-        # --- NOTIFICATION SETTINGS ACTIONS ---
-        elif action == 'add_subscriber':
-            event_type = request.POST.get('event_type')
-            sub_user_id = request.POST.get('sub_user_id')
-            
-            setting, _ = NotificationEventSetting.objects.get_or_create(event_type=event_type)
-            user_to_add = get_object_or_404(User, id=sub_user_id)
-            
-            setting.subscribers.add(user_to_add)
-            messages.success(request, f'Added {user_to_add.username} to {setting.get_event_type_display()}.')
-            
-        elif action == 'remove_subscriber':
-            event_type = request.POST.get('event_type')
-            sub_user_id = request.POST.get('sub_user_id')
-            
-            setting = get_object_or_404(NotificationEventSetting, event_type=event_type)
-            user_to_remove = get_object_or_404(User, id=sub_user_id)
-            
-            setting.subscribers.remove(user_to_remove)
-            messages.warning(request, f'Removed {user_to_remove.username} from {setting.get_event_type_display()}.')
-            
         return redirect('admin_dashboard')
+
+    # Prepare Notification Settings for Template
 
     # Prepare Notification Settings for Template
     # Ensure all types exist
@@ -364,9 +377,30 @@ def search_users_notification(request):
 
 @login_required
 def list_notifications(request):
-    """API to list user notifications"""
+    """API to list user notifications with pagination and cleanup"""
     from .models import SystemNotification
-    notifs = SystemNotification.objects.filter(recipient=request.user).order_by('-created_at')[:10]
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # 5-Day Expiry logic for READ items (Filtering only, not deleting yet)
+    five_days_ago = timezone.now() - timedelta(days=5)
+    
+    # Base Query: Belong to user AND (Unread OR Read within last 5 days)
+    # This filters out "old read" notifications from the UI
+    notifs_query = SystemNotification.objects.filter(
+        recipient=request.user
+    ).filter(
+        Q(is_read=False) | Q(created_at__gte=five_days_ago) 
+    ).order_by('-created_at')
+    
+    # Pagination
+    page = int(request.GET.get('page', 1))
+    limit = 5 # Small limit as requested to avoid "too big" dialog
+    start = (page - 1) * limit
+    end = start + limit
+    
+    total_count = notifs_query.count()
+    notifs = notifs_query[start:end]
     
     data = []
     for n in notifs:
@@ -379,12 +413,68 @@ def list_notifications(request):
             'created_at': n.created_at.strftime('%Y-%m-%d %H:%M')
         })
         
-        # Mark as read when fetched (simple logic for now)
-        if not n.is_read:
-            n.is_read = True
-            n.save()
-            
-    return JsonResponse({'notifications': data})
+    return JsonResponse({
+        'notifications': data,
+        'has_next': end < total_count,
+        'next_page': page + 1 if end < total_count else None
+    })
+
+@login_required
+def mark_notification_read(request, notification_id):
+    """API to mark a single notification as read"""
+    from .models import SystemNotification
+    try:
+        notif = SystemNotification.objects.get(id=notification_id, recipient=request.user)
+        notif.is_read = True
+        notif.save()
+        return JsonResponse({'status': 'success'})
+    except SystemNotification.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+
+@login_required
+def mark_notification_unread(request, notification_id):
+    """API to mark a single notification as unread"""
+    from .models import SystemNotification
+    try:
+        notif = SystemNotification.objects.get(id=notification_id, recipient=request.user)
+        notif.is_read = False
+        notif.save()
+        return JsonResponse({'status': 'success'})
+    except SystemNotification.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+
+@login_required
+def mark_all_read(request):
+    """API to mark all notifications as read"""
+    from .models import SystemNotification
+    SystemNotification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({'status': 'success'})
+
+@login_required
+def mark_all_unread(request):
+    """API to mark all notifications as unread"""
+    from .models import SystemNotification
+    # Only mark those that are currently read as unread
+    SystemNotification.objects.filter(recipient=request.user, is_read=True).update(is_read=False)
+    return JsonResponse({'status': 'success'})
+
+@login_required
+def delete_notification(request, notification_id):
+    """API to delete a single notification"""
+    from .models import SystemNotification
+    try:
+        notif = SystemNotification.objects.get(id=notification_id, recipient=request.user)
+        notif.delete()
+        return JsonResponse({'status': 'success'})
+    except SystemNotification.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Notification not found'}, status=404)
+
+@login_required
+def clear_all_notifications(request):
+    """API to delete all notifications for the user"""
+    from .models import SystemNotification
+    SystemNotification.objects.filter(recipient=request.user).delete()
+    return JsonResponse({'status': 'success'})
 
 @login_required
 def check_notifications(request):

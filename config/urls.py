@@ -29,6 +29,12 @@ urlpatterns = [
     path('api/notifications/search-users/', core_views.search_users_notification, name='search_users_notification'),
     path('api/notifications/list/', core_views.list_notifications, name='list_notifications'),
     path('api/notifications/check/', core_views.check_notifications, name='check_notifications'),
+    path('api/notifications/mark-read/<int:notification_id>/', core_views.mark_notification_read, name='mark_notification_read'),
+    path('api/notifications/mark-unread/<int:notification_id>/', core_views.mark_notification_unread, name='mark_notification_unread'),
+    path('api/notifications/mark-all-read/', core_views.mark_all_read, name='mark_all_read'),
+    path('api/notifications/mark-all-unread/', core_views.mark_all_unread, name='mark_all_unread'),
+    path('api/notifications/delete/<int:notification_id>/', core_views.delete_notification, name='delete_notification'),
+    path('api/notifications/clear-all/', core_views.clear_all_notifications, name='clear_all_notifications'),
     path('api/tools/set/', core_views.set_user_tools, name='set_user_tools'),
     path('restore/<int:log_id>/', core_views.restore_item, name='restore_item'),
 ]

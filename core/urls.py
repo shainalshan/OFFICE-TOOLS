@@ -14,4 +14,10 @@ urlpatterns = [
     path('api/notifications/search-users/', views.search_users_notification, name='search_users_notification'),
     path('api/notifications/list/', views.list_notifications, name='list_notifications'),
     path('api/notifications/check/', views.check_notifications, name='check_notifications'),
+    path('api/notifications/mark-read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
+    path('api/notifications/mark-unread/<int:notification_id>/', views.mark_notification_unread, name='mark_notification_unread'),
+    path('api/notifications/mark-all-read/', views.mark_all_read, name='mark_all_read'),
+    path('api/notifications/mark-all-unread/', views.mark_all_unread, name='mark_all_unread'),
+    path('api/notifications/delete/<int:notification_id>/', views.delete_notification, name='delete_notification'),
+    path('api/notifications/clear-all/', views.clear_all_notifications, name='clear_all_notifications'),
 ]
