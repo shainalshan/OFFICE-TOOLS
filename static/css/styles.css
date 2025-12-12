@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap'); */
 
 :root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -11,7 +11,7 @@
 }
 
 body {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Segoe UI', 'Outfit', sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -54,6 +54,7 @@ header {
     font-weight: 700;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     text-decoration: none;
 }

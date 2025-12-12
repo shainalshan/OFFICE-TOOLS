@@ -18,6 +18,7 @@ urlpatterns = [
     path('signature/download/', signature_views.download_signature, name='download_signature'),
     # Ticketing
     path('tickets/', include('tickets.urls')),
+    path('hr/', include('hr.urls')),
     
     # Tools
     path('news/', include('news.urls')),

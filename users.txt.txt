@@ -1,0 +1,1931 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Mohammad Jabed Aalam
+N:Aalam;Mohammad Jabed;;;
+ORG:PIXL;Finance
+TITLE:Senior Accountant
+TEL;TYPE=WORK,VOICE:0566409359
+EMAIL:jabed@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rexi Abesekara
+N:Abesekara;Rexi;;;
+ORG:PIXL;CEO
+TITLE:Company Driver
+TEL;TYPE=WORK,VOICE:526605885
+EMAIL:rexi@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Prince Abongnuk
+N:Abongnuk;Prince;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 279 5769
+EMAIL:prince@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ayesha Aftab
+N:Aftab;Ayesha;;;
+ORG:Invespy
+TITLE:Sales Associate
+EMAIL:ayesha@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ahmed Agiza
+N:Agiza;Ahmed;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971 589880925
+EMAIL:ahmed@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan | 2 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nikhil Agrawal
+N:Agrawal;Nikhil;;;
+ORG:Quattro;Finance
+TITLE:FP & A Analyst
+TEL;TYPE=WORK,VOICE:+971561669451
+TEL;TYPE=WORK,VOICE:0561669451
+EMAIL:nikhil@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Bilal Ahmad
+N:Ahmad;Bilal;;;
+ORG:Creative
+TITLE:Senior Designer
+EMAIL:bilal@pixl.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Pierre Van der Merwe
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Khaled Ahmed
+N:Ahmed;Khaled;;;
+ORG:Invespy
+TITLE:Sales Executive
+TEL;TYPE=WORK,VOICE:+971555201578
+EMAIL:khaled@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Mubeen Iqbal
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rizwan Ahmed
+N:Ahmed;Rizwan;;;
+ORG:Invespy
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:+971 55 961 9500
+EMAIL:rizwan@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Abdullah Al-Mohammedi
+N:Al-Mohammedi;Abdullah;;;
+ORG:PIXL;Sales
+TITLE:Manager- Business Growth & Client Relations
+TEL;TYPE=WORK,VOICE:0562445541
+EMAIL:abdullah.a@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Nishanth Kakkamani
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Marah Alachkar
+N:Alachkar;Marah;;;
+ORG:PIXL;Content
+TITLE:Copywriter
+TEL;TYPE=WORK,VOICE:+971 50 124 5096
+EMAIL:marah@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mohammad Albeetar
+N:Albeetar;Mohammad;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 164 1224
+EMAIL:mohammad.a@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Azad Attar
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Naushad Ali
+N:Ali;Naushad;;;
+ORG:PIXL;Finance
+TITLE:Senior Accountant
+EMAIL:naushad@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Eugiel Alquizar
+N:Alquizar;Eugiel;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971554679383
+EMAIL:eugiel@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rajakumari Ambati
+N:Ambati;Rajakumari;;;
+ORG:PIXL;Finance
+TITLE:Procurement Manager
+TEL;TYPE=WORK,VOICE:+971 52 563 0860
+EMAIL:rajakumari@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Karthik Anoop
+N:Anoop;Karthik;;;
+ORG:PIXL;Content
+TITLE:Editor
+TEL;TYPE=WORK,VOICE:+91 90619 30892
+EMAIL:karthik@invespy.com
+ADR;TYPE=WORK:;;India;;;;
+NOTE:Reports to Habeeb Mohammed Ismail
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Hamza Asad
+N:Asad;Hamza;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 55 746 5558
+EMAIL:hamza@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Toby Mishon
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Sherief Aslan
+N:Aslan;Sherief;;;
+ORG:Invespy;Sales
+TITLE:Project Manager
+EMAIL:Sherief@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan | 4 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Azad Attar
+N:Attar;Azad;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971 58 945 6493
+EMAIL:azad@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan | 4 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ryland Austria
+N:Austria;Ryland;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971 50 464 9813
+EMAIL:ryland@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mandy Azzi
+N:Azzi;Mandy;;;
+ORG:PIXL;Creative
+TITLE:Social Media Manager - Content
+TEL;TYPE=WORK,VOICE:+96171001959
+TEL;TYPE=WORK,VOICE:0523462506
+EMAIL:mandy@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Binesh Babu
+N:Babu;Binesh;;;
+ORG:Property Time
+TITLE:CEO of Property Time
+TEL;TYPE=WORK,VOICE:0585463838
+EMAIL:bpanicker@propertytime.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 1 direct report
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nadiya Bacharni
+N:Bacharni;Nadiya;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971526950030
+EMAIL:nadiya@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Toby Mishon
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Shainal Badusha
+N:Badusha;Shainal;;;
+ORG:PIXL;Operations
+TITLE:IT Executive
+TEL;TYPE=WORK,VOICE:+971521374423
+EMAIL:shainal@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Arjun Balagopal
+N:Balagopal;Arjun;;;
+ORG:Invespy
+TITLE:Senior Manager - Channel Relationship
+TEL;TYPE=WORK,VOICE:+971 58 580 0759
+EMAIL:arjun.b@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Divya Balakrishnan
+N:Balakrishnan;Divya;;;
+ORG:PIXL;Account Management
+TITLE:Account Executive
+TEL;TYPE=WORK,VOICE:502882107
+EMAIL:divya@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Raneen Zaatarah
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Luliia Baranovska
+N:Baranovska;Luliia;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 56 896 6388
+EMAIL:iuliia@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Navid Rashid
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mounya Barich
+N:Barich;Mounya;;;
+ORG:Invespy
+TITLE:Channel Relationship Manager
+TEL;TYPE=WORK,VOICE:0527058673
+EMAIL:mounya@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Art Barrero
+N:Barrero;Art;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971 55 974 3548
+EMAIL:art@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Elnaz Barzegari
+N:Barzegari;Elnaz;;;
+ORG:Quattro;Sales
+TITLE:Relationship Manager
+EMAIL:elnaz@quattro-capital.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Mohammad Motavasel
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Monisha Baskar
+N:Baskar;Monisha;;;
+ORG:PIXL;Sales
+TITLE:Media Manager
+TEL;TYPE=WORK,VOICE:0565981697
+EMAIL:Monisha@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Beah Beah
+N:Beah;Beah;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 56 730 0932
+EMAIL:ahmed.b@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Ahmed Agiza
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Panda Bear
+N:Bear;Panda;;;
+ORG:PIXL
+TITLE:dummy employee
+EMAIL:zeeshan@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Venn Bedayo
+N:Bedayo;Venn;;;
+ORG:Invespy
+TITLE:Sales Operations Executive
+TEL;TYPE=WORK,VOICE:+971502935501
+EMAIL:wilven@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Kate Benas
+N:Benas;Kate;;;
+ORG:PIXL;Human Resources
+TITLE:Receptionist/ Office Assistant
+TEL;TYPE=WORK,VOICE:0554531740
+EMAIL:kate@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Manahil Bhatti
+N:Bhatti;Manahil;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 56 909 5115
+EMAIL:manahil@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Azad Attar
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Assia boudfel Boudfel
+N:Boudfel;Assia boudfel;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971545393060
+EMAIL:assia@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Sherief Aslan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Carla Butler
+N:Butler;Carla;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 516 2658
+EMAIL:carla@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Sherief Aslan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nancy Cabanillas
+N:Cabanillas;Nancy;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 50 348 1494
+EMAIL:nancy@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Navid Rashid
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Chazel Carnero
+N:Carnero;Chazel;;;
+ORG:PIXL;Operations
+TITLE:Barista
+EMAIL:chazel@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Alejandro Ceron
+N:Ceron;Alejandro;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 52 472 2404
+EMAIL:alejandro@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Henry Martin
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Harshyy Chandwani
+N:Chandwani;Harshyy;;;
+ORG:PIXL;Creative
+TITLE:Content Creator
+TEL;TYPE=WORK,VOICE:+971 58 588 7132
+EMAIL:harshul@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Amer Chaudhary
+N:Chaudhary;Amer;;;
+ORG:Invespy
+TITLE:Director
+TEL;TYPE=WORK,VOICE:+971 58 667 0543
+EMAIL:amer@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Imran Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Debanjana Chaudhuri
+N:Chaudhuri;Debanjana;;;
+ORG:PIXL;PR
+TITLE:Head- PR
+EMAIL:deb@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 3 direct reports | OUT NOV 28-JAN 5
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mike Cortiz
+N:Cortiz;Mike;;;
+ORG:PIXL;Operations
+TITLE:Office Boy
+EMAIL:mike@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Amogh Desmukh
+N:Desmukh;Amogh;;;
+ORG:Invespy
+TITLE:Director
+TEL;TYPE=WORK,VOICE:+971586748706
+EMAIL:amogh@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 13 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Amitabh Dhawan
+N:Dhawan;Amitabh;;;
+ORG:Invespy
+TITLE:Director
+TEL;TYPE=WORK,VOICE:+971 50 580 1343
+EMAIL:amitabh@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Gouthami Durgasi
+N:Durgasi;Gouthami;;;
+ORG:PIXL;Marketing
+TITLE:Marketing Executive
+TEL;TYPE=WORK,VOICE:+971 55 527 4699
+EMAIL:gouthami@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Lixx Edmund Madamesila
+N:Madamesila;Lixx Edmund;;;
+ORG:Technology Group;Integration and Tech Support
+TITLE:Data Integration Specialist
+TEL;TYPE=WORK,VOICE:+639672663595
+EMAIL:felix@pixl.ae
+ADR;TYPE=WORK:;;Philippines;;;;
+NOTE:Reports to Venkatesan Rajagopal
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Asmaa Elmahdy
+N:Elmahdy;Asmaa;;;
+ORG:Invespy
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:+971564237147
+EMAIL:asmaa@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Amogh Desmukh | OUT DEC 10-19
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rawan Elsanoucy
+N:Elsanoucy;Rawan;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971507031294
+EMAIL:rawan@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Toby Mishon
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nadine Elwakdy
+N:Elwakdy;Nadine;;;
+ORG:PIXL;Account Management
+TITLE:Account Manager
+TEL;TYPE=WORK,VOICE:+971 56 592 6728
+EMAIL:nadine@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Omnia Mohammed
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Stuart Flynn
+N:Flynn;Stuart;;;
+ORG:Invespy
+TITLE:Senior Manager - Channel Relationship
+TEL;TYPE=WORK,VOICE:+971 54 402 5210
+EMAIL:stuart@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh | 4 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Neha Gaba
+N:Gaba;Neha;;;
+ORG:PIXL;Performance
+TITLE:Digital Marketing Manager
+EMAIL:neha@pixl.ae
+ADR;TYPE=WORK:;;India;;;;
+NOTE:Reports to Prasad Sawant
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Jo dela Fuente Geronimo
+N:Geronimo;Jo dela Fuente;;;
+ORG:Invespy
+TITLE:Admin Executive
+TEL;TYPE=WORK,VOICE:0507341013
+EMAIL:xyza@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Numan Ghani
+N:Ghani;Numan;;;
+ORG:PIXL;Creative
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+923464449176
+EMAIL:numan@pixl.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Fahad Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Haider Habib
+N:Habib;Haider;;;
+ORG:PIXL;Account Management
+TITLE:Account Executive
+TEL;TYPE=WORK,VOICE:0502564747
+EMAIL:haider@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Urooj Husain | OUT DEC 8-22
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Omer Hamid
+N:Hamid;Omer;;;
+ORG:Technology Group
+TITLE:Business Systems Manager
+EMAIL:omer@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Venkatesan Rajagopal
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Kashmala Hattan
+N:Hattan;Kashmala;;;
+ORG:PIXL;Creative
+TITLE:Social Media Designer
+TEL;TYPE=WORK,VOICE:+971526031024
+EMAIL:kashmala@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Aruna Herath
+N:Herath;Aruna;;;
+ORG:PIXL;Content
+TITLE:Video Content Creator
+TEL;TYPE=WORK,VOICE:+971564995653
+EMAIL:aruna@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Marvie Hingpit
+N:Hingpit;Marvie;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971545151887
+EMAIL:marvie@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Urooj Husain
+N:Husain;Urooj;;;
+ORG:PIXL;Account Management
+TITLE:Director- Client Success
+TEL;TYPE=WORK,VOICE:0588853448
+TEL;TYPE=WORK,VOICE:0527769622
+EMAIL:urooj@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Omnia Mohammed | 1 direct report
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Taufique Hussain
+N:Hussain;Taufique;;;
+ORG:Invespy
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:+971 52 778 6643
+EMAIL:taufique@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Einas Ibrahim
+N:Ibrahim;Einas;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 55 659 7663
+EMAIL:einas@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Fatima Imran
+N:Imran;Fatima;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971504703009
+EMAIL:fatima@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Toby Mishon
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mubeen Iqbal
+N:Iqbal;Mubeen;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971521011370
+EMAIL:mubeen@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan | 2 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Alaa Jabbour
+N:Jabbour;Alaa;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 56 600 5454
+EMAIL:alaa@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Maria Jacob
+N:Jacob;Maria;;;
+ORG:PIXL;Events
+TITLE:Event Coordinator
+TEL;TYPE=WORK,VOICE:+971527812298
+EMAIL:maria@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Antigona Jahaj
+N:Jahaj;Antigona;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971543100309
+EMAIL:antigona@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Anshu Jain
+N:Jain;Anshu;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971 58 588 7120
+EMAIL:anshu@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Deepanshu Jangid
+N:Jangid;Deepanshu;;;
+ORG:PIXL;Content
+TITLE:Performance Copywriter
+TEL;TYPE=WORK,VOICE:9643418826
+EMAIL:deepanshu@pixl.ae
+ADR;TYPE=WORK:;;India;;;;
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Lisha Jindal
+N:Jindal;Lisha;;;
+ORG:PIXL;Performance
+TITLE:Paid Media Executive
+TEL;TYPE=WORK,VOICE:+919599174307
+EMAIL:lisha@pixl.ae
+ADR;TYPE=WORK:;;Gurgaon, India;;;;
+NOTE:Reports to Prasad Sawant
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Carmen Joseph
+N:Joseph;Carmen;;;
+ORG:Invespy
+TITLE:Sales Manager
+EMAIL:carmen@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Prashant Joshi
+N:Joshi;Prashant;;;
+ORG:Invespy;Performance
+TITLE:FB Ads Specialist
+TEL;TYPE=WORK,VOICE:9766188479
+EMAIL:prashant@pixl.ae
+ADR;TYPE=WORK:;;Gurgaon, India;;;;
+NOTE:Reports to Prasad Sawant
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Annie Justin
+N:Justin;Annie;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971 50 230 6980
+EMAIL:annie@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ergena Kaci
+N:Kaci;Ergena;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971 52 508 5389
+EMAIL:ergena@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Stuart Flynn
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nishanth Kakkamani
+N:Kakkamani;Nishanth;;;
+ORG:PIXL;Sales
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 52 965 3567
+EMAIL:nishanth@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 3 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rashmi Kapale
+N:Kapale;Rashmi;;;
+ORG:PIXL;Human Resources
+TITLE:HR Business Partner
+TEL;TYPE=WORK,VOICE:+971522436879
+EMAIL:rashmi@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 12 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Leyli Kazyohan
+N:Kazyohan;Leyli;;;
+ORG:Invespy;Sales
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:585255909
+EMAIL:leyli@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Jacob Kerrecoe
+N:Kerrecoe;Jacob;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 540 8939
+EMAIL:jacob@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Henry Martin | OUT DEC 1-19
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Pruthvi Khade
+N:Khade;Pruthvi;;;
+ORG:Invespy;Sales
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 568 2493
+EMAIL:pruthvi@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Azad Attar
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Hamid Khan
+N:Khan;Hamid;;;
+ORG:Property Time;Creative
+TITLE:Graphic Designer
+EMAIL:hamid.khan@propertytime.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Binesh Babu
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Imran Khan
+N:Khan;Imran;;;
+ORG:PIXL;CEO
+TITLE:CEO
+TEL;TYPE=WORK,VOICE:+971504107307
+EMAIL:imran@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:15 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Zaid Khan
+N:Khan;Zaid;;;
+ORG:Invespy
+TITLE:Operations Executive
+TEL;TYPE=WORK,VOICE:0525204959
+TEL;TYPE=WORK,VOICE:+971505933962
+EMAIL:mohiuddin@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Fahad Khan
+N:Khan;Fahad;;;
+ORG:Creative;Design
+TITLE:Senior Art Director
+TEL;TYPE=WORK,VOICE:0504354454
+EMAIL:fahad@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe | 3 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Owais Khan
+N:Khan;Owais;;;
+ORG:Invespy
+TITLE:Director
+TEL;TYPE=WORK,VOICE:971555435670
+EMAIL:owais@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 32 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Safi Khan
+N:Khan;Safi;;;
+ORG:Invespy
+TITLE:Sales Associate
+EMAIL:Safi@invespy.com
+ADR;TYPE=WORK:;;USA;;;;
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Heba Fareed Saleh Khas
+N:Khas;Heba Fareed Saleh;;;
+ORG:Invespy;Sales
+TITLE:Sales Associate
+EMAIL:heba@invespy.com
+ADR;TYPE=WORK:;;USA;;;;
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Alina Kindyakova
+N:Kindyakova;Alina;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 55 212 9713
+EMAIL:alina@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Arpit Kohli
+N:Kohli;Arpit;;;
+ORG:Invespy
+TITLE:Channel Relationship Manager
+TEL;TYPE=WORK,VOICE:+971 521577559
+EMAIL:arpit@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Atash Kulkarni
+N:Kulkarni;Atash;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:0588581196
+EMAIL:atash@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Ahmed Agiza
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Suman Kumari
+N:Kumari;Suman;;;
+ORG:PIXL;Finance
+TITLE:FP&A Manager
+TEL;TYPE=WORK,VOICE:588853343
+TEL;TYPE=WORK,VOICE:504312784
+EMAIL:suman@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 7 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Luwi Limbo
+N:Limbo;Luwi;;;
+ORG:PIXL;Email Marketing and Data Analytics
+TITLE:Email Marketing Specialist
+EMAIL:luwi@pixl.ae
+ADR;TYPE=WORK:;;Philippines;;;;
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Pershant Lohana
+N:Lohana;Pershant;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971544051828
+EMAIL:pershant@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Stuart Flynn
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Julio Luengo
+N:Luengo;Julio;;;
+ORG:PIXL;Creative
+TITLE:Creative Director
+TEL;TYPE=WORK,VOICE:+971 52 933 5855
+EMAIL:julio@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Donna Mackin
+N:Mackin;Donna;;;
+ORG:PIXL;PR
+TITLE:Public Relations Manager
+TEL;TYPE=WORK,VOICE:+971 58 568 9909
+EMAIL:donna@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Debanjana Chaudhuri
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Melanie Mag-Aso
+N:Mag-Aso;Melanie;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:971561133885
+EMAIL:melanie@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Henry Martin
+N:Martin;Henry;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971 54 715 3112
+EMAIL:henry@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan | 2 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Stacy Matilla
+N:Matilla;Stacy;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971509325647
+EMAIL:stacy@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Shauna Mc Dermott
+N:Mc Dermott;Shauna;;;
+ORG:PIXL;Human Resources
+TITLE:Talent Acquisition Lead
+TEL;TYPE=WORK,VOICE:+971585075381
+EMAIL:shauna@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nadia Megtit
+N:Megtit;Nadia;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971503811090
+EMAIL:nadia@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Stuart Flynn
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Seblewengel Mengiste
+N:Mengiste;Seblewengel;;;
+ORG:Invespy
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:+971 50 819 5056
+EMAIL:seblewengel@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Toby Mishon
+N:Mishon;Toby;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971559997343
+EMAIL:toby@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Owais Khan | 5 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Arjun Mitawalkar
+N:Mitawalkar;Arjun;;;
+ORG:PIXL;Sales
+TITLE:Senior Manager- Commercial Excellence
+TEL;TYPE=WORK,VOICE:588853593
+EMAIL:arjun@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Nishanth Kakkamani
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Aswanth Mk
+N:Mk;Aswanth;;;
+ORG:PIXL;Finance
+TITLE:Accounts Executive
+TEL;TYPE=WORK,VOICE:+971 56 886 9551
+EMAIL:aswanth@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Omnia Mohammed
+N:Mohammed;Omnia;;;
+ORG:PIXL;Account Management
+TITLE:Head of Client Success
+TEL;TYPE=WORK,VOICE:+971563986454
+EMAIL:omnia@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 4 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Habeeb Mohammed Ismail
+N:Mohammed Ismail;Habeeb;;;
+ORG:PIXL;Content
+TITLE:Content Creator
+TEL;TYPE=WORK,VOICE:0508468055
+TEL;TYPE=WORK,VOICE:0525209955
+EMAIL:habeeb@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe | 1 direct report
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mohammad Motavasel
+N:Motavasel;Mohammad;;;
+ORG:Quattro;Business Development
+TITLE:Managing Partner
+EMAIL:mm@quattro-capital.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:1 direct report
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mary Motubatse
+N:Motubatse;Mary;;;
+ORG:PIXL;Creative
+TITLE:Traffic Manager
+TEL;TYPE=WORK,VOICE:+9715830204896
+TEL;TYPE=WORK,VOICE:+27718668490
+EMAIL:mary@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ellie Mousavi
+N:Mousavi;Ellie;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971585981217
+EMAIL:ellie@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Sherief Aslan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nayab Mumtaz
+N:Mumtaz;Nayab;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971 545451503
+TEL;TYPE=WORK,VOICE:+971 528459500
+EMAIL:nayab@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ivan Musoke
+N:Musoke;Ivan;;;
+ORG:PIXL;Content
+TITLE:Senior Copywriter
+TEL;TYPE=WORK,VOICE:+971586921800
+TEL;TYPE=WORK,VOICE:+256772571800
+EMAIL:ivan@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Yasser Najaar
+N:Najaar;Yasser;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971 56 729 2840
+EMAIL:yasser@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Julie Ann Narito
+N:Narito;Julie Ann;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971526364574
+EMAIL:julie@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Muhammad Navaid
+N:Navaid;Muhammad;;;
+ORG:Invespy
+TITLE:Technical Project Lead
+TEL;TYPE=WORK,VOICE:057114541
+EMAIL:navaid@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Sameh Nooh
+N:Nooh;Sameh;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 50 488 4822
+EMAIL:sameh@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Mubeen Iqbal
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Shenna Ocay
+N:Ocay;Shenna;;;
+ORG:PIXL;Finance
+TITLE:Accounting and Admin Executive
+EMAIL:shenna@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Samiya Oubrahim
+N:Oubrahim;Samiya;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 56 159 1153
+EMAIL:samiya@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Michael Masri
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Vishwa Patni
+N:Patni;Vishwa;;;
+ORG:PIXL;Account Management
+TITLE:Senior Account Executive
+EMAIL:vishwa@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Mansi Patel | OUT DEC 4-12
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Monica Pawar
+N:Pawar;Monica;;;
+ORG:PIXL;Design
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+971 525361658
+EMAIL:monica@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Fahad Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Dheerka Pradeep Nishantha De Alwis
+N:De Alwis;Dheerka Pradeep Nishantha;;;
+ORG:Invespy
+TITLE:Pre-Sales Executive
+TEL;TYPE=WORK,VOICE:562791990
+EMAIL:dheerka@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Mouzam Rahman
+N:Rahman;Mouzam;;;
+ORG:PIXL;Marketing
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+923110484180
+EMAIL:mouzam@pixl.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Venkatesan Rajagopal
+N:Rajagopal;Venkatesan;;;
+ORG:Technology Group
+TITLE:Head of Technology
+TEL;TYPE=WORK,VOICE:+916385528531
+EMAIL:venky@pixl.ae
+ADR;TYPE=WORK:;;India;;;;
+NOTE:Reports to Imran Khan | 3 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Shweta Ramesh
+N:Ramesh;Shweta;;;
+ORG:PIXL;PR
+TITLE:Senior Communications Strategist
+TEL;TYPE=WORK,VOICE:+971 56 822 1395
+EMAIL:shweta@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Debanjana Chaudhuri
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Navid Rashid
+N:Rashid;Navid;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971585887871
+EMAIL:navid@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan | 2 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Saloni Rohatgi
+N:Rohatgi;Saloni;;;
+ORG:Technology Group;Email Marketing and Data Analytics
+TITLE:Product Director Invespy
+TEL;TYPE=WORK,VOICE:0525601824
+EMAIL:saloni@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 8 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Elaine Rubiso
+N:Rubiso;Elaine;;;
+ORG:Invespy
+TITLE:Relationship Manager
+TEL;TYPE=WORK,VOICE:+971545204415
+EMAIL:elaine@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Stuart Flynn
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ravikant Runthla
+N:Runthla;Ravikant;;;
+ORG:PIXL;Finance
+TITLE:Accounts Executive
+TEL;TYPE=WORK,VOICE:+971564519871
+EMAIL:ravikant@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Suman Kumari
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Zonja Rust
+N:Rust;Zonja;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971 58 520 5829
+TEL;TYPE=WORK,VOICE:0585205829
+EMAIL:zonja@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan | 3 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ahla Saeed
+N:Saeed;Ahla;;;
+ORG:Creative
+TITLE:Senior Designer
+TEL;TYPE=WORK,VOICE:+971523205565
+EMAIL:ahla@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe | OUT DEC 1-17
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Gie Santos
+N:Santos;Gie;;;
+ORG:PIXL;Human Resources
+TITLE:Talent Acquisition Executive
+TEL;TYPE=WORK,VOICE:+971 58 592 9885
+EMAIL:angeline@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Jomark Sanvicente
+N:Sanvicente;Jomark;;;
+ORG:PIXL;Creative
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+971561711149
+EMAIL:joseph.s@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Prasad Sawant
+N:Sawant;Prasad;;;
+ORG:PIXL;Marketing
+TITLE:Head of Growth Marketing
+TEL;TYPE=WORK,VOICE:+971 58 953 7400
+EMAIL:prasad@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 4 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Rida Sehrish
+N:Sehrish;Rida;;;
+ORG:PIXL;Content
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+923321664819
+EMAIL:rida@pixl.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Azra Sulthana
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Revanth Selvan
+N:Selvan;Revanth;;;
+ORG:PIXL;Account Management
+TITLE:Account Executive
+EMAIL:revanth@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Jamie Donovan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Zain Shah
+N:Shah;Zain;;;
+ORG:Invespy
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 54 500 8839
+EMAIL:zain@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Zonja Rust
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Saad Shakoor
+N:Shakoor;Saad;;;
+ORG:PIXL;Creative
+TITLE:Graphic Designer
+TEL;TYPE=WORK,VOICE:+923125381072
+EMAIL:saad@pixl.ae
+ADR;TYPE=WORK:;;Pakistan;;;;
+NOTE:Reports to Fahad Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ramadevan Shanmugam
+N:Shanmugam;Ramadevan;;;
+ORG:Technology Group
+TITLE:Product Designer
+TEL;TYPE=WORK,VOICE:+919047119115
+EMAIL:ram@pixl.ae
+ADR;TYPE=WORK:;;India;;;;
+NOTE:Reports to Venkatesan Rajagopal
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Shiva Sharma
+N:Sharma;Shiva;;;
+ORG:Technology Group;Email Marketing and Data Analytics
+TITLE:Data Analyst
+TEL;TYPE=WORK,VOICE:8439803044
+EMAIL:shiva@pixl.ae
+ADR;TYPE=WORK:;;Gurgaon, India;;;;
+NOTE:Reports to Saloni Rohatgi | OUT DEC 4-16
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Alaa Shkier
+N:Shkier;Alaa;;;
+ORG:Invespy
+TITLE:Project Manager
+TEL;TYPE=WORK,VOICE:+971561132499
+TEL;TYPE=WORK,VOICE:0561105058
+EMAIL:alaa.s@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Marifi Silvestre
+N:Silvestre;Marifi;;;
+ORG:Invespy
+TITLE:Administrator
+TEL;TYPE=WORK,VOICE:+971 56 936 9454
+EMAIL:marifi@invespy.com
+ADR;TYPE=WORK:;;Dubai - Other location;;;;UAE
+NOTE:Reports to Owais Khan | OUT DEC 10-12
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Amarjeet Singh
+N:Singh;Amarjeet;;;
+ORG:PIXL;Performance
+TITLE:Paid Media Manager
+TEL;TYPE=WORK,VOICE:9654000830
+TEL;TYPE=WORK,VOICE:7015235054
+EMAIL:amarjeet@pixl.ae
+ADR;TYPE=WORK:;;Gurgaon, India;;;;
+NOTE:Reports to Prasad Sawant | OUT DEC 8-19
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Liwaa Sleit
+N:Sleit;Liwaa;;;
+ORG:PIXL;Sales
+TITLE:Business Development Manager
+EMAIL:liwaa@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Nishanth Kakkamani | OUT DEC 11-12
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Pranjali Somase
+N:Somase;Pranjali;;;
+ORG:PIXL;PR
+TITLE:PR Executive
+TEL;TYPE=WORK,VOICE:0542484775
+EMAIL:pranjali@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Debanjana Chaudhuri
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+FN:Pranjali Somase
+N:Somase;Pranjali;;;
+ORG:PIXL;PR
+TITLE:PR Executive
+TEL;TYPE=WORK,VOICE:0542484775
+EMAIL:pranjali@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Debanjana Chaudhuri
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Savita Sood
+N:Sood;Savita;;;
+ORG:Invespy;Marketing
+TITLE:Marketing Manager
+TEL;TYPE=WORK,VOICE:+971 52 329 9339
+EMAIL:savita@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Azra Sulthana
+N:Sulthana;Azra;;;
+ORG:Creative;Content
+TITLE:Head of Content
+TEL;TYPE=WORK,VOICE:0585946548
+EMAIL:azra@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Pierre Van der Merwe | 8 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Aleksandra Taybulatova
+N:Taybulatova;Aleksandra;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971581782588
+EMAIL:aleksandra@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Zonja Rust
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Priya Thul
+N:Thul;Priya;;;
+ORG:Invespy;
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:+971 52 791 0103
+EMAIL:priya@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Amogh Desmukh
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Nicola Tomanic
+N:Tomanic;Nicola;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971585199803
+EMAIL:nicola@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Zonja Rust
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Larissa Tsapousto
+N:Tsapousto;Larissa;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 58 828 0270
+EMAIL:larissa@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Toby Mishon
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ahmad Ali turkman
+N:turkman;Ahmad Ali;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 54 771 1911
+EMAIL:ahmad@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Sherief Aslan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Pierre Van der Merwe
+N:Van der Merwe;Pierre;;;
+ORG:PIXL;Creative
+TITLE:Executive Creative Director
+TEL;TYPE=WORK,VOICE:+971 551230394
+EMAIL:pierre@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Imran Khan | 8 direct reports
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Ivana Van Heer
+N:Van Heer;Ivana;;;
+ORG:PIXL;Events
+TITLE:Events Executive
+EMAIL:ivana@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Veranika Varabei
+N:Varabei;Veranika;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971 50 993 9185
+EMAIL:veranika@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Marivic Verana
+N:Verana;Marivic;;;
+ORG:PIXL;Human Resources
+TITLE:Front Office & Administrative Executive
+TEL;TYPE=WORK,VOICE:+971 50 196 7481
+EMAIL:marivic@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Owen Virtucio
+N:Virtucio;Owen;;;
+ORG:PIXL;Email Marketing and Data Analytics
+TITLE:Senior Email Marketing Specialist
+EMAIL:owen@pixl.ae
+ADR;TYPE=WORK:;;Philippines;;;;
+NOTE:Reports to Saloni Rohatgi
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Kyle Wych
+N:Wych;Kyle;;;
+ORG:Invespy;Sales
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971585737485
+EMAIL:kyle@invespy.com
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Azad Attar
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Dinu Yatawathurage
+N:Yatawathurage;Dinu;;;
+ORG:;Client Success
+TITLE:Tele Sales Executive
+TEL;TYPE=WORK,VOICE:971 58 885 3935
+EMAIL:dineshika@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Omnia Mohammed
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Olfa Zaairi
+N:Zaairi;Olfa;;;
+ORG:Invespy;
+TITLE:Sales Manager
+TEL;TYPE=WORK,VOICE:+971525528485
+EMAIL:olfa@invespy.com
+ADR;TYPE=WORK:;;Dubai -Other location;;;;UAE
+NOTE:Reports to Owais Khan
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Raneen Zaatarah
+N:Zaatarah;Raneen;;;
+ORG:PIXL;Account Management
+TITLE:Account Director
+TEL;TYPE=WORK,VOICE:+971 50 498 5826
+EMAIL:raneen@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Omnia Mohammed | 1 direct report
+END:VCARD
+
+BEGIN:VCARD
+VERSION:3.0
+FN:Clarita Zgheib
+N:Zgheib;Clarita;;;
+ORG:PIXL;Marketing
+TITLE:Senior Event Coordinator
+TEL;TYPE=WORK,VOICE:0566946969
+EMAIL:clarita@pixl.ae
+ADR;TYPE=WORK:;;Dubai - Head Office;;;;UAE
+NOTE:Reports to Rashmi Kapale
+END:V

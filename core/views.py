@@ -163,7 +163,7 @@ def admin_dashboard(request):
                 designation=designation
             )
             messages.success(request, f'Contact {name} added.')
-            return redirect('admin_dashboard')
+            return redirect('/dashboard/?section=manage-contacts-section')
 
         elif action == 'update_contact':
             contact_id = request.POST.get('contact_id')
@@ -176,7 +176,7 @@ def admin_dashboard(request):
             contact.save()
             
             messages.success(request, f'Contact {contact.name} updated.')
-            return redirect('admin_dashboard')
+            return redirect('/dashboard/?section=manage-contacts-section')
 
         elif action == 'delete_contact':
             contact_id = request.POST.get('contact_id')
@@ -184,7 +184,7 @@ def admin_dashboard(request):
             name = contact.name
             contact.delete()
             messages.warning(request, f'Contact {name} deleted.')
-            return redirect('admin_dashboard') 
+            return redirect('/dashboard/?section=manage-contacts-section') 
 
         # --- NOTIFICATION SETTINGS ACTIONS ---
         elif action == 'add_subscriber':

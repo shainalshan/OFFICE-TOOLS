@@ -1,12 +1,76 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from core.decorators import check_tool_access
 from .models import Contact
-
-def contact_home(request):
-    return render(request, 'contacts/index.html')
-
 import zipfile
 import io
+
+@login_required
+def contact_home(request):
+    # Allow access if user has EITHER 'contact-numbers' OR 'manage-contacts'
+    can_manage = False
+    if request.user.is_superuser:
+        can_manage = True
+    else:
+        try:
+            user_tools = request.user.tool_access.tools.filter(is_active=True)
+            has_access = user_tools.filter(slug__in=['contact-numbers', 'manage-contacts']).exists()
+            if not has_access:
+                messages.error(request, "You do not have permission to access contact tools.")
+                return redirect('home')
+            
+            # Check specifically for management permission
+            can_manage = user_tools.filter(slug='manage-contacts').exists()
+        except: # UserToolAccess might not exist
+             messages.error(request, "You do not have permission to access contact tools.")
+             return redirect('home')
+
+    contacts = Contact.objects.all().order_by('name')
+    return render(request, 'contacts/index.html', {'contacts': contacts, 'can_manage': can_manage})
+
+# --- CRUD Operations ---
+@login_required
+@check_tool_access('manage-contacts')
+def add_contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
+        designation = request.POST.get('designation')
+        
+        Contact.objects.create(
+            name=name,
+            phone_number=phone_number,
+            email=email,
+            designation=designation
+        )
+        messages.success(request, f'Contact {name} added.')
+    return redirect('contact_home')
+
+@login_required
+@check_tool_access('manage-contacts')
+def edit_contact(request, contact_id):
+    if request.method == 'POST':
+        contact = get_object_or_404(Contact, id=contact_id)
+        contact.name = request.POST.get('name')
+        contact.phone_number = request.POST.get('phone_number')
+        contact.email = request.POST.get('email')
+        contact.designation = request.POST.get('designation')
+        contact.save()
+        messages.success(request, f'Contact {contact.name} updated.')
+    return redirect('contact_home')
+
+@login_required
+@check_tool_access('manage-contacts')
+def delete_contact(request, contact_id):
+    if request.method == 'POST':
+        contact = get_object_or_404(Contact, id=contact_id)
+        name = contact.name
+        contact.delete()
+        messages.warning(request, f'Contact {name} deleted.')
+    return redirect('contact_home')
 
 def download_vcf(request):
     contacts = Contact.objects.all().order_by('name')
@@ -25,7 +89,7 @@ def download_vcf(request):
         vcard_data += f"N:{n_field}\n"
         if contact.designation:
             vcard_data += f"TITLE:{contact.designation}\n"
-            vcard_data += f"ORG:{contact.designation}\n" # Also add to ORG for better visibility
+            vcard_data += f"ORG:{contact.designation}\n"
         vcard_data += f"TEL;TYPE=CELL,VOICE:{contact.phone_number}\n"
         if contact.email:
             vcard_data += f"EMAIL;TYPE=WORK,INTERNET:{contact.email}\n"

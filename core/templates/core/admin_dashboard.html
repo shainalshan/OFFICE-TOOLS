@@ -58,6 +58,31 @@
             <div class="tool-title">Recovery</div>
             <div class="tool-desc">View logs and restore deleted items</div>
         </div>
+
+        <!-- HR Portal Card -->
+        <div class="tool-card" onclick="showSection('hr-portal-section')">
+            <div class="tool-icon">👔</div>
+            <div class="tool-title">HR Portal</div>
+            <div class="tool-desc">Manage employee records and policies</div>
+        </div>
+    </div>
+
+    <!-- HR PORTAL SECTION -->
+    <div id="hr-portal-section" style="display: none;">
+        <button onclick="showMenu()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+        <section>
+            <h2 style="color: #818cf8; margin-bottom: 1rem;">👔 HR Portal Control Panel</h2>
+            <div class="glass-container" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                <div style="font-size: 3rem; margin: 1rem 0;">👔</div>
+                <h3>HR Management Module</h3>
+                <p style="margin-bottom: 2rem;">Manage employee access, timesheets, and attendance logs.</p>
+                <a href="{% url 'hr_admin_dashboard' %}" class="btn-primary"
+                    style="display: inline-block; text-decoration: none;">
+                    Open HR Control Panel
+                </a>
+            </div>
+        </section>
     </div>
 
     <!-- RECOVERY SECTION -->
@@ -439,6 +464,13 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                 </a>
             </div>
 
+            <!-- Search Bar -->
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="contact-search" placeholder="Search contacts by name, phone, or email..."
+                    onkeyup="filterContacts()"
+                    style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;">
+            </div>
+
             <!-- Add Contact Form -->
             <div class="glass-container" style="padding: 1.5rem; margin-bottom: 2rem;">
                 <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; color: #cbd5e1;">Add New Contact</h3>
@@ -484,7 +516,9 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                     </thead>
                     <tbody>
                         {% for contact in all_contacts %}
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <tr class="contact-item"
+                            data-search="{{ contact.name|lower }} {{ contact.phone_number }} {{ contact.email|lower|default:'' }} {{ contact.designation|lower|default:'' }}"
+                            style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td style="padding: 1rem; font-weight: bold;">{{ contact.name }}</td>
                             <td style="padding: 1rem;">{{ contact.phone_number }}</td>
                             <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
@@ -493,7 +527,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                             </td>
                             <td style="padding: 1rem; text-align: right;">
                                 <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-                                    <button data-id="{{ contact.id }}" data-name="{{ contact.name }}"
+                                    <button type="button" data-id="{{ contact.id }}" data-name="{{ contact.name }}"
                                         data-phone="{{ contact.phone_number }}"
                                         data-email="{{ contact.email|default:'' }}"
                                         data-designation="{{ contact.designation|default:'' }}"
@@ -536,7 +570,8 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
 
             <h2 style="color: #60a5fa; margin-top: 0; margin-bottom: 1.5rem;">✏️ Edit Contact</h2>
 
-            <form method="post" style="display: flex; flex-direction: column; gap: 1rem;">
+            <form method="post"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="update_contact">
                 <input type="hidden" name="contact_id" id="edit_contact_id">
@@ -561,7 +596,9 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                     <input type="text" name="designation" id="edit_contact_designation">
                 </div>
 
-                <button type="submit" class="btn-primary">Update Contact</button>
+                <button type="submit" class="btn-primary"
+                    style="margin: 0; display: flex; align-items: center; justify-content: center;">Update
+                    Contact</button>
             </form>
         </div>
     </div>
@@ -595,7 +632,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     function showSection(sectionId) {
         document.getElementById('admin-menu').style.display = 'none';
 
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section'].forEach(id => {
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'recovery-section', 'hr-portal-section'].forEach(id => {
             document.getElementById(id).style.display = 'none';
         });
 
@@ -604,7 +641,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     }
 
     function showMenu() {
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'recovery-section'].forEach(id => {
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'recovery-section', 'hr-portal-section'].forEach(id => {
             document.getElementById(id).style.display = 'none';
         });
         document.getElementById('admin-menu').style.display = 'grid';
@@ -642,6 +679,21 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     }
 
     // --- Permission Search Logic ---
+    function filterContacts() {
+        const input = document.getElementById('contact-search');
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName('contact-item');
+
+        for (let i = 0; i < rows.length; i++) {
+            const searchData = rows[i].getAttribute('data-search');
+            if (searchData.includes(filter)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+
     function filterUserPermissions() {
         const input = document.getElementById('permission-search');
         const filter = input.value.toLowerCase();
@@ -772,9 +824,21 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
 
     // Restore state on load (useful after form submit)
     document.addEventListener('DOMContentLoaded', () => {
-        const lastSection = localStorage.getItem('admin_last_section');
-        if (lastSection) {
-            showSection(lastSection);
+        // 1. Check URL parameters first (highest priority for redirects)
+        const urlParams = new URLSearchParams(window.location.search);
+        const sectionParam = urlParams.get('section');
+
+        if (sectionParam && document.getElementById(sectionParam)) {
+            showSection(sectionParam);
+            // Optional: Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // 2. Fallback to localStorage
+        else {
+            const lastSection = localStorage.getItem('admin_last_section');
+            if (lastSection && document.getElementById(lastSection)) {
+                showSection(lastSection);
+            }
         }
     });
 

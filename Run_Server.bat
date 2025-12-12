@@ -14,5 +14,6 @@ echo.
 echo Starting Office Tools Portal...
 cd /d "c:\Users\Shalu\.gemini\antigravity\scratch\office_tools_portal"
 call venv\Scripts\activate
+echo Access this on other devices using: http://[YOUR-IP]:8000
 python manage.py runserver 0.0.0.0:8000
 pause

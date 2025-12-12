@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'news',
     'monitor',
     'contacts', # core contact app
+    'hr',
 ]
 
 MIDDLEWARE = [

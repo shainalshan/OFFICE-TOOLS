@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0;">👔 HR Control Panel</h1>
+        {% if user.is_superuser %}
+        <a href="{% url 'admin_dashboard' %}" class="btn-secondary">Back to Main Admin</a>
+        {% else %}
+        <a href="{% url 'home' %}" class="btn-secondary">Back to Home</a>
+        {% endif %}
+    </div>
+
+    <!-- Access Management -->
+    <div class="glass-container" style="padding: 2rem;">
+        <h2 style="margin-top: 0; color: #818cf8; margin-bottom: 1.5rem;">👥 Employee Access Management</h2>
+
+        <!-- Search Bar -->
+        <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+            <input type="text" name="q" placeholder="Search employees..." value="{{ search_query|default:'' }}"
+                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
+            <button type="submit" class="btn-primary">Search</button>
+            {% if search_query %}
+            <a href="{% url 'hr_admin_dashboard' %}" class="btn-secondary">Clear</a>
+            {% endif %}
+        </form>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <th style="padding: 1rem;">Employee</th>
+                        <th style="padding: 1rem;">Role</th>
+                        <th style="padding: 1rem;">Timesheet Access</th>
+                        <th style="padding: 1rem;">HR Admin Access</th>
+                        <th style="padding: 1rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;">
+                            <div style="font-weight: bold;">{{ u.first_name }} {{ u.last_name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ u.username }}</div>
+                        </td>
+                        <td style="padding: 1rem;">
+                            {% if u.hr_settings.is_hr_admin %}
+                            <span
+                                style="background: rgba(129, 140, 248, 0.2); color: #818cf8; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">HR
+                                Admin</span>
+                            {% else %}
+                            <span style="color: var(--text-secondary);">Staff</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem;">
+                            {% if u.hr_settings.timesheet_enabled %}
+                            <span style="color: #4ade80;">✅ Enabled</span>
+                            {% else %}
+                            <span style="color: #f87171;">❌ Disabled</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem;">
+                            {% if u.hr_settings.is_hr_admin %}
+                            <span style="color: #4ade80;">✅ Yes</span>
+                            {% else %}
+                            <span style="color: var(--text-secondary);">No</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; display: flex; gap: 0.5rem;">
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="toggle_timesheet">
+                                <button type="submit"
+                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                    {% if u.hr_settings.timesheet_enabled %}Disable Timesheet{% else %}Enable
+                                    Timesheet{% endif %}
+                                </button>
+                            </form>
+
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <input type="hidden" name="action" value="toggle_hr">
+                                <button type="submit"
+                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                    {% if u.hr_settings.is_hr_admin %}Revoke HR{% else %}Make HR{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto; padding-bottom: 4rem;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8rem;">👋 Hello, {{ user.first_name|default:user.username }}</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">{{ current_time|date:"l, F j, Y" }}</p>
+        </div>
+        <div style="text-align: right;">
+            <span id="current-clock" style="font-size: 1.5rem; font-family: monospace; color: #818cf8;"></span>
+        </div>
+    </div>
+
+    <!-- Alert for disabled -->
+    {% if not settings.timesheet_enabled %}
+    <div
+        style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+        ⚠️ Timesheet access is currently disabled for your account. Please contact HR.
+    </div>
+    {% endif %}
+
+    <!-- PUNCH SECTION -->
+    <div class="glass-container"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; margin-bottom: 2rem;">
+
+        <!-- Status Indicator -->
+        <div id="status-text"
+            style="font-size: 1.2rem; margin-bottom: 2rem; color: {% if is_punched_in %}#4ade80{% else %}var(--text-secondary){% endif %};">
+            {% if is_punched_in %}
+            🟢 You are currently <b>Punched IN</b>
+            {% else %}
+            ⚪ You are currently <b>Punched OUT</b>
+            {% endif %}
+        </div>
+
+        <!-- THE BUTTON -->
+        <button id="punch-btn" onclick="togglePunch()" {% if not settings.timesheet_enabled %}disabled{% endif %}
+            class="punch-button {% if is_punched_in %}punched-in{% endif %}">
+            <div class="punch-inner">
+                <span class="punch-label">{% if is_punched_in %}PUNCH<br>OUT{% else %}PUNCH<br>IN{% endif %}</span>
+            </div>
+            <div class="punch-ripple"></div>
+        </button>
+
+        Click to record your attendance.
+        </p>
+
+        <!-- COUNTDOWN TIMER -->
+        {% if first_punch_in %}
+        <div id="countdown-container"
+            style="margin-top: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; width: 100%;">
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Time Remaining (9h
+                Shift)</div>
+            <div id="shift-timer" style="font-size: 1.5rem; font-family: monospace; font-weight: bold; color: #fbbf24;">
+                Calculating...</div>
+        </div>
+        <script>
+            const firstPunchIso = "{{ first_punch_in|date:'c' }}";
+
+            function updateShiftTimer() {
+                const startTime = new Date(firstPunchIso);
+                const now = new Date();
+                const diffMs = now - startTime;
+
+                // 9 hours in ms
+                const targetMs = 9 * 60 * 60 * 1000;
+                const remainingMs = targetMs - diffMs;
+
+                const timerEl = document.getElementById('shift-timer');
+
+                if (remainingMs <= 0) {
+                    timerEl.innerText = "🎉 Shift Completed!";
+                    timerEl.style.color = "#4ade80"; // Green
+                } else {
+                    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+
+                    timerEl.innerText = `${hours}h ${minutes}m ${seconds}s`;
+
+                    if (hours === 0 && minutes < 60) {
+                        timerEl.style.color = "#f87171"; // Red urgency
+                    }
+                }
+            }
+
+            setInterval(updateShiftTimer, 1000);
+            updateShiftTimer(); // Initial call
+        </script>
+        {% endif %}
+
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'hr_current_timesheet' %}" class="btn-secondary" style="font-size: 0.9rem;">
+                📅 View Full Timesheet
+            </a>
+        </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="glass-container">
+        <h3
+            style="margin-top: 0; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+            🕒 Today's Activity</h3>
+        <div id="punch-log">
+            {% for punch in todays_punches %}
+            <div
+                style="display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span style="color: {% if punch.type == 'IN' %}#4ade80{% else %}#f87171{% endif %}; font-weight: bold;">
+                    {{ punch.get_type_display }}
+                </span>
+                <span style="font-family: monospace;">{{ punch.timestamp|time:"H:i:s" }}</span>
+            </div>
+            {% empty %}
+            <div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No activity today.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* PUNCH BUTTON STYLES */
+    .punch-button {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(145deg, #10b981, #059669);
+        /* Green for Punch In */
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .punch-button.punched-in {
+        background: linear-gradient(145deg, #ef4444, #b91c1c);
+        /* Red for Punch Out */
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .punch-button:active {
+        transform: scale(0.95);
+    }
+
+    .punch-button:disabled {
+        background: #475569;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .punch-inner {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .punch-label {
+        color: white;
+        font-weight: 800;
+        font-size: 1.5rem;
+        line-height: 1.2;
+        text-align: center;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+    }
+
+    /* Ripple Animation */
+    .punch-ripple {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+    }
+
+    .punch-button:active .punch-ripple {
+        animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+</style>
+
+<script>
+    // Live Clock
+    // Live Clock
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('current-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }, 1000);
+
+    // Punch Logic
+    function togglePunch() {
+        if (confirm("Are you sure you want to punch?")) {
+            const btn = document.getElementById('punch-btn');
+            const originalContent = btn.innerHTML;
+
+            // Loading state
+            btn.disabled = true;
+            btn.style.opacity = '0.8';
+
+            fetch("{% url 'hr_punch_api' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Force reload to update server-side state logic easily
+                        // Or we could update DOM dynamically, but reload allows backend to sort session pairing
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        btn.innerHTML = originalContent;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Network Error');
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                });
+        }
+    }
+</script>
+{% endblock %}
