@@ -3,12 +3,12 @@ from django.contrib.auth.models import User
 
 class Asset(models.Model):
     DEVICE_TYPES = [
-        ('LAPTOP', 'Laptop'),
-        ('MOBILE', 'Mobile'),
-        ('MONITOR', 'Monitor'),
-        ('MOUSE', 'Mouse'),
-        ('KEYBOARD', 'Keyboard'),
-        ('HEADPHONE', 'Headphone'),
+        ('WINDOWS', 'Windows'),
+        ('MAC', 'Mac'),
+        ('IPHONE', 'iPhone'),
+        ('DAMAGED', 'Damaged'),
+        ('REPLACEMENT', 'Replacement'),
+        ('RESIGNED', 'Resigned'),
         ('OTHER', 'Other'),
     ]
 

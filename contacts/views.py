@@ -16,13 +16,13 @@ def contact_home(request):
     else:
         try:
             user_tools = request.user.tool_access.tools.filter(is_active=True)
-            has_access = user_tools.filter(slug__in=['contact-numbers', 'manage-contacts']).exists()
+            has_access = user_tools.filter(slug__in=['contact-numbers', 'manage-contacts', 'contacts']).exists()
             if not has_access:
                 messages.error(request, "You do not have permission to access contact tools.")
                 return redirect('home')
             
             # Check specifically for management permission
-            can_manage = user_tools.filter(slug='manage-contacts').exists()
+            can_manage = user_tools.filter(slug__in=['manage-contacts', 'contacts']).exists()
         except: # UserToolAccess might not exist
              messages.error(request, "You do not have permission to access contact tools.")
              return redirect('home')
@@ -32,7 +32,7 @@ def contact_home(request):
 
 # --- CRUD Operations ---
 @login_required
-@check_tool_access('manage-contacts')
+@check_tool_access('contacts')
 def add_contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -50,7 +50,7 @@ def add_contact(request):
     return redirect('contact_home')
 
 @login_required
-@check_tool_access('manage-contacts')
+@check_tool_access('contacts')
 def edit_contact(request, contact_id):
     if request.method == 'POST':
         contact = get_object_or_404(Contact, id=contact_id)
@@ -63,7 +63,7 @@ def edit_contact(request, contact_id):
     return redirect('contact_home')
 
 @login_required
-@check_tool_access('manage-contacts')
+@check_tool_access('contacts')
 def delete_contact(request, contact_id):
     if request.method == 'POST':
         contact = get_object_or_404(Contact, id=contact_id)

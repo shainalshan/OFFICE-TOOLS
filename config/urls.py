@@ -12,6 +12,8 @@ urlpatterns = [
     path('register/', core_views.register, name='register'),
     path('dashboard/', core_views.admin_dashboard, name='admin_dashboard'),
     path('dashboard/check-users/', core_views.check_pending_users, name='check_pending_users'),
+    path('tools/chat/', core_views.group_chat, name='group_chat'),
+    path('tools/pdf-to-word/', core_views.pdf_to_word, name='pdf_to_word'),
     
     path('signature/', signature_views.create_signature, name='create_signature'),
     path('signature/success/', signature_views.signature_success, name='signature_success'),

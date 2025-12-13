@@ -44,11 +44,42 @@ tools_data = [
         'slug': 'image-compressor',
         'description': 'Compress images to 30-50KB allowed size',
         'is_active': True
+    },
+    {
+        'name': 'Server Monitor',
+        'slug': 'monitor',
+        'description': 'Live server performance and logs',
+        'is_active': True
+    },
+    {
+        'name': 'Contacts',
+        'slug': 'contacts',
+        'description': 'Manage employee and business contacts',
+        'is_active': True
+    },
+    {
+        'name': 'Timesheet',
+        'slug': 'timesheet',
+        'description': 'Timesheets and HR management',
+        'is_active': True
+    },
+    {
+        'name': 'Group Chat',
+        'slug': 'chat',
+        'description': 'Team communication',
+        'is_active': True
+    },
+    {
+        'name': 'PDF to Word',
+        'slug': 'pdf-to-word',
+        'description': 'Convert PDF documents to editable Word files',
+        'is_active': True
     }
 ]
 
+
 for tool_data in tools_data:
-    tool, created = Tool.objects.get_or_create(
+    tool, created = Tool.objects.update_or_create(
         slug=tool_data['slug'],
         defaults={
             'name': tool_data['name'],
@@ -59,7 +90,7 @@ for tool_data in tools_data:
     if created:
         print(f"Created tool: {tool.name}")
     else:
-        print(f"Tool already exists: {tool.name}")
+        print(f"Updated tool: {tool.name}")
 
 # Create Superuser if not exists
 if not User.objects.filter(username='admin').exists():

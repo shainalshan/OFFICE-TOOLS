@@ -22,6 +22,10 @@
                 <div style="font-size: 1.5rem; color: #a78bfa;">{{ phone_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Phones</div>
             </div>
+            <div class="glass-container" style="padding: 1rem; text-align: center;">
+                <div style="font-size: 1.5rem; color: #f472b6;">{{ other_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Other Device</div>
+            </div>
 
             <!-- Inventory Stats -->
             <div class="glass-container" style="padding: 1rem; text-align: center;">
@@ -52,11 +56,34 @@
             <a href="#" class="excel-tab">STAFF LIST</a>
         </div>
 
-        <div style="margin-bottom: 0.5rem;">
-            <a href="{% url 'admin:assets_asset_add' %}" target="_blank" class="btn-primary"
-                style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #10b981;">➕ Add</a>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <!-- Search Form -->
+            <form method="get" action="." style="display: flex; gap: 8px; align-items: center; margin: 0;">
+                <input type="hidden" name="tab" value="{{ current_tab }}">
+                <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search..."
+                    style="height: 36px; padding: 0 0.8rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: black; outline: none; width: 220px; box-sizing: border-box;"
+                    class="glass-input">
+                <button type="submit" class="btn-primary"
+                    style="height: 36px; padding: 0 1rem; font-size: 0.85rem; background: #0f766e; border: none; cursor: pointer; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                    Search
+                </button>
+            </form>
+
+            <button onclick="showAddRow()" class="btn-primary"
+                style="height: 36px; padding: 0 1rem; font-size: 0.85rem; background: #10b981; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; color: white; box-sizing: border-box;">
+                <span style="margin-right: 4px;">➕</span> Add
+            </button>
+
+            <a href="{% url 'export_assets' %}?tab={{ current_tab }}&q={{ search_query|default:'' }}"
+                class="btn-primary"
+                style="height: 36px; padding: 0 1rem; font-size: 0.85rem; background: #ea580c; text-decoration: none; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; box-sizing: border-box;">
+                <span style="margin-right: 4px;">📄</span> Export Excel
+            </a>
+
             <a href="{% url 'admin:assets_asset_changelist' %}" target="_blank" class="btn-primary"
-                style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #64748b;">🔧 Admin</a>
+                style="height: 36px; padding: 0 1rem; font-size: 0.85rem; background: #64748b; text-decoration: none; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; box-sizing: border-box;">
+                <span style="margin-right: 4px;">🔧</span> Admin
+            </a>
         </div>
     </div>
 
@@ -78,9 +105,10 @@
                     <th class="excel-th">Status/Remarks</th>
                 </tr>
             </thead>
-            <tbody style="background: white; color: black;">
+            <tbody id="assets-table-body" style="background: white; color: black;">
                 {% for asset in assets %}
-                <tr style="border-bottom: 1px solid #e2e8f0;">
+                <tr id="row-{{ asset.id }}" onclick="enableEditRow('{{ asset.id }}')"
+                    style="border-bottom: 1px solid #e2e8f0; cursor: pointer;" title="Click to Edit">
                     <td class="excel-td" style="color: #64748b;">{{ asset.mni }}</td>
                     <td class="excel-td" style="font-weight: 500;">
                         {% if asset.assigned_to %}
@@ -176,6 +204,371 @@
 
     .status-DAMAGED {
         color: #dc2626;
+    }
+
+    .glass-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .glass-input:focus {
+        background: white;
+        border-color: #0f766e;
+    }
+</style>
+
+<!-- HIDDEN PRE-RENDERED OPTIONS FOR JS -->
+<select id="device-type-options" hidden>
+    <option value="WINDOWS">Windows</option>
+    <option value="MAC">Mac</option>
+    <option value="IPHONE">iPhone</option>
+    <option value="DAMAGED">Damaged</option>
+    <option value="REPLACEMENT">Replacement</option>
+    <option value="RESIGNED">Resigned</option>
+    <option value="OTHER">Other</option>
+</select>
+
+<select id="status-options" hidden>
+    <option value="IN_STORE">Available</option>
+    <option value="IN_USE">Assigned</option>
+    <option value="DAMAGED">Damaged</option>
+    <option value="REPAIR">Replacement</option>
+</select>
+
+<!-- ROW TEMPLATE FOR JS -->
+<script>
+    let isEditing = false;
+    let currentTab = "{{ current_tab }}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showAddRow() {
+        if (isEditing) {
+            alert("Please finish editing the current row first.");
+            return;
+        }
+
+        isEditing = true;
+        const tbody = document.getElementById('assets-table-body');
+        const row = document.createElement('tr');
+        row.id = 'new-asset-row';
+        row.style.background = '#f0fdf4'; // Light green highlight
+
+        const deviceOptions = document.getElementById('device-type-options').innerHTML;
+        const statusOptions = document.getElementById('status-options').innerHTML;
+
+        row.innerHTML = `
+        <td class="excel-td"><input type="text" id="new-mni" class="inline-input" placeholder="MNI"></td>
+        <td class="excel-td"><input type="text" id="new-staff" class="inline-input" placeholder="Staff Name"></td>
+        <td class="excel-td"><select id="new-device" class="inline-input">${deviceOptions}</select></td>
+        <td class="excel-td"><input type="text" id="new-brand" class="inline-input" placeholder="Brand"></td>
+        <td class="excel-td"><input type="text" id="new-detail" class="inline-input" placeholder="Detail/Specs"></td>
+        <td class="excel-td"><input type="text" id="new-serial" class="inline-input" placeholder="S/N (Unique)"></td>
+        <td class="excel-td" style="color: #cbd5e1; font-style: italic;">Auto</td>
+        <td class="excel-td" style="text-align: center;"><input type="checkbox" id="new-signed"></td>
+        <td class="excel-td"><input type="date" id="new-date" class="inline-input"></td>
+        <td class="excel-td">
+            <input type="text" id="new-remarks" class="inline-input" placeholder="Remarks">
+            <div style="margin-top: 5px;">
+                <button onclick="saveAsset('add')" class="btn-xs btn-save">Save</button>
+                <button onclick="cancelAdd()" class="btn-xs btn-cancel">Cancel</button>
+            </div>
+        </td>
+    `;
+
+        tbody.insertBefore(row, tbody.firstChild);
+    }
+
+    function cancelAdd() {
+        document.getElementById('new-asset-row').remove();
+        isEditing = false;
+    }
+
+    // Global cache for reverting edits
+    let originalRowHtml = {};
+
+    function enableEditRow(rowId) {
+        if (isEditing) return; // Prevent multiple edits? Or allow row swapping if we handle logic carefully.
+        // User said: "Only one row can be in edit mode at a time."
+        // So we check flag.
+
+        // Check if we clicked on actions (prevent loop)
+        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
+
+        isEditing = true;
+        const row = document.getElementById(`row-${rowId}`);
+        originalRowHtml[rowId] = row.innerHTML; // Backup
+
+        // Extract current values (naive text parsing or data attributes would be better, but we parse text for efficiency validation)
+        // Actually, safer to rely on cell index.
+        const cells = row.cells;
+        const mni = cells[0].innerText.trim();
+        const staff = cells[1].innerText.trim() === '-' ? '' : cells[1].innerText.trim();
+        const deviceTypeDisplay = cells[2].innerText.trim(); // We need Value, not Display. Trickier. 
+        // We might default to LAPTOP or simple match.
+        // Better approach: Populate Dropdown and let user fix if defaults wrong?
+        // Or simple heuristic.
+        const brand = cells[3].innerText.trim();
+        const detail = cells[4].innerText.trim();
+        const serial = cells[5].innerText.trim();
+        const statusText = cells[6].innerText.trim(); // "Available" -> IN_STORE
+        const signed = cells[7].innerText.includes('####');
+        const dateText = cells[8].innerText.trim(); // dd-MMM-yyyy -> yyyy-MM-dd logic needed? 
+        // Or just empty if complex.
+        // Actually date input expects yyyy-mm-dd.
+        const remarks = cells[9].innerText.trim() === '-' ? '' : cells[9].innerText.trim();
+
+        const deviceOptions = document.getElementById('device-type-options').innerHTML;
+        const statusOptions = document.getElementById('status-options').innerHTML;
+
+        // Simple date parse helper
+        let dateValue = '';
+        // If format is like "13-Dec-2025" or similar from Django date filter
+        if (dateText !== '-') {
+            const d = new Date(dateText);
+            if (!isNaN(d)) {
+                // format to yyyy-mm-dd
+                dateValue = d.toISOString().split('T')[0];
+            }
+        }
+
+        row.classList.add('editing-row');
+        row.innerHTML = `
+        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}"></td>
+        <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}"></td>
+        <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input">${deviceOptions}</select></td>
+        <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}"></td>
+        <td class="excel-td"><input type="text" id="edit-detail-${rowId}" class="inline-input" value="${detail}"></td>
+        <td class="excel-td"><input type="text" id="edit-serial-${rowId}" class="inline-input" value="${serial}"></td>
+        <td class="excel-td"><select id="edit-status-${rowId}" class="inline-input">${statusOptions}</select></td>
+        <td class="excel-td" style="text-align: center;"><input type="checkbox" id="edit-signed-${rowId}" ${signed ? 'checked' : ''}></td>
+        <td class="excel-td"><input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}"></td>
+        <td class="excel-td">
+            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}">
+            <div style="margin-top: 5px;">
+                <button onclick="saveAsset('edit', '${rowId}')" class="btn-xs btn-save">Save</button>
+                <button onclick="cancelEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
+            </div>
+        </td>
+    `;
+
+        // Attempt to set Select values by Text match (imperfect but works for MVP)
+        // Device
+        const devSelect = document.getElementById(`edit-device-${rowId}`);
+        for (let i = 0; i < devSelect.options.length; i++) {
+            if (devSelect.options[i].text === deviceTypeDisplay) {
+                devSelect.selectedIndex = i;
+                break;
+            }
+        }
+        // Status
+        const statSelect = document.getElementById(`edit-status-${rowId}`);
+        for (let i = 0; i < statSelect.options.length; i++) {
+            if (statSelect.options[i].text === statusText) {
+                statSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    function cancelEdit(rowId) {
+        const row = document.getElementById(`row-${rowId}`);
+        row.innerHTML = originalRowHtml[rowId];
+        row.classList.remove('editing-row');
+        isEditing = false;
+    }
+
+    function saveAsset(action, rowId = null) {
+        const prefix = action === 'add' ? 'new' : `edit`;
+        const suffix = action === 'add' ? '' : `-${rowId}`;
+
+        const payload = {
+            action: action,
+            asset_id: rowId,
+            mni: document.getElementById(`${prefix}-mni${suffix}`).value,
+            staff_name: document.getElementById(`${prefix}-staff${suffix}`).value,
+            device_type: document.getElementById(`${prefix}-device${suffix}`).value,
+            brand: document.getElementById(`${prefix}-brand${suffix}`).value,
+            model_detail: document.getElementById(`${prefix}-detail${suffix}`).value,
+            serial_number: document.getElementById(`${prefix}-serial${suffix}`).value,
+            // status: Auto-derived on backend
+            is_signed: document.getElementById(`${prefix}-signed${suffix}`).checked,
+            date_issued: document.getElementById(`${prefix}-date${suffix}`).value,
+            remarks: document.getElementById(`${prefix}-remarks${suffix}`).value,
+            location: currentTab
+        };
+
+        if (!payload.serial_number) {
+            alert("Serial Number is required!");
+            return;
+        }
+
+        // Disable buttons
+        const btns = document.querySelectorAll('.btn-save');
+        btns.forEach(b => b.disabled = true);
+
+        fetch("{% url 'api_manage_asset' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Reload page to update counters and show clean row (simplest way to ensure stats update)
+                    // Or we can manually reconstruct HTML.
+                    // User requirement: "Update dashboard counters instantly." -> Reload is easiest.
+                    // But user also said "No page reloads." -> Tricky.
+
+                    // Reconstructing HTML:
+                    if (action === 'add') {
+                        document.getElementById('new-asset-row').remove();
+                        // We need to append the real row now. 
+                        // Because we can't easily fetch the full Django template row from JS without HTMX
+                        // We will manually build it.
+                        // Insert new row at top
+                        insertRowHtml(data.asset, true);
+                    } else {
+                        // Update existing row
+                        const row = document.getElementById(`row-${rowId}`);
+                        row.outerHTML = buildRowHtml(data.asset);
+                    }
+                    isEditing = false;
+                    // Update counters? We'd need to fetch them. 
+                    // For MVP "No page reloads" implies client-side update or partial fetch.
+                    // I'll skip counter update for now or just reload if critical.
+                    // Actually, simply reloading is safer for correct state, but violates "No page reloads".
+                    // I will update the row in DOM.
+                    // Update stats
+                    if (data.stats) {
+                        try {
+                            // Helper to animate or update text
+                            const updateStat = (idx, val) => {
+                                // We need to find elements. They don't have IDs yet. 
+                                // Let's try to add IDs to stats containers or querySelectors.
+                                // Based on template structure:
+                                // Mac: 1st glass-container .text-result
+                                // But simpler is to add IDs to them. 
+                                // Since I can't easily edit HTML above without replacing it all, I'll use IDs if I can add them.
+                                // Or use text content matching "Mac", "Windows" etc.
+                                // Let's use specific IDs for stats which I will add in a separate chunk or just Replace the HTML block above too.
+                                // WAIT - I can just send a separate tool call to add IDs to stats, OR rely on class selection sequence.
+                                // Mac=0, Windows=1, Phones=2, Other=3, Available=4, Damaged=5, Replace=6
+                                const statsGrid = document.querySelector('.tools-grid');
+                                const statsCards = statsGrid.querySelectorAll('.glass-container div:first-child');
+                                if (statsCards[0]) statsCards[0].innerText = data.stats.mac_count;
+                                if (statsCards[1]) statsCards[1].innerText = data.stats.windows_count;
+                                if (statsCards[2]) statsCards[2].innerText = data.stats.phone_count;
+                                if (statsCards[3]) statsCards[3].innerText = data.stats.other_count;
+                                if (statsCards[4]) statsCards[4].innerText = data.stats.laptops_remaining;
+                                if (statsCards[5]) statsCards[5].innerText = data.stats.damaged_count;
+                                if (statsCards[6]) statsCards[6].innerText = data.stats.replacements_count;
+                            };
+                            updateStat();
+                        } catch (e) { console.error("Stats update failed", e); }
+                    }
+
+                    alert("Saved!");
+                } else {
+                    alert("Error: " + data.message);
+                    btns.forEach(b => b.disabled = false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Server Error");
+                btns.forEach(b => b.disabled = false);
+            });
+    }
+
+    function buildRowHtml(asset) {
+        const signedHtml = asset.is_signed
+            ? '<span style="color: #10b981; font-weight: bold;">####</span>'
+            : '<span style="color: #cbd5e1;">-</span>';
+
+        // Visual state for Resigned
+        const rowStyle = asset.device_type === 'RESIGNED'
+            ? 'background: #f3f4f6; color: #9ca3af;'
+            : 'border-bottom: 1px solid #e2e8f0; cursor: pointer;';
+        const title = asset.device_type === 'RESIGNED' ? 'Resigned Asset' : 'Click to Edit';
+
+        return `
+    <tr id="row-${asset.id}" onclick="enableEditRow('${asset.id}')" style="${rowStyle}" title="${title}">
+        <td class="excel-td" style="color: #64748b;">${asset.mni}</td>
+        <td class="excel-td" style="font-weight: 500;">${asset.staff_name}</td>
+        <td class="excel-td">${asset.device_type_display}</td>
+        <td class="excel-td">${asset.brand}</td>
+        <td class="excel-td">${asset.model_detail}</td>
+        <td class="excel-td" style="font-family: monospace;">${asset.serial_number}</td>
+        <td class="excel-td">
+            <span class="status-cell status-${asset.status}">${asset.status_display}</span>
+        </td>
+        <td class="excel-td" style="text-align: center;">${signedHtml}</td>
+        <td class="excel-td">${asset.date_issued || '-'}</td>
+        <td class="excel-td" style="color: #475569;">${asset.remarks}</td>
+    </tr>
+    `;
+    }
+
+    function insertRowHtml(asset, atTop) {
+        const tbody = document.getElementById('assets-table-body');
+        const html = buildRowHtml(asset);
+        const temp = document.createElement('tbody');
+        temp.innerHTML = html;
+        const tr = temp.firstElementChild;
+
+        if (atTop) {
+            tbody.insertBefore(tr, tbody.firstChild);
+        } else {
+            tbody.appendChild(tr);
+        }
+    }
+</script>
+
+<style>
+    .inline-input {
+        width: 100%;
+        padding: 4px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .btn-xs {
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        cursor: pointer;
+        border-radius: 4px;
+        border: none;
+        color: white;
+    }
+
+    .btn-save {
+        background: #10b981;
+        margin-right: 4px;
+    }
+
+    .btn-cancel {
+        background: #ef4444;
+    }
+
+    .editing-row {
+        background: #fdf2f8 !important;
     }
 </style>
 {% endblock %}

@@ -36,13 +36,13 @@
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
-        {% elif tool.slug == 'contact-numbers' %}
+
+        {% elif tool.slug == 'manage-contacts' or tool.slug == 'contacts' %}
         <a href="{% url 'contact_home' %}" class="tool-card glass-container">
-            <div class="tool-icon">📱</div>
+            <div class="tool-icon">👥</div>
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
-        {% elif tool.slug == 'manage-contacts' %}
         <!-- Hidden: Accessed via Contact Numbers tool if permissions allow -->
         {% elif tool.slug == 'hr-portal' or tool.slug == 'hr' or tool.slug == 'hr-manager' %}
         <a href="{% url 'hr_admin_dashboard' %}" class="tool-card glass-container">
@@ -59,6 +59,18 @@
         {% elif tool.slug == 'image-compressor' %}
         <a href="{% url 'compress_image' %}" class="tool-card glass-container">
             <div class="tool-icon">🖼️</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'chat' %}
+        <a href="{% url 'group_chat' %}" class="tool-card glass-container">
+            <div class="tool-icon">💬</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'pdf-to-word' %}
+        <a href="{% url 'pdf_to_word' %}" class="tool-card glass-container">
+            <div class="tool-icon">📄</div>
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
