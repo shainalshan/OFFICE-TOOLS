@@ -28,6 +28,8 @@ urlpatterns = [
     path('monitor/', include('monitor.urls')),
     path('contacts/', include('contacts.urls')),
     path('tools/compressor/', include('image_compressor.urls')),
+    path('3d/', include('three_d_view.urls')),
+
 
     # APIs
     path('api/notifications/search-users/', core_views.search_users_notification, name='search_users_notification'),
