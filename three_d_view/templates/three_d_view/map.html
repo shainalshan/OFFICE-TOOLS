@@ -73,23 +73,49 @@
 
                 // Add to Map
                 const position = Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt);
-                const heading = Cesium.Math.toRadians(proj.heading);
-                const pitch = 0;
-                const roll = 0;
-                const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
-                const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
 
-                const entity = viewer.entities.add({
-                    name: proj.name,
-                    position: position,
-                    orientation: orientation,
-                    model: {
-                        uri: proj.url,
-                        scale: proj.scale,
-                        minimumPixelSize: 128,
-                        maximumScale: 20000
-                    }
-                });
+                // Check if OBJ
+                const isObj = proj.url.toLowerCase().endsWith('.obj');
+
+                if (isObj) {
+                    // Render as Marker
+                    viewer.entities.add({
+                        name: proj.name,
+                        position: position,
+                        billboard: {
+                            image: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Location pin
+                            width: 32,
+                            height: 32,
+                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                        },
+                        description: `
+                            <div style="padding:10px;">
+                                <h3>${proj.name}</h3>
+                                <p>This is an OBJ file (mesh not rendered).</p>
+                                <a href="${proj.url}" target="_blank" style="color: cyan;">Download OBJ File</a>
+                            </div>
+                        `
+                    });
+                } else {
+                    // Render as Model (GLB/GLTF)
+                    const heading = Cesium.Math.toRadians(proj.heading);
+                    const pitch = 0;
+                    const roll = 0;
+                    const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+                    const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+
+                    viewer.entities.add({
+                        name: proj.name,
+                        position: position,
+                        orientation: orientation,
+                        model: {
+                            uri: proj.url,
+                            scale: proj.scale,
+                            minimumPixelSize: 128,
+                            maximumScale: 20000
+                        }
+                    });
+                }
             });
         })
         .catch(err => console.error("Error loading projects:", err));
