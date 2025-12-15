@@ -88,6 +88,22 @@
         gap: 0.75rem;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .5;
+        }
+    }
 </style>
 
 <div class="animate-fade-in"
@@ -101,7 +117,14 @@
             📢
         </div>
         <div>
-            <div style="font-weight: bold; color: #e9edef;">Office Updates</div>
+            <div style="font-weight: bold; color: #e9edef;">
+                Office Updates <span style="font-size: 0.7em; opacity: 0.5;">v2.0</span>
+            </div>
+            <div id="status-text" style="font-size: 0.75rem; color: #4ade80; display: flex; align-items: center; gap: 4px;">
+                <span id="status-dot" class="animate-pulse"
+                    style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; display: inline-block;"></span>
+                Live
+            </div>
         </div>
         <div style="margin-left: auto; display: flex; gap: 1rem; align-items: center;">
             <!-- Admin Manage Link -->
@@ -118,7 +141,7 @@
     <div id="chat-container" class="chat-container"
         style="flex: 1; padding: 1rem 2rem; overflow-y: auto; background-color: #0b141a; position: relative;">
 
-        <div style="position: relative; z-index: 1;">
+        <div id="messages-wrapper" style="position: relative; z-index: 1;">
             {% for item in news %}
             <div class="msg-row {% if item.created_by == user %}me{% else %}other{% endif %}" id="msg-{{ item.id }}">
                 <div class="msg-bubble {% if item.created_by == user %}me{% else %}other{% endif %}">
@@ -210,97 +233,90 @@
 </div>
 
 <script>
-    // Store latest ID
-    // List is descending (newest first), so first item has max ID.
-    // If list is empty, 0.
-    let lastMsgId = {% if news.first %}{ { news.first.id } } {% else %} 0{% endif %};
+    // Store latest ID from server-rendered template
+    let lastMsgId = {% if news.first %}{{ news.first.id }}{% else %}0{% endif %};
     const currentUser = "{{ user.username }}";
 
-    // Request Notification Permission on first interaction
-    document.body.addEventListener('click', () => {
-        if (Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-    }, { once: true });
+    // Elements
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const msgWrapper = document.getElementById('messages-wrapper');
+
+    // Audio for new messages
+    const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2346/2346-preview.mp3');
 
     async function syncChat() {
         try {
-            const response = await fetch(`/news/api/messages/?since_id=${lastMsgId}&t=${new Date().getTime()}`);
-            if (!response.ok) return;
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            const response = await fetch(`/news/api/messages/?since_id=${lastMsgId}&t=${now.getTime()}`);
+
+            if (!response.ok) throw new Error("Network response was not ok");
 
             const data = await response.json();
 
+            // Update UI to show we are alive
+            if (statusDot) statusDot.style.background = '#4ade80'; // Green
+            if (statusText) statusText.innerText = `Live (Checked ${timeString})`;
+
             if (data.messages.length > 0) {
-                const msgWrapper = document.querySelector('#chat-container > div:last-child');
+                // Play sound
+                notificationSound.play().catch(e => console.log("Audio play failed (user interaction needed)"));
 
                 data.messages.forEach(msg => {
                     lastMsgId = Math.max(lastMsgId, msg.id);
 
-                    // Prevent duplicate if already exists (paranoia check)
+                    // Prevent duplicate
                     if (document.getElementById(`msg-${msg.id}`)) return;
 
                     const isMe = msg.is_me;
                     const rowClass = isMe ? 'me' : 'other';
                     const bubbleClass = isMe ? 'me' : 'other';
-                    const authorColor = msg.type === 'EVENT' ? '#f59e0b' : (msg.type === 'NOTIFICATION' ? '#ef4444' :
-                        '#53bdeb');
+                    const authorColor = msg.type === 'EVENT' ? '#f59e0b' : (msg.type === 'NOTIFICATION' ? '#ef4444' : '#53bdeb');
 
                     let attachmentHtml = '';
                     if (msg.attachment_url) {
                         let imgHtml = '';
                         if (msg.is_image) {
                             imgHtml = `
-            <div style="margin-top: 0.5rem;">
-                <img src="${msg.attachment_url}" style="max-width: 100%; border-radius: 8px; cursor: pointer;"
-                    onclick="window.open(this.src, '_blank')" onload="container.scrollTop = container.scrollHeight;">
-            </div>`;
+                            <div style="margin-top: 0.5rem;">
+                                <img src="${msg.attachment_url}" style="max-width: 100%; border-radius: 8px; cursor: pointer;"
+                                    onclick="window.open(this.src, '_blank')">
+                            </div>`;
                         }
-
                         attachmentHtml = `
-            ${imgHtml}
-            <div
-                style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.2rem;">📎</span>
-                <a href="${msg.attachment_url}" target="_blank"
-                    style="color: #53bdeb; text-decoration: none; font-size: 0.9rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 150px;">
-                    Attachment
-                </a>
-                <a href="${msg.attachment_url}" download
-                    style="margin-left: auto; text-decoration: none; font-size: 1.2rem;" title="Download">
-                    ⬇️
-                </a>
-            </div>`;
+                        ${imgHtml}
+                        <div style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem;">📎</span>
+                            <a href="${msg.attachment_url}" target="_blank" style="color: #53bdeb; text-decoration: none; font-size: 0.9rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Attachment</a>
+                             <a href="${msg.attachment_url}" download style="margin-left: auto; text-decoration: none; font-size: 1.2rem;">⬇️</a>
+                        </div>`;
                     }
 
-                    let titleHtml = '';
-                    if (msg.title && msg.title !== 'Update') {
-                        titleHtml = `<div style="font-weight: bold; margin-bottom: 0.25rem;">${msg.title}</div>`;
-                    }
+                    let titleHtml = (msg.title && msg.title !== 'Update') ? `<div style="font-weight: bold; margin-bottom: 0.25rem;">${msg.title}</div>` : '';
 
                     const html = `
-            <div class="msg-row ${rowClass}" id="msg-${msg.id}">
-                <div class="msg-bubble ${bubbleClass}">
-                    <div class="msg-author" style="color: ${authorColor};">
-                        ${msg.author}
-                    </div>
+                    <div class="msg-row ${rowClass} animate-fade-in" id="msg-${msg.id}">
+                        <div class="msg-bubble ${bubbleClass}">
+                            <div class="msg-author" style="color: ${authorColor};">${msg.author}</div>
+                            ${titleHtml}
+                            <div style="white-space: pre-wrap;">${msg.content}</div>
+                            ${attachmentHtml}
+                            <div class="msg-meta">
+                                ${msg.created_at}
+                                ${isMe ? '<span>✓✓</span>' : ''}
+                            </div>
+                        </div>
+                    </div>`;
 
-                    ${titleHtml}
-                    <div style="white-space: pre-wrap;">${msg.content}</div>
-                    ${attachmentHtml}
-
-                    <div class="msg-meta">
-                        ${msg.created_at}
-                        ${isMe ? '<span>✓✓</span>' : ''}
-                    </div>
-                </div>
-            </div>`;
-
-                    // Prepend HTML (Newest at top)
-                    msgWrapper.insertAdjacentHTML('afterbegin', html);
+                    if (msgWrapper) msgWrapper.insertAdjacentHTML('afterbegin', html);
                 });
             }
         } catch (e) {
             console.error("Sync error:", e);
+            if (statusDot) statusDot.style.background = '#ef4444'; // Red
+            if (statusText) statusText.innerText = "Connection Lost";
         }
     }
 
