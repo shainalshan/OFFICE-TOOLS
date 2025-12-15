@@ -124,6 +124,10 @@ def get_messages(request):
         
     new_items = NewsItem.objects.filter(is_active=True, id__gt=since_id).order_by('created_at')
     
+    # DEBUG PRINT
+    if new_items.exists():
+        print(f"API: User {request.user.username} asking since_id={since_id}. Found {new_items.count()} items: {[i.id for i in new_items]}")
+    
     data = []
     for item in new_items:
         data.append({

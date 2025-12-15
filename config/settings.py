@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'hr',
     'image_compressor',
     'three_d_view',
+    'device_tracker',
 ]
 
 MIDDLEWARE = [

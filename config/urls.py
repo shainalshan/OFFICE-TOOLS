@@ -29,6 +29,7 @@ urlpatterns = [
     path('contacts/', include('contacts.urls')),
     path('tools/compressor/', include('image_compressor.urls')),
     path('3d/', include('three_d_view.urls')),
+    path('tracker/', include('device_tracker.urls')),
 
 
     # APIs

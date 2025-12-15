@@ -95,15 +95,9 @@ def download_vcf(request):
             vcard_data += f"EMAIL;TYPE=WORK,INTERNET:{contact.email}\n"
         vcard_data += "END:VCARD\n"
 
-    # Create ZIP in memory
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        zip_file.writestr('company_contacts.vcf', vcard_data)
-    
-    zip_buffer.seek(0)
-
-    response = HttpResponse(zip_buffer, content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="company_contacts.zip"'
+    # Return as single VCF file (better for mobile import)
+    response = HttpResponse(vcard_data, content_type='text/x-vcard')
+    response['Content-Disposition'] = 'attachment; filename="company_contacts.vcf"'
     return response
 
 from django.db.models import Q

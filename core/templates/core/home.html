@@ -80,6 +80,12 @@
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
+        {% elif tool.slug == 'device-tracker' %}
+        <a href="{% url 'tracker_dashboard' %}" class="tool-card glass-container">
+            <div class="tool-icon">📡</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
         {% else %}
         <!-- Fallback for generic/future tools -->
         <div class="tool-card glass-container" style="opacity: 0.7; cursor: not-allowed;">
@@ -96,6 +102,16 @@
         {% else %}
         <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">
             <p>You don't have access to any tools yet.</p>
+            <!-- Device Tracker -->
+            <a href="{% url 'tracker_dashboard' %}" class="tool-card hover-lift" style="text-decoration: none;">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    📡
+                </div>
+                <h3 class="tool-title">Device Monitor</h3>
+                <p class="tool-desc">Real-time CPU, RAM & Location tracking.</p>
+            </a>
+
+            <!-- Server Monitor -->
             <p>Please contact the administrator.</p>
         </div>
         {% endif %}

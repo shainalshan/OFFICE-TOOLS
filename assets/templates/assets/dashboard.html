@@ -20,7 +20,7 @@
             </div>
             <div class="glass-container" style="padding: 1rem; text-align: center;">
                 <div style="font-size: 1.5rem; color: #a78bfa;">{{ phone_count }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.8rem;">Phones</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">iPhones</div>
             </div>
             <div class="glass-container" style="padding: 1rem; text-align: center;">
                 <div style="font-size: 1.5rem; color: #f472b6;">{{ other_count }}</div>
@@ -53,7 +53,8 @@
                 LIST</a>
             <a href="?tab=PAKISTAN" class="excel-tab {% if current_tab == 'PAKISTAN' %}active{% endif %}">PAKISTAN
                 DEVICE LIST</a>
-            <a href="#" class="excel-tab">STAFF LIST</a>
+            <a href="?tab=STAFF LIST" class="excel-tab {% if current_tab == 'STAFF LIST' %}active{% endif %}">STAFF
+                LIST</a>
         </div>
 
         <div style="display: flex; gap: 8px; align-items: center;">
@@ -89,6 +90,38 @@
 
     <!-- Excel-like Table -->
     <div class="glass-container" style="overflow-x: auto; padding: 0; border-top-left-radius: 0;">
+        {% if current_tab == 'STAFF LIST' %}
+        <!-- Staff List Table -->
+        <table
+            style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <thead style="background: #0f766e; color: white;">
+                <tr>
+                    <th class="excel-th">Staff No</th>
+                    <th class="excel-th">Staff Name</th>
+                    <th class="excel-th">Total Pixl Devices</th>
+                    <th class="excel-th">Personal Devices</th>
+                    <th class="excel-th">Total</th>
+                </tr>
+            </thead>
+            <tbody style="background: white; color: black;">
+                {% for staff in staff_list %}
+                <tr id="staff-row-{{ staff.id }}" onclick="enableEditStaffRow('{{ staff.id }}')"
+                    style="border-bottom: 1px solid #e2e8f0; cursor: pointer;" title="Click to Edit">
+                    <td class="excel-td">{{ staff.staff_no }}</td>
+                    <td class="excel-td" style="font-weight: 500;">{{ staff.name }}</td>
+                    <td class="excel-td">{{ staff.pixl_devices }}</td>
+                    <td class="excel-td">{{ staff.personal_devices }}</td>
+                    <td class="excel-td">{{ staff.total }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: #64748b;">No staff data found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <!-- Existing Asset Table -->
         <table
             style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <thead style="background: #0f766e; color: white;">
@@ -146,6 +179,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
 </div>
 
@@ -228,16 +262,18 @@
 </select>
 
 <select id="status-options" hidden>
-    <option value="IN_STORE">Available</option>
-    <option value="IN_USE">Assigned</option>
+    <option value="IN_STORE">In Store</option>
+    <option value="IN_USE">Company Asset</option>
     <option value="DAMAGED">Damaged</option>
-    <option value="REPAIR">Replacement</option>
+    <option value="REPAIR">Under Repair</option>
 </select>
 
 <!-- ROW TEMPLATE FOR JS -->
 <script>
     let isEditing = false;
     let currentTab = "{{ current_tab }}";
+    // Global cache for reverting edits
+    let originalRowHtml = {};
 
     function getCookie(name) {
         let cookieValue = null;
@@ -296,103 +332,27 @@
         isEditing = false;
     }
 
-    // Global cache for reverting edits
-    let originalRowHtml = {};
-
-    function enableEditRow(rowId) {
-        if (isEditing) return; // Prevent multiple edits? Or allow row swapping if we handle logic carefully.
-        // User said: "Only one row can be in edit mode at a time."
-        // So we check flag.
-
-        // Check if we clicked on actions (prevent loop)
-        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
-
-        isEditing = true;
-        const row = document.getElementById(`row-${rowId}`);
-        originalRowHtml[rowId] = row.innerHTML; // Backup
-
-        // Extract current values (naive text parsing or data attributes would be better, but we parse text for efficiency validation)
-        // Actually, safer to rely on cell index.
-        const cells = row.cells;
-        const mni = cells[0].innerText.trim();
-        const staff = cells[1].innerText.trim() === '-' ? '' : cells[1].innerText.trim();
-        const deviceTypeDisplay = cells[2].innerText.trim(); // We need Value, not Display. Trickier. 
-        // We might default to LAPTOP or simple match.
-        // Better approach: Populate Dropdown and let user fix if defaults wrong?
-        // Or simple heuristic.
-        const brand = cells[3].innerText.trim();
-        const detail = cells[4].innerText.trim();
-        const serial = cells[5].innerText.trim();
-        const statusText = cells[6].innerText.trim(); // "Available" -> IN_STORE
-        const signed = cells[7].innerText.includes('####');
-        const dateText = cells[8].innerText.trim(); // dd-MMM-yyyy -> yyyy-MM-dd logic needed? 
-        // Or just empty if complex.
-        // Actually date input expects yyyy-mm-dd.
-        const remarks = cells[9].innerText.trim() === '-' ? '' : cells[9].innerText.trim();
-
-        const deviceOptions = document.getElementById('device-type-options').innerHTML;
-        const statusOptions = document.getElementById('status-options').innerHTML;
-
-        // Simple date parse helper
-        let dateValue = '';
-        // If format is like "13-Dec-2025" or similar from Django date filter
-        if (dateText !== '-') {
-            const d = new Date(dateText);
-            if (!isNaN(d)) {
-                // format to yyyy-mm-dd
-                dateValue = d.toISOString().split('T')[0];
-            }
-        }
-
-        row.classList.add('editing-row');
-        row.innerHTML = `
-        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}"></td>
-        <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}"></td>
-        <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input">${deviceOptions}</select></td>
-        <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}"></td>
-        <td class="excel-td"><input type="text" id="edit-detail-${rowId}" class="inline-input" value="${detail}"></td>
-        <td class="excel-td"><input type="text" id="edit-serial-${rowId}" class="inline-input" value="${serial}"></td>
-        <td class="excel-td"><select id="edit-status-${rowId}" class="inline-input">${statusOptions}</select></td>
-        <td class="excel-td" style="text-align: center;"><input type="checkbox" id="edit-signed-${rowId}" ${signed ? 'checked' : ''}></td>
-        <td class="excel-td"><input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}"></td>
-        <td class="excel-td">
-            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}">
-            <div style="margin-top: 5px;">
-                <button onclick="saveAsset('edit', '${rowId}')" class="btn-xs btn-save">Save</button>
-                <button onclick="cancelEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
-            </div>
-        </td>
-    `;
-
-        // Attempt to set Select values by Text match (imperfect but works for MVP)
-        // Device
-        const devSelect = document.getElementById(`edit-device-${rowId}`);
-        for (let i = 0; i < devSelect.options.length; i++) {
-            if (devSelect.options[i].text === deviceTypeDisplay) {
-                devSelect.selectedIndex = i;
-                break;
-            }
-        }
-        // Status
-        const statSelect = document.getElementById(`edit-status-${rowId}`);
-        for (let i = 0; i < statSelect.options.length; i++) {
-            if (statSelect.options[i].text === statusText) {
-                statSelect.selectedIndex = i;
-                break;
-            }
-        }
-    }
-
-    function cancelEdit(rowId) {
-        const row = document.getElementById(`row-${rowId}`);
-        row.innerHTML = originalRowHtml[rowId];
-        row.classList.remove('editing-row');
-        isEditing = false;
-    }
-
     function saveAsset(action, rowId = null) {
         const prefix = action === 'add' ? 'new' : `edit`;
         const suffix = action === 'add' ? '' : `-${rowId}`;
+
+        // Get Status Value
+        let statusVal = 'IN_STORE'; // Default
+        const statusEl = document.getElementById(`${prefix}-status${suffix}`);
+        if (statusEl) statusVal = statusEl.value;
+        // For new row, status might be auto text "Auto" in HTML
+        // but in my previous code I just put "Auto" text for add row.
+        // Wait, for 'Add' row, the HTML was:
+        // <td class="excel-td" style="color: #cbd5e1; font-style: italic;">Auto</td>
+        // So user CANNOT select status on Add?
+        // If user wants to add as "Company Asset", they can't.
+        // I should change Add Row to have a dropdown too.
+
+        // Let's check Add Row HTML in showAddRow()
+        // It has: <td ...>Auto</td>
+        // I should probably change that too, but let's fix Edit first as that's where the dropdown is visible.
+        // For Edit:
+        // <select id="edit-status-${rowId}" ...>
 
         const payload = {
             action: action,
@@ -403,7 +363,7 @@
             brand: document.getElementById(`${prefix}-brand${suffix}`).value,
             model_detail: document.getElementById(`${prefix}-detail${suffix}`).value,
             serial_number: document.getElementById(`${prefix}-serial${suffix}`).value,
-            // status: Auto-derived on backend
+            status: statusVal,
             is_signed: document.getElementById(`${prefix}-signed${suffix}`).checked,
             date_issued: document.getElementById(`${prefix}-date${suffix}`).value,
             remarks: document.getElementById(`${prefix}-remarks${suffix}`).value,
@@ -496,6 +456,81 @@
             });
     }
 
+    function enableEditRow(rowId) {
+        if (isEditing) return;
+
+        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
+
+        isEditing = true;
+        const row = document.getElementById(`row-${rowId}`);
+        originalRowHtml[rowId] = row.innerHTML;
+
+        const cells = row.cells;
+        const mni = cells[0].innerText.trim();
+        const staff = cells[1].innerText.trim() === '-' ? '' : cells[1].innerText.trim();
+        const deviceTypeDisplay = cells[2].innerText.trim();
+        const brand = cells[3].innerText.trim();
+        const detail = cells[4].innerText.trim();
+        const serial = cells[5].innerText.trim();
+        const statusText = cells[6].innerText.trim();
+        const signed = cells[7].innerText.includes('####');
+        const dateText = cells[8].innerText.trim();
+        const remarks = cells[9].innerText.trim() === '-' ? '' : cells[9].innerText.trim();
+
+        const deviceOptions = document.getElementById('device-type-options').innerHTML;
+        const statusOptions = document.getElementById('status-options').innerHTML;
+
+        let dateValue = '';
+        if (dateText !== '-') {
+            const d = new Date(dateText);
+            if (!isNaN(d)) {
+                dateValue = d.toISOString().split('T')[0];
+            }
+        }
+
+        row.classList.add('editing-row');
+        row.innerHTML = `
+        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}"></td>
+        <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}"></td>
+        <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input">${deviceOptions}</select></td>
+        <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}"></td>
+        <td class="excel-td"><input type="text" id="edit-detail-${rowId}" class="inline-input" value="${detail}"></td>
+        <td class="excel-td"><input type="text" id="edit-serial-${rowId}" class="inline-input" value="${serial}"></td>
+        <td class="excel-td"><select id="edit-status-${rowId}" class="inline-input">${statusOptions}</select></td>
+        <td class="excel-td" style="text-align: center;"><input type="checkbox" id="edit-signed-${rowId}" ${signed ? 'checked' : ''}></td>
+        <td class="excel-td"><input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}"></td>
+        <td class="excel-td">
+            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}">
+            <div style="margin-top: 5px;">
+                <button onclick="saveAsset('edit', '${rowId}')" class="btn-xs btn-save">Save</button>
+                <button onclick="cancelEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
+            </div>
+        </td>
+    `;
+
+        const devSelect = document.getElementById(`edit-device-${rowId}`);
+        for (let i = 0; i < devSelect.options.length; i++) {
+            if (devSelect.options[i].text === deviceTypeDisplay) {
+                devSelect.selectedIndex = i;
+                break;
+            }
+        }
+        const statSelect = document.getElementById(`edit-status-${rowId}`);
+        for (let i = 0; i < statSelect.options.length; i++) {
+            if (statSelect.options[i].text === statusText) {
+                statSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    function cancelEdit(rowId) {
+        const row = document.getElementById(`row-${rowId}`);
+        row.innerHTML = originalRowHtml[rowId];
+        row.classList.remove('editing-row');
+        isEditing = false;
+    }
+
     function buildRowHtml(asset) {
         const signedHtml = asset.is_signed
             ? '<span style="color: #10b981; font-weight: bold;">####</span>'
@@ -523,6 +558,89 @@
         <td class="excel-td" style="color: #475569;">${asset.remarks}</td>
     </tr>
     `;
+    }
+
+    function enableEditStaffRow(rowId) {
+        if (isEditing) return;
+        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT') return;
+
+        isEditing = true;
+        const row = document.getElementById(`staff-row-${rowId}`);
+        originalRowHtml[rowId] = row.innerHTML;
+
+        const cells = row.cells;
+        const staffNo = cells[0].innerText.trim() === '-' ? '' : cells[0].innerText.trim();
+        const name = cells[1].innerText.trim();
+        const pixl = cells[2].innerText.trim(); // Read-only
+        const personal = cells[3].innerText.trim() === '-' ? '' : cells[3].innerText.trim();
+
+        row.classList.add('editing-row');
+        row.innerHTML = `
+        <td class="excel-td"><input type="text" id="edit-staffno-${rowId}" class="inline-input" value="${staffNo}"></td>
+        <td class="excel-td"><input type="text" id="edit-name-${rowId}" class="inline-input" value="${name}"></td>
+        <td class="excel-td" style="color: #64748b;">${pixl}</td>
+        <td class="excel-td"><input type="text" id="edit-personal-${rowId}" class="inline-input" value="${personal}"></td>
+        <td class="excel-td" style="color: #64748b;">-</td>
+        <td class="excel-td" style="position:absolute; background:none; border:none;">
+            <div style="margin-top: 5px; margin-left: -100px;">
+                <button onclick="saveStaff('${rowId}')" class="btn-xs btn-save">Save</button>
+                <button onclick="cancelStaffEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
+            </div>
+        </td>
+    `;
+    }
+
+    function cancelStaffEdit(rowId) {
+        const row = document.getElementById(`staff-row-${rowId}`);
+        row.innerHTML = originalRowHtml[rowId];
+        row.classList.remove('editing-row');
+        isEditing = false;
+    }
+
+    function saveStaff(rowId) {
+        const staffNo = document.getElementById(`edit-staffno-${rowId}`).value;
+        const name = document.getElementById(`edit-name-${rowId}`).value;
+        const personal = document.getElementById(`edit-personal-${rowId}`).value;
+
+        const payload = {
+            action: 'edit_staff',
+            staff_id: rowId,
+            staff_no: staffNo,
+            name: name,
+            personal_devices: personal
+        };
+
+        const btns = document.querySelectorAll('.btn-save');
+        btns.forEach(b => b.disabled = true);
+
+        fetch("{% url 'api_manage_asset' %}", { // Reusing endpoint or create new
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update Row in place
+                    const row = document.getElementById(`staff-row-${rowId}`);
+                    row.innerHTML = `
+                    <td class="excel-td">${data.staff.staff_no || '-'}</td>
+                    <td class="excel-td" style="font-weight: 500;">${data.staff.name}</td>
+                    <td class="excel-td">${data.staff.pixl_devices}</td>
+                    <td class="excel-td">${data.staff.personal_devices || '-'}</td>
+                    <td class="excel-td">${data.staff.total}</td>
+                `;
+                    row.classList.remove('editing-row');
+                    isEditing = false;
+                    alert("Saved!");
+                } else {
+                    alert("Error: " + data.message);
+                    btns.forEach(b => b.disabled = false);
+                }
+            });
     }
 
     function insertRowHtml(asset, atTop) {

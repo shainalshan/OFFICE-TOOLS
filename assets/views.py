@@ -50,6 +50,45 @@ def asset_dashboard(request):
     # "Replacement" -> Device Type Replacement
     replacements_count = base_qs.filter(device_type='REPLACEMENT').count()
 
+    if current_tab == 'STAFF LIST':
+        # Fetch from Contact DB model which is now synced
+        from contacts.models import Contact
+        staff_qs = Contact.objects.all().order_by('name')
+        
+        # We need to manually calculate asset counts since they are in Asset model
+        staff_data = []
+        for s in staff_qs:
+            # Count assets assigned to this person (by email/name match)
+            # Logic in import_assets was: assigned_to_email=staff_name
+            # So simple string match
+            pixl_count = Asset.objects.filter(assigned_to_email__iexact=s.name).count()
+            
+            staff_data.append({
+                'id': s.id,
+                'staff_no': s.staff_no or '-',
+                'name': s.name,
+                'pixl_devices': pixl_count,
+                'personal_devices': s.personal_devices or '-',
+                # Total logic? Maybe just pixl? Or sum?
+                # User had "Total" column in Excel. Let's just show Pixl count for now.
+                'total': pixl_count 
+            })
+
+        context = {
+            'assets': [], 
+            'staff_list': staff_data, 
+            'current_tab': current_tab,
+            'mac_count': mac_count,
+            'windows_count': windows_count,
+            'phone_count': phone_count,
+            'other_count': other_count,
+            'laptops_remaining': laptops_remaining,
+            'damaged_count': damaged_count,
+            'replacements_count': replacements_count,
+            'search_query': search_query,
+        }
+        return render(request, 'assets/dashboard.html', context)
+
     context = {
         'assets': assets,
         'current_tab': current_tab,
@@ -139,14 +178,23 @@ def api_manage_asset(request):
         # We can still accept it if needed, but per requirements "Intelligent Logic", we derive it.
         # status = data.get('status', 'IN_STORE') 
         
-        # Determine Status from Category/Device Type
-        if device_type == 'DAMAGED':
-            status = 'DAMAGED'
-        elif device_type == 'REPLACEMENT':
-            status = 'REPAIR'
+        # Determine Status
+        # Priority: Manual Input > Auto Derived
+        provided_status = data.get('status')
+        
+        if provided_status:
+            status = provided_status
+            # Auto-correction for specific types if needed, but Manual override should prevent confusion
+            if device_type == 'DAMAGED':
+                status = 'DAMAGED' # Force damaged for consistency
         else:
-            # Default to IN_STORE for devices, unless specific override (not requested)
-            status = 'IN_STORE'
+            # Fallback Auto Logic
+            if device_type == 'DAMAGED':
+                status = 'DAMAGED'
+            elif device_type == 'REPLACEMENT':
+                status = 'REPAIR'
+            else:
+                status = 'IN_STORE'
         is_signed = data.get('is_signed', False)
         date_issued = data.get('date_issued') or None
         remarks = data.get('remarks', '')
@@ -219,10 +267,38 @@ def api_manage_asset(request):
             asset.save()
             message = "Asset updated successfully."
             
+        elif action == 'edit_staff':
+            from contacts.models import Contact
+            staff_id = data.get('staff_id')
+            contact = get_object_or_404(Contact, id=staff_id)
+            
+            contact.staff_no = data.get('staff_no', '')
+            contact.name = data.get('name', '')
+            contact.personal_devices = data.get('personal_devices', '')
+            contact.save()
+            
+            message = "Staff updated successfully."
+            
+            # Recalculate stats for response
+            pixl_count = Asset.objects.filter(assigned_to_email__iexact=contact.name).count()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': message,
+                'staff': {
+                    'id': contact.id,
+                    'staff_no': contact.staff_no,
+                    'name': contact.name,
+                    'personal_devices': contact.personal_devices,
+                    'pixl_devices': pixl_count,
+                    'total': pixl_count # Adjust if total means something else
+                }
+            })
+
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid action'}, status=400)
 
-        # Return updated row data
+        # Return updated row data (for Asset actions)
         return JsonResponse({
             'status': 'success',
             'message': message,
