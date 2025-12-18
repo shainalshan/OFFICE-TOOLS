@@ -7,9 +7,9 @@ __pycache__/
 # Django
 *.log
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
+# db.sqlite3
+# db.sqlite3-journal
+# media/
 
 # Virtual Env
 venv/
@@ -19,3 +19,6 @@ env/
 # IDE
 .vscode/
 .idea/
+
+media/leadenhall_building.glb
+media/leadenhall_building_kEXGvBm.glb
