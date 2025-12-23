@@ -1,0 +1,126 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @media only screen and (max-width:480px) {
+            .main {
+                width: 100% !important
+            }
+
+            .block {
+                width: 100% !important;
+                display: block !important
+            }
+
+            .left {
+                text-align: left !important;
+                padding-top: 100px !important;
+                padding-bottom: 20px !important
+            }
+
+            .width {
+                width: auto !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table cellpadding="0" align="left" cellspacing="0" width="100%">
+        <tr>
+            <td align="left">
+                <table cellpadding="0" cellspacing="0" class="main" width="550" align="left" colspan="2">
+                    <tr>
+                        <td align="left" class="block">
+                            <span
+                                style="color:#331048;font-family: 'Poppins', sans-serif;font-size:25px;font-weight: 600;">{{ name }}</span> <br>
+                            <span style="font-size:15px;color:#58595B">{{ designation }}</span>
+
+                            <table align="left" cellpadding="0" cellspacing="0" class="main" width="400" colspan="2"
+                                style="padding-top: 20px">
+                                <tr>
+                                    <td width="160" class="width" style="padding-top: 5px;width:120px">
+                                        <span style="vertical-align: middle"><img
+                                                src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/2539819c-835b-c8a6-7337-aa593e97ba8e.png"
+                                                width="16"></span>&nbsp; <a
+                                            style="text-decoration: none;color:#808285;padding-left: 10px;font-size: 11px"
+                                            href="tel:{{ phone_mobile }}">{{ phone_mobile }}</a>
+                                    </td>
+                                    <td width="170" class="width" style="padding-top: 5px;width:120px">
+                                        <span style="vertical-align: middle"><img
+                                                src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/428d20c2-7f45-7fb7-4a55-0800d355c6d3.png"
+                                                width="16"></span>&nbsp; <a
+                                            style="text-decoration: none;color:#808285;padding-left: 10px;font-size: 11px"
+                                            href="https://{{ website }}">{{ website }}</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="" width="170" align="left" style="padding-top: 5px">
+                                        <span style="vertical-align: middle"><img
+                                                src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/aa7a7f30-75c0-7c8e-74d3-20f71342b296.png"
+                                                width="16"></span>&nbsp; <a
+                                            style="text-decoration: none;color:#808285;padding-left: 10px;font-size: 11px"
+                                            href="mailto:{{ email }}">{{ email }}</a>
+                                    </td>
+                                    <td class="" width="170" align="left" style="padding-top: 5px">
+                                        <span style="vertical-align: middle"><img
+                                                src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/d1f9fbe7-3a70-e544-609d-3e44454a3adc.png"
+                                                width="16"></span>&nbsp; <a
+                                            style="text-decoration: none;color:#808285;padding-left: 10px;font-size: 11px">{{ address }}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td align="right" class="block left">
+                            {% if photo_base64 %}
+                            <img src="data:image/jpeg;base64,{{ photo_base64 }}" width="136">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+                <table cellpadding="0" cellspacing="0" width="100" align="left" colspan="3">
+                    <tr>
+                        <td align="left">
+                            <img src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/eef472e1-59b0-a91b-7533-5a8d7000882a.png"
+                                width="29">
+                        </td>
+                        <td align="left">
+                            <a href="https://www.linkedin.com/company/invespy/" target="_blank"
+                                style="text-decoration: none">
+                                <img src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/3ffe5380-a554-451b-3309-916236f53302.png"
+                                    width="29">
+                            </a>
+                        </td>
+                        <td align="left">
+                            <a href="https://www.instagram.com/invespy/" target="_blank" style="text-decoration: none">
+                                <img src="https://mcusercontent.com/8867e3fc432494bb04fdfa740/images/e719e1a4-6164-0dc4-a2f7-a47604c51442.png"
+                                    width="29">
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

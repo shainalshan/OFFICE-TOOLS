@@ -13,3 +13,5 @@ class CurrentUserMiddleware:
         _thread_locals.user = getattr(request, 'user', None)
         response = self.get_response(request)
         return response
+
+

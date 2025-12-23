@@ -12,6 +12,7 @@ def create_signature(request):
     if request.method == 'POST':
         try:
             # Get form data
+            signature_model = request.POST.get('signature_model', 'pixl')
             name = request.POST.get('name')
             designation = request.POST.get('designation')
             email = request.POST.get('email')
@@ -46,7 +47,11 @@ def create_signature(request):
                 'photo_base64': photo_base64
             }
             
-            raw_html = render_to_string('signature/signature_template.html', context)
+            template_name = 'signature/signature_template.html'
+            if signature_model == 'invespy':
+                template_name = 'signature/signature_invespy.html'
+                
+            raw_html = render_to_string(template_name, context)
             compressed_html = compress_html(raw_html)
 
             # Store in session

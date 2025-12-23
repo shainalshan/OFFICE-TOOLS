@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'image_compressor',
     'three_d_view',
     'device_tracker',
+
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.CurrentUserMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
