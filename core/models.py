@@ -84,3 +84,20 @@ class FeatureFlag(models.Model):
 
     def __str__(self):
         return f"{self.name} ({'ON' if self.is_active else 'OFF'})"
+
+class EmailConfiguration(models.Model):
+    email_host = models.CharField(max_length=100, default='smtp.gmail.com')
+    email_port = models.IntegerField(default=587)
+    email_host_user = models.CharField(max_length=255, help_text="Email ID")
+    email_host_password = models.CharField(max_length=255, help_text="App Password")
+    email_use_tls = models.BooleanField(default=True)
+    default_from_email = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Singleton pattern enforcement logic can be done in save() or just assumed by always fetching .first()
+    
+    def __str__(self):
+        return f"Email Config: {self.email_host_user}"
+
+    class Meta:
+        verbose_name = "Email Configuration"
+        verbose_name_plural = "Email Configuration"

@@ -1,4 +1,8 @@
 {% extends 'core/base.html' %}
+{% load waffle_tags %}
+
+
+
 
 {% block content %}
 <div class="animate-fade-in">
@@ -7,6 +11,70 @@
         <h1 style="margin:0;">Admin Dashboard</h1>
         <!-- Global Actions or Status could go here -->
     </div>
+
+    <style>
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 200px;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .tool-desc {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1024px) {
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 
     <!-- MAIN MENU -->
     <div id="admin-menu" class="tools-grid">
@@ -39,26 +107,27 @@
         </div>
 
         <!-- Manage Tickets Card -->
-        <a href="{% url 'admin_ticket_panel' %}" class="tool-card" target="_blank" style="text-decoration: none;">
+        <a href="{% url 'admin_ticket_panel' %}" class="tool-card" target="_blank">
             <div class="tool-icon">🎫</div>
             <div class="tool-title">Manage Tickets</div>
             <div class="tool-desc">Open ticketing system in new tab</div>
         </a>
 
-        <!-- Notification Settings Card -->
+        <!-- Notifications Card -->
         <div class="tool-card" onclick="showSection('notification-settings-section')">
             <div class="tool-icon">🔔</div>
             <div class="tool-title">Notifications</div>
             <div class="tool-desc">System alerts and subscribers</div>
         </div>
 
-        <!-- Email Notification System Card -->
-        <div class="tool-card" onclick="showSection('email-notification-settings-section')">
-            <div class="tool-icon">📧</div>
-            <div class="tool-title">Email Notifications</div>
-            <div class="tool-desc">Manage ticket email subscribers</div>
+        <!-- Feature Flags Card -->
+        {% if can_manage_flags %}
+        <div class="tool-card" onclick="showSection('feature-management-section')">
+            <div class="tool-icon">🚩</div>
+            <div class="tool-title">Feature Flags</div>
+            <div class="tool-desc">Manage system features and permissions</div>
         </div>
-
+        {% endif %}
 
         <!-- Recovery Card -->
         <div class="tool-card" onclick="showSection('recovery-section')">
@@ -73,12 +142,20 @@
             <div class="tool-title">HR Portal</div>
             <div class="tool-desc">Manage employee records and policies</div>
         </div>
+
+        <!-- Email Notification System Card -->
+        <div class="tool-card" onclick="showSection('email-notification-settings-section')">
+            <div class="tool-icon">📧</div>
+            <div class="tool-title">Email Notifications</div>
+            <div class="tool-desc">Manage ticket email subscribers</div>
+        </div>
     </div>
 
     <!-- HR PORTAL SECTION -->
     <div id="hr-portal-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #818cf8; margin-bottom: 1rem;">👔 HR Portal Control Panel</h2>
             <div class="glass-container" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
@@ -96,7 +173,8 @@
     <!-- RECOVERY SECTION -->
     <div id="recovery-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #34d399; margin-bottom: 1rem;">♻️ Audit Logs & Recovery</h2>
 
@@ -154,7 +232,8 @@
     <!-- NOTIFICATION SETTINGS SECTION -->
     <div id="notification-settings-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #6366f1; margin-bottom: 1rem;">🔔 Notification Settings</h2>
 
@@ -200,7 +279,8 @@
     <!-- EMAIL NOTIFICATION SETTINGS SECTION -->
     <div id="email-notification-settings-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #6366f1; margin-bottom: 1rem;">📧 Email Notification System</h2>
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
@@ -209,6 +289,44 @@
                 <small><em>Note: Users only receive emails if they are <strong>Subscribed</strong> below AND overlap
                         with the ticket (Creator or Assignee).</em></small>
             </p>
+
+            {% flag "dynamic_email_config" %}
+            <div class="glass-container"
+                style="padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                <h3 style="margin-top: 0; color: #34d399; margin-bottom: 1rem;">⚙️ SMTP Configuration</h3>
+                <form method="post" style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
+                        <input type="hidden" name="action" value="update_email_config">
+
+                        <div style="flex: 1; min-width: 250px;">
+                            <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">Email
+                                ID</label>
+                            <input type="email" name="email_user" value="{{ email_config.email_host_user|default:'' }}"
+                                placeholder="notifications@example.com" required
+                                style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                        </div>
+
+                        <div style="flex: 1; min-width: 250px;">
+                            <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">App
+                                Password</label>
+                            <input type="text" name="app_password"
+                                value="{{ email_config.email_host_password|default:'' }}"
+                                placeholder="xxxx xxxx xxxx xxxx" required
+                                style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; padding-top: 0.5rem;">
+                        <button type="submit" class="btn-primary" style="flex: 1;">💾 Save Configuration</button>
+                        <button type="submit" name="action" value="test_email_config"
+                            style="flex: 0 0 auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer;">
+                            📨 Test
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endflag %}
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 {% for setting in email_notification_settings %}
@@ -286,7 +404,8 @@
     <!-- CREATE USER SECTION -->
     <div id="create-user-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #4ade80; margin-bottom: 1rem;">➕ Create New User</h2>
             <div class="glass-container" style="padding: 1.5rem;">
@@ -335,7 +454,8 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     <!-- EDIT USER SECTION -->
     <div id="edit-user-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #60a5fa; margin-bottom: 1rem;">✏️ Edit User Details</h2>
             <div class="glass-container" style="padding: 1.5rem;">
@@ -377,7 +497,8 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     <!-- PENDING APPROVALS SECTION -->
     <div id="pending-approvals-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #fbbf24; margin-bottom: 1rem;">🕒 Pending Approvals</h2>
             <div id="pending-users-container" class="glass-container" style="padding: 0;">
@@ -390,7 +511,8 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     <!-- USER PERMISSIONS SECTION -->
     <div id="user-permissions-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <h2 style="color: #667eea; margin-bottom: 1rem;">👥 User Permissions</h2>
 
@@ -514,7 +636,8 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     <!-- MANAGE CONTACTS SECTION -->
     <div id="manage-contacts-section" style="display: none;">
         <button onclick="showMenu()" class="btn-primary"
-            style="width: auto; margin-bottom: 1rem; background: #475569;">← Back to Menu</button>
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Menu</button>
         <section>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2 style="color: #fca5a5; margin: 0;">📒 Manage Company Contacts</h2>
@@ -664,6 +787,182 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     </div>
 </div>
 
+<!-- FEATURE MANAGEMENT SECTION -->
+<div id="feature-management-section" style="display: none;">
+    <button onclick="showMenu()" class="btn-primary" style="width: auto; margin-bottom: 1rem; background: #475569;">←
+        Back to Menu</button>
+    <section>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="color: #f472b6; margin: 0;">🚩 Feature Management</h2>
+            <button onclick="document.getElementById('add-flag-modal').style.display='flex'" class="btn-primary"
+                style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem;">
+                + New Flag
+            </button>
+        </div>
+
+        <div class="glass-container" style="padding: 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);">
+                        <th style="padding: 1rem; text-align: left;">Flag Name</th>
+                        <th style="padding: 1rem; text-align: left;">Global</th>
+                        <th style="padding: 1rem; text-align: left;">Admins</th>
+                        <th style="padding: 1rem; text-align: left;">User Count</th>
+                        <th style="padding: 1rem; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flag in waffle_flags %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem; font-weight: bold; color: #f472b6;">{{ flag.name }}</td>
+                        <td style="padding: 1rem;">
+                            {% if flag.everyone %}
+                            <span
+                                style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 4px;">Active</span>
+                            {% elif flag.everyone == False %}
+                            <span
+                                style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 0.2rem 0.5rem; border-radius: 4px;">Disabled</span>
+                            {% else %}
+                            <span style="color: var(--text-secondary);">—</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem;">
+                            {% if flag.superusers %}✅{% else %}❌{% endif %}
+                        </td>
+                        <td style="padding: 1rem;">
+                            {{ flag.users.count }}
+                        </td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <button
+                                    onclick="openManageFlag('{{ flag.id }}', '{{ flag.name }}', {{ flag.everyone|yesno:'true,false,null' }}, {{ flag.superusers|yesno:'true,false' }}, {{ flag.users.exists|yesno:'true,false' }})"
+                                    style="background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                                    ⚙️ Rules
+                                </button>
+
+                                <form method="post" style="display: inline;"
+                                    onsubmit="return confirm('Delete flag {{ flag.name }}?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_flag">
+                                    <input type="hidden" name="flag_id" value="{{ flag.id }}">
+                                    <button type="submit"
+                                        style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No
+                            flags found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- ADD FLAG MODAL -->
+<div id="add-flag-modal"
+    style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container" style="padding: 2rem; width: 100%; max-width: 400px; position: relative;">
+        <button onclick="document.getElementById('add-flag-modal').style.display='none'"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        <h2 style="color: #f472b6; margin-top: 0;">New Feature Flag</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_flag">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Flag Name (e.g. `new_dashboard_v2`)</label>
+                <input type="text" name="flag_name" required pattern="[a-zA-Z0-9_]+" placeholder="lower_case_snake_case"
+                    style="width: 100%;">
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Create Flag</button>
+        </form>
+    </div>
+</div>
+
+<!-- MANAGE FLAG RULES MODAL -->
+<div id="manage-flag-modal"
+    style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container"
+        style="padding: 2rem; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative;">
+        <button onclick="document.getElementById('manage-flag-modal').style.display='none'"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        <h2 style="color: #f472b6; margin-top: 0;">Manage Rules: <span id="manage-flag-name"></span></h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_flag_rule">
+            <input type="hidden" name="flag_id" id="manage-flag-id">
+
+            <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem;">Who should see this feature?
+            </h3>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <!-- GLOBAL CHECKBOX -->
+                <label
+                    style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" name="is_global" id="cb-global" onchange="toggleFlagInputs()">
+                    <div>
+                        <div style="font-weight: bold;">Global (Everyone)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Enable for all users. (Overrides
+                            others)</div>
+                    </div>
+                </label>
+
+                <div id="subset-controls"
+                    style="display: flex; flex-direction: column; gap: 0.5rem; transition: opacity 0.3s;">
+                    <!-- ADMIN CHECKBOX -->
+                    <label
+                        style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="is_admin" id="cb-admin" onchange="toggleFlagInputs()">
+                        <div>
+                            <div style="font-weight: bold;">Admin Only</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Enable for Superusers.</div>
+                        </div>
+                    </label>
+
+                    <!-- SPECIFIC CHECKBOX -->
+                    <label
+                        style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="is_specific" id="cb-specific" onchange="toggleFlagInputs()">
+                        <div>
+                            <div style="font-weight: bold;">Specific Users</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Enable for selected users
+                                below.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- User Selector (Hidden by default) -->
+            <div id="audience-user-selector" style="display: none; margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Search & Add Users</label>
+                <input type="text" id="flag-user-search" placeholder="Search user..."
+                    onkeyup="searchUsersForFlag(this.value)" style="width: 100%; margin-bottom: 0.5rem;">
+
+                <div id="flag-user-results"
+                    style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 0.5rem; margin-bottom: 0.5rem;">
+                </div>
+
+                <div id="selected-flag-users" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <!-- Selected users tags go here -->
+                </div>
+                <!-- Hidden List for Form Submission -->
+                <div id="hidden-user-inputs"></div>
+            </div>
+
+            <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <button type="submit" class="btn-primary" style="width: 100%;">Save Rules</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
     .tool-btn {
         background: rgba(255, 255, 255, 0.1);
@@ -692,17 +991,20 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     function showSection(sectionId) {
         document.getElementById('admin-menu').style.display = 'none';
 
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'email-notification-settings-section', 'recovery-section', 'hr-portal-section'].forEach(id => {
-            document.getElementById(id).style.display = 'none';
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'email-notification-settings-section', 'recovery-section', 'hr-portal-section', 'feature-management-section'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
         });
 
-        document.getElementById(sectionId).style.display = 'block';
+        const section = document.getElementById(sectionId);
+        if (section) section.style.display = 'block';
         localStorage.setItem('admin_last_section', sectionId);
     }
 
     function showMenu() {
-        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'email-notification-settings-section', 'recovery-section', 'hr-portal-section'].forEach(id => {
-            document.getElementById(id).style.display = 'none';
+        ['create-user-section', 'pending-approvals-section', 'user-permissions-section', 'edit-user-section', 'manage-contacts-section', 'notification-settings-section', 'email-notification-settings-section', 'recovery-section', 'hr-portal-section', 'feature-management-section'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
         });
         document.getElementById('admin-menu').style.display = 'grid';
         localStorage.removeItem('admin_last_section');
@@ -916,5 +1218,127 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     }
 
     setInterval(checkNewUsers, 5000);
+
+    // --- Flag Manager JS ---
+    function openManageFlag(id, name, everyone, superusers) {
+        document.getElementById('manage-flag-id').value = id;
+        document.getElementById('manage-flag-name').innerText = name;
+
+        // Reset all
+        document.getElementById('cb-global').checked = false;
+        document.getElementById('cb-admin').checked = false;
+        document.getElementById('cb-specific').checked = false;
+
+        // Set state based on values
+        if (everyone === true) {
+            document.getElementById('cb-global').checked = true;
+        } else {
+            // If everyone is not true (None or False), we check others
+            if (superusers === true) {
+                document.getElementById('cb-admin').checked = true;
+            }
+            // We can't easily know "Specific" valid state just from passed args without checking count, 
+            // but we can assume if not global, user might want to see specific. 
+            // Actually, simplest is to let user check it. 
+            // For better UX, we should probably pass 'has_users' bool from backend or just default to unchecked.
+            // We'll leave specific unchecked by default unless we detect it later (requires data attribute update).
+            // UPDATE: I will assume if it's not global, and we have users, it's specific. 
+            // But for now, let's just let the user toggle 'Specific' themselves to see the list.
+            // Wait, I can pass a count or has_users bool.
+            // Let's rely on the user adding users. 
+        }
+
+        // Trigger UI updates
+        toggleFlagInputs();
+
+        // Reset users list UI
+        selectedFlagUsers.clear();
+        document.getElementById('selected-flag-users').innerHTML = '';
+        document.getElementById('hidden-user-inputs').innerHTML = '';
+
+        document.getElementById('manage-flag-modal').style.display = 'flex';
+    }
+
+    function toggleFlagInputs() {
+        const isGlobal = document.getElementById('cb-global').checked;
+        const isAdmin = document.getElementById('cb-admin').checked;
+        const isSpecific = document.getElementById('cb-specific').checked;
+
+        const subsetContainer = document.getElementById('subset-controls');
+        const userSelector = document.getElementById('audience-user-selector');
+
+        if (isGlobal) {
+            // If Global is ON, others are irrelevant/overridden
+            subsetContainer.style.opacity = '0.5';
+            subsetContainer.style.pointerEvents = 'none';
+            userSelector.style.display = 'none';
+        } else {
+            subsetContainer.style.opacity = '1';
+            subsetContainer.style.pointerEvents = 'auto';
+
+            if (isSpecific) {
+                userSelector.style.display = 'block';
+            } else {
+                userSelector.style.display = 'none';
+            }
+        }
+    }
+
+    function searchUsersForFlag(query) {
+        if (query.length < 1) return;
+
+        const searchUrl = "{% url 'search_users_notification' %}";
+        fetch(searchUrl + `?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('flag-user-results');
+                container.innerHTML = '';
+                data.users.forEach(u => {
+                    const div = document.createElement('div');
+                    div.style.padding = '0.3rem';
+                    div.style.cursor = 'pointer';
+                    div.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                    div.innerText = u.username;
+                    div.onclick = function () { addUserToFlag(u.id, u.username); };
+                    container.appendChild(div);
+                });
+            });
+    }
+
+    const selectedFlagUsers = new Set();
+    function addUserToFlag(id, username) {
+        if (selectedFlagUsers.has(id)) return;
+        selectedFlagUsers.add(id);
+
+        // Add Checkbox/Input
+        const wrapper = document.getElementById('hidden-user-inputs');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'user_ids';
+        input.value = id;
+        input.id = 'flag-input-' + id;
+        wrapper.appendChild(input);
+
+        // UI Tag
+        const display = document.getElementById('selected-flag-users');
+        const tag = document.createElement('div');
+        tag.id = 'flag-tag-' + id;
+        tag.style.background = '#6366f1';
+        tag.style.padding = '0.2rem 0.5rem';
+        tag.style.borderRadius = '15px';
+        tag.style.fontSize = '0.8rem';
+        tag.innerHTML = `${username} <span style="cursor:pointer; margin-left:5px;" onclick="removeUserFromFlag('${id}')">&times;</span>`;
+        display.appendChild(tag);
+    }
+
+    function removeUserFromFlag(id) {
+        selectedFlagUsers.delete(id);
+        document.getElementById('flag-input-' + id).remove();
+        document.getElementById('flag-tag-' + id).remove();
+    }
+
+
+
+
 </script>
 {% endblock %}

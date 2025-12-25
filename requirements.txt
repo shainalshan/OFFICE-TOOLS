@@ -3,3 +3,4 @@ Pillow
 requests
 psycopg2-binary
 openpyxl
+django-waffle

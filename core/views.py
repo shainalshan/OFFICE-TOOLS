@@ -11,6 +11,10 @@ from contacts.models import Contact
 from assets.models import Asset
 from .forms import RegistrationForm
 from .decorators import check_tool_access
+import waffle
+from waffle.models import Flag
+from .email_utils import send_dynamic_email
+from .models import Tool, UserToolAccess, User, UserProfile, NotificationEventSetting, AuditLog, EmailConfiguration
 
 @login_required
 def test_error(request):
@@ -103,7 +107,78 @@ def admin_dashboard(request):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        if action == 'create_user':
+        # --- DYNAMIC EMAIL CONFIG (SAFETY MODE) ---
+        if waffle.flag_is_active(request, 'dynamic_email_config'):
+            if action == 'update_email_config':
+                email_user = request.POST.get('email_user')
+                app_password = request.POST.get('app_password')
+                
+                config, _ = EmailConfiguration.objects.get_or_create(id=1) # Singleton-ish
+                config.email_host_user = email_user
+                config.email_host_password = app_password
+                config.save()
+                messages.success(request, 'Email Configuration Updated.')
+                return redirect('admin_dashboard')
+
+            elif action == 'test_email_config':
+                try:
+                    send_dynamic_email(
+                        'Test Email - Office Portal',
+                        f'This is a test email from {request.user.username}.',
+                        [request.user.email]
+                    )
+                    messages.success(request, f'Test email sent to {request.user.email}.')
+                except Exception as e:
+                    messages.error(request, f'Test Failed: {str(e)}')
+                return redirect('admin_dashboard')
+
+        if action == 'create_flag':
+            flag_name = request.POST.get('flag_name')
+            if flag_name:
+                Flag.objects.get_or_create(name=flag_name)
+                messages.success(request, f'Flag "{flag_name}" created.')
+            return redirect('admin_dashboard')
+
+        elif action == 'delete_flag':
+            flag_id = request.POST.get('flag_id')
+            Flag.objects.filter(id=flag_id).delete()
+            messages.warning(request, 'Flag deleted.')
+            return redirect('admin_dashboard')
+
+        elif action == 'update_flag_rule':
+            flag_id = request.POST.get('flag_id')
+            
+            # Checkbox values
+            is_global = request.POST.get('is_global') == 'on'
+            is_admin = request.POST.get('is_admin') == 'on'
+            is_specific = request.POST.get('is_specific') == 'on'
+            user_ids = request.POST.getlist('user_ids') # For specific
+            
+            flag = get_object_or_404(Flag, id=flag_id)
+            
+            # Logic:
+            # 1. If Global is ON -> everyone=True. (Superusers/Users irrelevant for logic, but we can keep/clear them)
+            # 2. If Global OFF -> everyone=None. Then Superusers/Users apply.
+            
+            if is_global:
+                flag.everyone = True
+                flag.superusers = True # Optional, but keeps it clean
+                flag.users.clear() # Clear specific to avoid confusion? Or keep them? Let's clear to match "Global" concept.
+            else:
+                flag.everyone = None # This enables "Fallthrough" logic
+                flag.superusers = is_admin
+                
+                if is_specific:
+                    users_to_add = User.objects.filter(id__in=user_ids)
+                    flag.users.set(users_to_add)
+                else:
+                    flag.users.clear()
+            
+            flag.save()
+            messages.success(request, f'Updated rules for flag "{flag.name}".')
+            return redirect('admin_dashboard')
+
+        elif action == 'create_user':
             username = request.POST.get('username', '').strip()
             email = request.POST.get('email', '').strip()
             password = request.POST.get('password')
@@ -246,13 +321,20 @@ def admin_dashboard(request):
             
             # Send Email Notification
             try:
-                send_mail(
-                    'Account Approved - Office Portal',
-                    f'Hello {user.username},\n\nYour account has been approved by the administrator. You can now login using your credentials.\n\nBest regards,\nOffice Admin',
-                    'admin@officeportal.local',
-                    [user.email],
-                    fail_silently=True,
-                )
+                if waffle.flag_is_active(request, 'dynamic_email_config'):
+                    send_dynamic_email(
+                        'Account Approved - Office Portal',
+                        f'Hello {user.username},\n\nYour account has been approved by the administrator. You can now login using your credentials.\n\nBest regards,\nOffice Admin',
+                        [user.email]
+                    )
+                else:
+                    send_mail(
+                        'Account Approved - Office Portal',
+                        f'Hello {user.username},\n\nYour account has been approved by the administrator. You can now login using your credentials.\n\nBest regards,\nOffice Admin',
+                        'admin@officeportal.local',
+                        [user.email],
+                        fail_silently=True,
+                    )
             except Exception:
                 pass # Fail silently for local dev if config issues
         
@@ -282,7 +364,7 @@ def admin_dashboard(request):
             user.save()
             messages.success(request, f"Password for {user.username} reset successfully.")
 
-        elif action == 'assign_tool':
+        if action == 'assign_tool':
             tool_slug = request.POST.get('tool_slug')
             tool = get_object_or_404(Tool, slug=tool_slug)
             
@@ -293,6 +375,9 @@ def admin_dashboard(request):
             else:
                 access.tools.add(tool)
                 messages.success(request, f'Assigned {tool.name} to {user.username}.')
+
+        # --- WAFFLE FLAG MANAGEMENT ---
+
 
         return redirect('admin_dashboard')
 
@@ -311,6 +396,18 @@ def admin_dashboard(request):
     email_notification_settings = all_settings.filter(event_type__in=email_notification_types)
     system_notification_settings = all_settings.exclude(event_type__in=email_notification_types)
 
+    # Waffle Flags Access Logic
+    # Superusers ALWAYS have access (Safety Net), or if the flag is enabled
+    can_manage_flags = request.user.is_superuser or waffle.flag_is_active(request, 'admin_waffle_manager')
+    
+    waffle_flags = []
+    if can_manage_flags:
+        waffle_flags = Flag.objects.all().order_by('name')
+
+    email_config = None
+    if waffle.flag_is_active(request, 'dynamic_email_config'):
+        email_config = EmailConfiguration.objects.first()
+
     return render(request, 'core/admin_dashboard.html', {
         'pending_users': pending_users,
         'managed_users': managed_users,
@@ -318,7 +415,10 @@ def admin_dashboard(request):
         'all_contacts': all_contacts,
         'system_notification_settings': system_notification_settings,
         'email_notification_settings': email_notification_settings,
-        'audit_logs': audit_logs
+        'audit_logs': audit_logs,
+        'waffle_flags': waffle_flags,
+        'email_config': email_config,
+        'can_manage_flags': can_manage_flags,
     })
 
 @login_required
