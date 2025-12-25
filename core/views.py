@@ -12,6 +12,17 @@ from assets.models import Asset
 from .forms import RegistrationForm
 from .decorators import check_tool_access
 
+@login_required
+def test_error(request):
+    """
+    Intentionally raises an error to test GlobalExceptionMiddleware.
+    """
+    if request.user.is_superuser:
+        # Raise a random exception
+        raise Exception("This is a test exception to verify the 500 error page.")
+    return redirect('home')
+
+
 def home(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -292,14 +303,21 @@ def admin_dashboard(request):
     for type_code, type_label in NotificationEventSetting.EVENT_TYPES:
         NotificationEventSetting.objects.get_or_create(event_type=type_code)
     
-    notification_settings = NotificationEventSetting.objects.all()
+    all_settings = NotificationEventSetting.objects.all()
+    
+    # Split into two groups
+    email_notification_types = ['TICKET_CREATED', 'TICKET_ASSIGNED', 'TICKET_STATUS_CHANGED', 'TICKET_COMMENTED']
+    
+    email_notification_settings = all_settings.filter(event_type__in=email_notification_types)
+    system_notification_settings = all_settings.exclude(event_type__in=email_notification_types)
 
     return render(request, 'core/admin_dashboard.html', {
         'pending_users': pending_users,
         'managed_users': managed_users,
         'all_tools': all_tools,
         'all_contacts': all_contacts,
-        'notification_settings': notification_settings,
+        'system_notification_settings': system_notification_settings,
+        'email_notification_settings': email_notification_settings,
         'audit_logs': audit_logs
     })
 

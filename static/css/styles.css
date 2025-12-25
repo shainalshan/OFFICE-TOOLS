@@ -165,6 +165,37 @@ button.btn-primary:hover {
     opacity: 0.9;
 }
 
+/* Link Buttons */
+a.btn-primary,
+a.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    border: none;
+}
+
+a.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+a.btn-secondary {
+    background: #64748b;
+    color: white;
+}
+
+a.btn-primary:hover,
+a.btn-secondary:hover {
+    opacity: 0.9;
+}
+
 .file-hint {
     font-size: 0.8rem;
     color: #94a3b8;

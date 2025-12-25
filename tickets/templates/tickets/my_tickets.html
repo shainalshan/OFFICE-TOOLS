@@ -4,23 +4,36 @@
 <div class="animate-fade-in">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 style="margin:0;">My Tickets</h1>
-        <a href="{% url 'create_ticket' %}" class="btn-primary"
-            style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem;">+ New Ticket</a>
+        <div style="display: flex; gap: 1rem;">
+            {% if is_admin %}
+            <a href="{% url 'admin_ticket_panel' %}" class="btn-secondary">🔧 Admin Panel</a>
+            {% endif %}
+            <a href="{% url 'ticket_history' %}" class="btn-secondary">📜 History</a>
+            <a href="{% url 'create_ticket' %}" class="btn-primary">+ New Ticket</a>
+        </div>
     </div>
 
     {% for ticket in tickets %}
-    <div class="ticket-card priority-{{ ticket.priority }}">
+    <div class="ticket-card priority-{{ ticket.priority }}"
+        onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'" style="cursor: pointer;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
             <div>
                 <span style="font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_id }}</span>
                 <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
                     {{ ticket.created_at|date:"M d, H:i" }}
                 </span>
+
+                {% if ticket.deadline %}
+                <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
+                    style="color: #fbbf24; font-size: 0.9rem; font-weight: bold; margin-top: 0.25rem;">
+                    ⏳ Calculating...
+                </div>
+                {% endif %}
             </div>
             <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
         </div>
 
-        <p style="margin: 0; color: var(--text-secondary);">
+        <p style="margin: 0; color: var(--text-secondary); word-wrap: break-word; overflow-wrap: break-word;">
             {{ ticket.issue }}
         </p>
 
@@ -36,5 +49,99 @@
         <p style="font-size: 0.9rem; opacity: 0.7;">Completed tickets disappear after 24 hours.</p>
     </div>
     {% endfor %}
+
+    {% if assigned_tickets %}
+    <h2 style="margin-top: 3rem; margin-bottom: 1.5rem;">Assigned to Me</h2>
+    {% for ticket in assigned_tickets %}
+    <div class="ticket-card priority-{{ ticket.priority }}"
+        onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'" style="cursor: pointer;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <span style="font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_id }}</span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
+                    From: {{ ticket.user.username }} • {{ ticket.created_at|date:"M d, H:i" }}
+                </span>
+
+                {% if ticket.deadline %}
+                <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
+                    style="color: #fbbf24; font-size: 0.9rem; font-weight: bold; margin-top: 0.25rem;">
+                    ⏳ Calculating...
+                </div>
+                {% endif %}
+            </div>
+            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        </div>
+
+        <p style="margin: 0; color: var(--text-secondary); word-wrap: break-word; overflow-wrap: break-word;">
+            {{ ticket.issue }}
+        </p>
+
+        {% if ticket.status == 'COMPLETED' %}
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: #4ade80;">
+            ✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateCountdowns() {
+        const timers = document.querySelectorAll('.deadline-timer');
+        const now = new Date();
+
+        timers.forEach(timer => {
+            const deadline = new Date(timer.dataset.deadline);
+            const diff = deadline - now;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                let timeStr = "";
+                if (days > 0) timeStr += `${days}d `;
+                if (hours > 0) timeStr += `${hours}h `;
+                timeStr += `${minutes}m remaining`;
+
+                timer.innerText = "⏳ " + timeStr;
+                timer.style.color = "#fbbf24"; // Warning color
+
+                // Critical (less than 4 hours)
+                if (days === 0 && hours < 4) {
+                    timer.style.color = "#ef4444"; // Red
+                    timer.style.animation = "pulse 1.5s infinite";
+                }
+            } else {
+                timer.innerHTML = "⚠️ BREACHED";
+                timer.style.color = "#ef4444";
+                timer.style.fontWeight = "bold";
+            }
+        });
+    }
+
+    // Update every second
+    setInterval(updateCountdowns, 1000);
+    // Initial call
+    updateCountdowns();
+</script>
+
+<style>
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+</style>
 {% endblock %}

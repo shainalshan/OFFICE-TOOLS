@@ -4,8 +4,17 @@
 <div class="animate-fade-in">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 style="margin:0;">Ticket Admin Panel</h1>
-        <a href="{% url 'ticket_reports' %}" class="btn-primary"
-            style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">📊 View Reports</a>
+        <div style="display: flex; gap: 1rem;">
+            {% if user.is_superuser %}
+            <button onclick="toggleAccessModal()" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">👥 Assignee</button>
+            <button onclick="toggleAccessModal()" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">👥 Manage
+                Access</button>
+            {% endif %}
+            <a href="{% url 'ticket_reports' %}" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">📊 View Reports</a>
+        </div>
     </div>
 
     <!-- Filters -->
@@ -19,13 +28,18 @@
         <a href="?status=IN_PROGRESS"
             style="color: white; text-decoration: none; opacity: {% if status_filter == 'IN_PROGRESS' %}1{% else %}0.6{% endif %};">In
             Progress</a>
-        <a href="?priority=P1"
-            style="color: #ef4444; text-decoration: none; opacity: {% if priority_filter == 'P1' %}1{% else %}0.6{% endif %}; font-weight: bold;">P1
-            Critical</a>
+        <a href="?status=COMPLETED"
+            style="color: white; text-decoration: none; opacity: {% if status_filter == 'COMPLETED' %}1{% else %}0.6{% endif %};">Completed</a>
+        <a href="?status=CANCELLED"
+            style="color: white; text-decoration: none; opacity: {% if status_filter == 'CANCELLED' %}1{% else %}0.6{% endif %};">Cancelled</a>
+        <a href="?priority=DEADLINE"
+            style="color: #fbbf24; text-decoration: none; opacity: {% if priority_filter == 'DEADLINE' %}1{% else %}0.6{% endif %}; font-weight: bold;">
+            ⏳ Deadline Tickets
+        </a>
 
         <!-- Search -->
         <form method="get" style="margin-left: auto; display: flex; gap: 0.5rem;">
-            <input type="text" name="ticket_search" placeholder="Search Ticket ID..."
+            <input type="text" name="ticket_search" placeholder="Search Ticket ID or User..."
                 value="{{ request.GET.ticket_search|default:'' }}"
                 style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
             <button type="submit" class="btn-primary"
@@ -34,54 +48,269 @@
     </div>
 
     <!-- Ticket List -->
-    <div class="glass-container" style="padding: 0;">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div class="glass-container" style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; min-width: 1400px; border-collapse: collapse; table-layout: fixed;">
             <thead>
                 <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                    <th style="padding: 1rem;">ID</th>
-                    <th style="padding: 1rem;">User</th>
-                    <th style="padding: 1rem;">Priority</th>
-                    <th style="padding: 1rem;">Issue</th>
-                    <th style="padding: 1rem;">Status</th>
-                    <th style="padding: 1rem;">Created</th>
+                    <th style="padding: 1rem; width: 80px;">ID</th>
+                    <th style="padding: 1rem; width: 100px;">User</th>
+                    <th style="padding: 1rem; width: 100px;">Priority</th>
+                    <th style="padding: 1rem; width: 200px;">Issue</th>
+                    <th style="padding: 1rem; width: 120px;">Status</th>
+                    <th style="padding: 1rem; width: 140px;">Assign To</th>
+                    <th style="padding: 1rem; width: 250px;">Resolution</th>
+                    <th style="padding: 1rem; width: 110px;">Deadline</th>
+                    <th style="padding: 1rem; width: 100px;">Created</th>
+                    <th style="padding: 1rem; width: 90px;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for ticket in tickets %}
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 1rem; font-weight: bold;">{{ ticket.ticket_id }}</td>
-                    <td style="padding: 1rem;">{{ ticket.user.username }}</td>
+                    <td
+                        style="padding: 1rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <a href="{% url 'ticket_detail' ticket.ticket_id %}"
+                            style="color: #60a5fa; text-decoration: none;">
+                            {{ ticket.ticket_id }}
+                        </a>
+                    </td>
+                    <td style="padding: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title="{{ ticket.user.username }}">{{ ticket.user.username }}</td>
                     <td style="padding: 1rem;">
                         <span class="dot-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
                     </td>
-                    <td style="padding: 1rem; max-width: 300px;">{{ ticket.issue|truncatechars:50 }}</td>
-                    <td style="padding: 1rem;">
-                        <!-- Status Changer Form -->
-                        <form method="post" style="display: flex; gap: 0.5rem;">
-                            {% csrf_token %}
-                            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-                            <select name="new_status" onchange="this.form.submit()"
-                                style="padding: 0.25rem; font-size: 0.8rem; width: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="PENDING" {% if ticket.status=='PENDING' %}selected{% endif %}>Pending
-                                </option>
-                                <option value="IN_PROGRESS" {% if ticket.status=='IN_PROGRESS' %}selected{% endif %}>In
-                                    Progress</option>
-                                <option value="COMPLETED" {% if ticket.status=='COMPLETED' %}selected{% endif %}>
-                                    Completed</option>
-                            </select>
-                        </form>
+                    <td style="padding: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"
+                        title="{{ ticket.issue }}">
+                        {{ ticket.issue }}
                     </td>
-                    <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">{{
-                        ticket.created_at|date:"M d H:i" }}</td>
+
+                    <!-- Form spans multiple columns -->
+                    <form method="post" style="display: contents;">
+                        {% csrf_token %}
+                        <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+
+                        <td style="padding: 1rem;">
+                            <select name="new_status"
+                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
+
+                                {% if ticket.status == "PENDING" %}
+                                <option value="PENDING" selected>Pending</option>
+                                {% else %}
+                                <option value="PENDING">Pending</option>
+                                {% endif %}
+
+                                {% if ticket.status == "IN_PROGRESS" %}
+                                <option value="IN_PROGRESS" selected>In Progress</option>
+                                {% else %}
+                                <option value="IN_PROGRESS">In Progress</option>
+                                {% endif %}
+
+                                {% if ticket.status == "COMPLETED" %}
+                                <option value="COMPLETED" selected>Completed</option>
+                                {% else %}
+                                <option value="COMPLETED">Completed</option>
+                                {% endif %}
+
+                                {% if ticket.status == "CANCELLED" %}
+                                <option value="CANCELLED" selected>Cancelled</option>
+                                {% else %}
+                                <option value="CANCELLED">Cancelled</option>
+                                {% endif %}
+                            </select>
+                        </td>
+
+                        <td style="padding: 1rem;">
+                            <select name="assigned_to"
+                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="none">Unassigned</option>
+                                {% for user in users %}
+                                {% if ticket.assigned_to.id == user.id %}
+                                <option value="{{ user.id }}" selected>{{ user.username }}</option>
+                                {% else %}
+                                <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </td>
+
+                        <td style="padding: 1rem;">
+                            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                                <input type="text" name="resolution" value="{{ ticket.resolution|default:'' }}"
+                                    placeholder="Add resolution..."
+                                    style="width: 100%; padding: 0.25rem; font-size: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                                <button type="submit" title="Save Changes"
+                                    style="background: none; border: none; cursor: pointer; color: #4ade80;">💾</button>
+                            </div>
+                        </td>
+
+                        <td style="padding: 1rem; color: {% if ticket.deadline %}{% if ticket.deadline < now %}#ef4444{% else %}#fbbf24{% endif %}{% else %}var(--text-secondary){% endif %}; font-size: 0.9rem;"
+                            class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}">
+                            {% if ticket.deadline %}
+                            {{ ticket.deadline|date:"M d, H:i" }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+
+                        <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            {{ ticket.created_at|date:"M d H:i" }}
+                        </td>
+
+                        <td style="padding: 1rem;">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" class="btn-icon" title="Save All Changes"
+                                    style="background: #3b82f6; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                    💾
+                                </button>
+                                <a href="{% url 'delete_ticket' ticket.ticket_id %}" class="btn-icon"
+                                    title="Delete Ticket"
+                                    onclick="return confirm('Are you sure you want to delete this ticket?');"
+                                    style="background: #ef4444; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                                    🗑️
+                                </a>
+                            </div>
+                        </td>
+                    </form>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No tickets
-                        found.</td>
+                    <td colspan="9" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                        No tickets found matching current filters.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Access Management Modal -->
+<div id="accessModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container"
+        style="width: 500px; max-height: 80vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;">
+
+        <div
+            style="flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+            <button onclick="toggleAccessModal()"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Manage Assignee Access</h2>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Grant access to employees to start
+                receiving tickets.</p>
+
+            <!-- Search Access Input -->
+            <input type="text" id="accessSearch" placeholder="Search user to grant access..."
+                onkeyup="filterAccessList()"
+                style="width: 100%; padding: 0.75rem; margin-top: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+        </div>
+
+        <div style="flex-grow: 1; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody id="accessTableBody">
+                    {% for item in users_with_access %}
+                    <tr class="access-row" data-username="{{ item.user.username|lower }}"
+                        data-has-access="{{ item.has_access|yesno:'true,false' }}"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;">{{ item.user.username }}</td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <form method="post" action="{% url 'manage_ticket_access' %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ item.user.id }}">
+                                {% if item.has_access %}
+                                <input type="hidden" name="action" value="revoke">
+                                <button type="submit"
+                                    style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;">Revoke</button>
+                                {% else %}
+                                <input type="hidden" name="action" value="grant">
+                                <button type="submit" class="btn-primary"
+                                    style="padding: 0.25rem 0.75rem; width: auto; font-size: 0.9rem;">Grant</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAccessModal() {
+        const modal = document.getElementById('accessModal');
+        if (modal.style.display === 'none') {
+            modal.style.display = 'flex';
+            filterAccessList(); // Reset filter/view on open
+        } else {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('accessModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            toggleAccessModal();
+        }
+    });
+
+    function filterAccessList() {
+        const input = document.getElementById('accessSearch');
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName('access-row');
+
+        for (let i = 0; i < rows.length; i++) {
+            const username = rows[i].getAttribute('data-username');
+            const hasAccess = rows[i].getAttribute('data-has-access') === 'true';
+            if (filter === "") {
+                if (hasAccess) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            } else {
+                if (username.indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    // --- Deadline Timer Logic ---
+    function updateCountdowns() {
+        const timers = document.querySelectorAll('.deadline-timer');
+        const now = new Date();
+        timers.forEach(timer => {
+            const deadline = new Date(timer.dataset.deadline);
+            const diff = deadline - now;
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                let timeStr = "";
+                if (days > 0) timeStr += `${days}d `;
+                if (hours > 0) timeStr += `${hours}h `;
+                timeStr += `${minutes}m`;
+                timer.innerHTML = "⏳ " + timeStr;
+                timer.style.color = "#fbbf24";
+                if (days === 0 && hours < 4) {
+                    timer.style.color = "#ef4444";
+                }
+            } else {
+                timer.innerHTML = "⚠️ BREACHED";
+                timer.style.color = "#ef4444";
+                timer.style.fontWeight = "bold";
+            }
+        });
+    }
+
+    // Update every minute (or second if strict)
+    setInterval(updateCountdowns, 1000);
+    // Initial call after small delay to let render finish
+    setTimeout(updateCountdowns, 100);
+</script>
 {% endblock %}

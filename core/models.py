@@ -33,8 +33,13 @@ class NotificationEventSetting(models.Model):
         ('TIMESHEET_SUBMITTED', 'Timesheet Submitted'),
         ('TIMESHEET_REJECTED', 'Timesheet Rejected'),
         ('TIMESHEET_APPROVED', 'Timesheet Approved'),
+        # Email Notification System Events
+        ('TICKET_CREATED', 'Ticket Created'),
+        ('TICKET_ASSIGNED', 'Ticket Assigned'),
+        ('TICKET_STATUS_CHANGED', 'Ticket Status Changed'),
+        ('TICKET_COMMENTED', 'Ticket Commented'),
     ]
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, unique=True)
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES, unique=True)
     subscribers = models.ManyToManyField(User, related_name='notification_subscriptions', blank=True)
 
     def __str__(self):
@@ -71,3 +76,11 @@ class AuditLog(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+class FeatureFlag(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text="Unique key for the feature flag")
+    is_active = models.BooleanField(default=False, help_text="Global switch for this feature")
+    description = models.TextField(blank=True, help_text="What does this feature do?")
+
+    def __str__(self):
+        return f"{self.name} ({'ON' if self.is_active else 'OFF'})"

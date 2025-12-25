@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from tickets import views as ticket_views
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -7,6 +8,8 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('register/', views.register, name='register'),
     path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('tickets/manage-access/', ticket_views.manage_ticket_access, name='manage_ticket_access'),
+    path('tickets/manage-assignees/', ticket_views.manage_ticket_assignees, name='manage_ticket_assignees'),
     path('check-pending-users/', views.check_pending_users, name='check_pending_users'),
     path('news/', views.office_news, name='office_news'),
     path('chat/', views.group_chat, name='group_chat'),
@@ -20,4 +23,5 @@ urlpatterns = [
     path('api/notifications/mark-all-unread/', views.mark_all_unread, name='mark_all_unread'),
     path('api/notifications/delete/<int:notification_id>/', views.delete_notification, name='delete_notification'),
     path('api/notifications/clear-all/', views.clear_all_notifications, name='clear_all_notifications'),
+    path('test-error/', views.test_error, name='test_error'),
 ]

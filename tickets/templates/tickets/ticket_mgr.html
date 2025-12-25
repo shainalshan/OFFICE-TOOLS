@@ -53,11 +53,11 @@
                             <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
                             <select name="new_status" onchange="this.form.submit()"
                                 style="padding: 0.25rem; font-size: 0.8rem; width: auto; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="PENDING" {% if ticket.status=='PENDING' %}selected{% endif %}>Pending
+                                <option value="PENDING" {% if ticket.status == 'PENDING' %}selected{% endif %}>Pending
                                 </option>
-                                <option value="IN_PROGRESS" {% if ticket.status=='IN_PROGRESS' %}selected{% endif %}>In
+                                <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In
                                     Progress</option>
-                                <option value="COMPLETED" {% if ticket.status=='COMPLETED' %}selected{% endif %}>
+                                <option value="COMPLETED" {% if ticket.status == 'COMPLETED' %}selected{% endif %}>
                                     Completed</option>
                             </select>
                         </form>

@@ -23,6 +23,47 @@
             </div>
         </div>
 
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="id_deadline">Deadline (Optional)</label>
+            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">
+                {{ form.deadline }}
+
+                <!-- Quick Deadline Options -->
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" onclick="setDeadline(1)" class="btn-quick">1 Hour</button>
+                    <button type="button" onclick="setDeadline(5)" class="btn-quick">5 Hours</button>
+                    <button type="button" onclick="setDeadline(24)" class="btn-quick">24 Hours</button>
+                    <button type="button" onclick="setDeadline(48)" class="btn-quick">48 Hours</button>
+                    <button type="button" onclick="setDeadline(168)" class="btn-quick">1 Week</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function setDeadline(hours) {
+                const now = new Date();
+                now.setHours(now.getHours() + hours);
+
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hour = String(now.getHours()).padStart(2, '0');
+                const minute = String(now.getMinutes()).padStart(2, '0');
+
+                const formatted = `${year}-${month}-${day}T${hour}:${minute}`;
+                document.getElementById('id_deadline').value = formatted;
+            }
+        </script>
+
+        {% if form.assigned_to %}
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="id_assigned_to">Assign To (Optional)</label>
+            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">
+                {{ form.assigned_to }}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="form-group">
             <label for="id_issue">Issue Description</label>
             {{ form.issue }}
@@ -47,6 +88,22 @@
         color: white;
         font-family: inherit;
         font-size: 1rem;
+    }
+
+    .btn-quick {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .btn-quick:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
     }
 </style>
 {% endblock %}

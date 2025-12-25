@@ -1,0 +1,67 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin:0;">Ticket History</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'my_tickets' %}" class="btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="glass-container"
+        style="padding: 1rem; margin-bottom: 2rem; border-left: 4px solid var(--text-secondary);">
+        <p style="margin: 0; color: var(--text-secondary);">
+            Showing all <strong>Completed</strong> and <strong>Cancelled</strong> tickets where you were the creator or
+            assignee.
+        </p>
+    </div>
+
+    {% for ticket in tickets %}
+    <div class="ticket-card priority-{{ ticket.priority }}"
+        onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'"
+        style="cursor: pointer; opacity: 0.8; border-color: rgba(255,255,255,0.05);">
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <span style="font-weight: bold; font-size: 1.1rem; color: var(--text-secondary);">{{ ticket.ticket_id
+                    }}</span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
+                    Created: {{ ticket.created_at|date:"M d, Y" }}
+                </span>
+            </div>
+            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        </div>
+
+        <p style="margin: 0; color: var(--text-secondary); word-wrap: break-word; overflow-wrap: break-word;">
+            {{ ticket.issue }}
+        </p>
+
+        <div
+            style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-secondary);">
+            <span>
+                {% if ticket.user == request.user %}
+                You created this.
+                {% else %}
+                Created by {{ ticket.user.username }}
+                {% endif %}
+
+                {% if ticket.assigned_to == request.user %}
+                <strong>• Assigned to you.</strong>
+                {% endif %}
+            </span>
+
+            {% if ticket.completed_at %}
+            <span style="color: #4ade80;">✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}</span>
+            {% elif ticket.status == 'CANCELLED' %}
+            <span style="color: #ef4444;">✕ Cancelled</span>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="glass-container" style="text-align: center; padding: 3rem;">
+        <p style="color: var(--text-secondary);">No history found.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

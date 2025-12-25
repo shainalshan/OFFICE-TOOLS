@@ -1,0 +1,393 @@
+{% extends 'core/base.html' %}
+{% load core_tags %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin:0;">Ticket Admin Panel</h1>
+        <div style="display: flex; gap: 1rem;">
+            {% if user.is_superuser %}
+            <button onclick="toggleAssigneeModal()" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">🕵️ Manage
+                Assignees</button>
+            <button onclick="toggleAccessModal()" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">👥 Manage
+                Access</button>
+            {% endif %}
+            <a href="{% url 'ticket_reports' %}" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">📊 View Reports</a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="glass-container"
+        style="padding: 1rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center;">
+        <span style="font-weight: bold; color: var(--text-secondary);">Filter:</span>
+        <a href="?"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_active %}1{% else %}0.6{% endif %};">All</a>
+        <a href="?status=PENDING"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_pending %}1{% else %}0.6{% endif %};">Pending</a>
+        <a href="?status=IN_PROGRESS"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_in_progress %}1{% else %}0.6{% endif %};">In
+            Progress</a>
+        <a href="?status=COMPLETED"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_completed %}1{% else %}0.6{% endif %};">Completed</a>
+        <a href="?status=CANCELLED"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_cancelled %}1{% else %}0.6{% endif %};">Cancelled</a>
+        <a href="?priority=DEADLINE"
+            style="color: #fbbf24; text-decoration: none; opacity: {% if is_filter_deadline %}1{% else %}0.6{% endif %}; font-weight: bold;">
+            ⏳ Deadline Tickets
+        </a>
+        <span style="color: rgba(255,255,255,0.2);">|</span>
+        <a href="?assignee=none"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_unassigned %}1{% else %}0.6{% endif %};">Unassigned</a>
+        <a href="?assignee=me"
+            style="color: white; text-decoration: none; opacity: {% if is_filter_me %}1{% else %}0.6{% endif %};">My
+            Tickets</a>
+
+        <!-- Search -->
+        <form method="get" style="margin-left: auto; display: flex; gap: 0.5rem;">
+            <input type="text" name="ticket_search" placeholder="Search Ticket ID or User..."
+                value="{{ request.GET.ticket_search|default:'' }}"
+                style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
+            <button type="submit" class="btn-primary"
+                style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem;">Search</button>
+        </form>
+    </div>
+
+    <!-- Ticket List -->
+    <div class="glass-container" style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; min-width: 1200px; border-collapse: collapse; table-layout: fixed;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                    <th style="padding: 1rem; width: 100px;">ID</th>
+                    <th style="padding: 1rem; width: 100px;">User</th>
+                    <th style="padding: 1rem; width: 100px;">Priority</th>
+                    <th style="padding: 1rem; width: 120px;">Status</th>
+                    <th style="padding: 1rem; width: 140px;">Assign To</th>
+                    <th style="padding: 1rem; width: 25%;">Resolution</th>
+                    <th style="padding: 1rem; width: 110px;">Deadline</th>
+                    <th style="padding: 1rem; width: 100px;">Created</th>
+                    <th style="padding: 1rem; width: 90px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td
+                        style="padding: 1rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <a href="{% url 'ticket_detail' ticket.ticket_id %}"
+                            style="color: #60a5fa; text-decoration: none;">
+                            {{ ticket.ticket_id }}
+                        </a>
+                    </td>
+                    <td style="padding: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title="{{ ticket.user.username }}">{{ ticket.user.username }}</td>
+                    <td style="padding: 1rem;">
+                        <span class="dot-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+                    </td>
+
+                    <!-- Form spans multiple columns -->
+                    <form method="post" style="display: contents;">
+                        {% csrf_token %}
+                        <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+
+                        <td style="padding: 1rem;">
+                            <select name="new_status"
+                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="PENDING" {{ ticket.is_pending|yesno:"selected," }}>Pending</option>
+                                <option value="IN_PROGRESS" {{ ticket.is_in_progress|yesno:"selected," }}>In
+                                    Progress</option>
+                                <option value="COMPLETED" {{ ticket.is_completed|yesno:"selected," }}>Completed
+                                </option>
+                                <option value="CANCELLED" {{ ticket.is_cancelled|yesno:"selected," }}>Cancelled
+                                </option>
+                            </select>
+                        </td>
+
+                        <td style="padding: 1rem;">
+                            <select name="assigned_to"
+                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="none">Unassigned</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {{ ticket.assigned_to.id|is_eq:user.id|yesno:"selected,"
+                                    }}>{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+
+                        <td style="padding: 1rem;">
+                            <textarea name="resolution" rows="1" placeholder="Add comment..."
+                                style="width: 100%; padding: 0.25rem; font-size: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; resize: vertical;">{{ ticket.resolution|default:'' }}</textarea>
+                        </td>
+
+                        <td style="padding: 1rem; font-size: 0.9rem;">
+                            {% if ticket.deadline %}
+                            <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
+                                style="color: #fbbf24; font-weight: bold;">
+                                {{ ticket.deadline|date:"M d, H:i" }}
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-secondary);">-</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                            {{ ticket.created_at|date:"M d H:i" }}
+                        </td>
+
+                        <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                            <button type="submit" class="btn-primary"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto;"
+                                title="Save Changes">💾</button>
+
+                            <button type="submit" formaction="{% url 'delete_ticket' ticket.ticket_id %}"
+                                onclick="return confirm('Are you sure you want to delete ticket {{ ticket.ticket_id }}?');"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius: 4px; cursor: pointer;"
+                                title="Delete Ticket">
+                                🗑️
+                            </button>
+                        </td>
+                    </form>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No tickets
+                        found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Access Management Modal -->
+<div id="accessModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container"
+        style="width: 500px; max-height: 80vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;">
+
+        <div
+            style="flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+            <button onclick="toggleAccessModal()"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Manage Ticket Admin Access</h2>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Grant access to employees to view and
+                manage tickets.</p>
+
+            <!-- Search Access Input -->
+            <input type="text" id="accessSearch" placeholder="Search user to grant access..."
+                onkeyup="filterAccessList()"
+                style="width: 100%; padding: 0.75rem; margin-top: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+        </div>
+
+        <div style="flex-grow: 1; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody id="accessTableBody">
+                    {% for item in users_with_access %}
+                    <tr class="access-row" data-username="{{ item.user.username|lower }}"
+                        data-has-access="{{ item.has_access|yesno:'true,false' }}"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;">{{ item.user.username }}</td>
+                        <td style="padding: 1rem; text-align: right;">
+                            <form method="post" action="{% url 'manage_ticket_access' %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ item.user.id }}">
+                                {% if item.has_access %}
+                                <input type="hidden" name="action" value="revoke">
+                                <button type="submit"
+                                    style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;">Revoke</button>
+                                {% else %}
+                                <input type="hidden" name="action" value="grant">
+                                <button type="submit" class="btn-primary"
+                                    style="padding: 0.25rem 0.75rem; width: auto; font-size: 0.9rem;">Grant</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Assignee Management Modal -->
+<div id="assigneeModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container"
+        style="width: 500px; max-height: 80vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;">
+
+        <div
+            style="flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+            <button onclick="toggleAssigneeModal()"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
+            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Manage Ticket Assignees</h2>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Grant ability to be assigned to
+                tickets.</p>
+
+            <!-- Search Assignee Input -->
+            <input type="text" id="assigneeSearch" placeholder="Search user to add as assignee..."
+                onkeyup="filterAssigneeList()"
+                style="width: 100%; padding: 0.75rem; margin-top: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+        </div>
+
+        <div style="flex-grow: 1; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+
+                {% for item in users_with_assignee_role %}
+                <tr class="assignee-row" data-username="{{ item.user.username|lower }}"
+                    data-is-assignee="{{ item.is_assignee|yesno:'true,false' }}"
+                    style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem;">{{ item.user.username }}</td>
+                    <td style="padding: 1rem; text-align: right;">
+                        <form method="post" action="{% url 'manage_ticket_assignees' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ item.user.id }}">
+                            {% if item.is_assignee %}
+                            <input type="hidden" name="action" value="revoke">
+                            <button type="submit"
+                                style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;">Remove</button>
+                            {% else %}
+                            <input type="hidden" name="action" value="grant">
+                            <button type="submit" class="btn-primary"
+                                style="padding: 0.25rem 0.75rem; width: auto; font-size: 0.9rem;">Add</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleAccessModal() {
+        const modal = document.getElementById('accessModal');
+        if (modal.style.display === 'none') {
+            modal.style.display = 'flex';
+            filterAccessList(); // Reset filter/view on open
+        } else {
+            modal.style.display = 'none';
+        }
+    }
+
+    function toggleAssigneeModal() {
+        const modal = document.getElementById('assigneeModal');
+        if (modal.style.display === 'none') {
+            modal.style.display = 'flex';
+            filterAssigneeList();
+        } else {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Close modals when clicking outside
+    document.getElementById('accessModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            toggleAccessModal();
+        }
+    });
+
+    document.getElementById('assigneeModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            toggleAssigneeModal();
+        }
+    });
+
+    function filterAccessList() {
+        const input = document.getElementById('accessSearch');
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName('access-row');
+
+        for (let i = 0; i < rows.length; i++) {
+            const username = rows[i].getAttribute('data-username');
+            const hasAccess = rows[i].getAttribute('data-has-access') === 'true';
+
+            if (filter === "") {
+                if (hasAccess) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            } else {
+                if (username.indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    function filterAssigneeList() {
+        const input = document.getElementById('assigneeSearch');
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName('assignee-row');
+
+        for (let i = 0; i < rows.length; i++) {
+            const username = rows[i].getAttribute('data-username');
+            const isAssignee = rows[i].getAttribute('data-is-assignee') === 'true';
+
+            // Logic:
+            // 1. If search is empty: Show ONLY isAssignee=true (similar to Access modal)
+            // 2. If search is NOT empty: Show if username matches
+
+            if (filter === "") {
+                if (isAssignee) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            } else {
+                if (username.indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    // --- Deadline Timer Logic ---
+    function updateCountdowns() {
+        const timers = document.querySelectorAll('.deadline-timer');
+        const now = new Date();
+
+        timers.forEach(timer => {
+            const deadline = new Date(timer.dataset.deadline);
+            const diff = deadline - now;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                let timeStr = "";
+                if (days > 0) timeStr += `${days}d `;
+                if (hours > 0) timeStr += `${hours}h `;
+                timeStr += `${minutes}m`;
+
+                timer.innerHTML = "⏳ " + timeStr;
+                timer.style.color = "#fbbf24";
+
+                if (days === 0 && hours < 4) {
+                    timer.style.color = "#ef4444";
+                }
+            } else {
+                timer.innerHTML = "⚠️ BREACHED";
+                timer.style.color = "#ef4444";
+                timer.style.fontWeight = "bold";
+            }
+        });
+    }
+
+    // Update every minute (or second if strict)
+    setInterval(updateCountdowns, 1000);
+    // Initial call after small delay to let render finish
+    setTimeout(updateCountdowns, 100);
+</script>
+{% endblock %}
