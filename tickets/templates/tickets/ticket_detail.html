@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load waffle_tags %}
 
 {% block content %}
 <div class="animate-fade-in">
@@ -34,6 +35,20 @@
                     <p
                         style="line-height: 1.6; margin: 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
                         {{ ticket.issue }}</p>
+
+                    <!-- Ticket Attachments -->
+                    {% flag "ticket_attachments" %}
+                    <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% for att in ticket.attachments.all %}
+                        {% if not att.comment %}
+                        <a href="{{ att.file.url }}" target="_blank"
+                            style="display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(255,255,255,0.1); padding: 0.3rem 0.6rem; border-radius: 4px; color: white; text-decoration: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.2);">
+                            📎 {{ att.file.name|slice:"12:" }}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endflag %}
                 </div>
 
                 {% if ticket.assigned_to %}
@@ -58,12 +73,26 @@
                         <div style="flex: 1;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
                                 <span style="font-weight: 600;">{{ comment.user.username }}</span>
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">{{
-                                    comment.created_at|timesince }} ago</span>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ comment.created_at|timesince }} ago</span>
                             </div>
                             <div
                                 style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0 12px 12px 12px; border: 1px solid rgba(255,255,255,0.1); word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
                                 {{ comment.text|linebreaksbr }}
+
+                                <!-- Comment Attachments -->
+                                {% flag "ticket_attachments" %}
+                                {% if comment.attachments.exists %}
+                                <div
+                                    style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                    {% for att in comment.attachments.all %}
+                                    <a href="{{ att.file.url }}" target="_blank"
+                                        style="display: inline-flex; align-items: center; gap: 0.3rem; color: #60a5fa; text-decoration: none; font-size: 0.85rem;">
+                                        📎 {{ att.file.name|slice:"12:" }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% endflag %}
                             </div>
                         </div>
                     </div>
@@ -76,11 +105,20 @@
 
                 <!-- Add Comment Form -->
                 {% if ticket.status != 'COMPLETED' and ticket.status != 'CANCELLED' %}
-                <form method="post" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+                <form method="post" enctype="multipart/form-data"
+                    style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="comment">
                     <textarea name="text" rows="3" placeholder="Type your comment here..." required
                         style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; padding: 1rem; font-family: inherit; margin-bottom: 1rem; box-sizing: border-box;"></textarea>
+
+                    {% flag "ticket_attachments" %}
+                    <div style="margin-bottom: 1rem;">
+                        <input type="file" name="attachment" class="form-control"
+                            style="font-size: 0.9rem; color: var(--text-secondary);">
+                    </div>
+                    {% endflag %}
+
                     <div style="text-align: right;">
                         <button type="submit" class="btn-primary" style="width: auto;">Post Comment</button>
                     </div>
