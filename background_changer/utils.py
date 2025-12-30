@@ -1,64 +1,98 @@
 
 import os
+from django.conf import settings
+from PIL import Image, ImageFilter
+import io
+
 try:
-    from rembg import remove
+    from rembg import remove, new_session
     REMBG_AVAILABLE = True
 except ImportError:
     REMBG_AVAILABLE = False
-    
-from PIL import Image
-import io
+    print("Warning: rembg not installed. Background removal will fail.")
 
-def process_image(input_image_path, background_template_path, output_path):
+def process_composite_image(user_image_file):
     """
-    Removes background from input_image and composites it onto background_template.
+    Processes the user uploaded image:
+    1. Removes background using 'u2net_human_seg' model.
+    2. Applies mask erosion to fix white halos.
+    3. Composites onto default background.
+    4. Resizes user image to 65% of background height.
+    5. Positions at bottom center.
     """
+    if not REMBG_AVAILABLE:
+        raise ImportError("rembg library is required but not installed.")
+
+    # 1. Load User Image
     try:
-        if not REMBG_AVAILABLE:
-            print("rembg library is not installed.")
-            return False
-
-        # Open Input Image
-        with open(input_image_path, 'rb') as i:
-            input_data = i.read()
-            
-        # Remove Background
-        subject_data = remove(input_data)
-        subject_img = Image.open(io.BytesIO(subject_data)).convert("RGBA")
-        
-        # Open Background Template
-        bg_img = Image.open(background_template_path).convert("RGBA")
-        
-        # Resize Subject to fit/match background?
-        # Strategy: Scale subject to fit within the background, maybe 80% height?
-        # Or just paste it? User said "pre build back ground image will be the background that human back ground"
-        # Assuming we want the human to look like they are in that background.
-        
-        bg_w, bg_h = bg_img.size
-        s_w, s_h = subject_img.size
-        
-        # Determine scale factor to make subject fit nicely (e.g. 90% of height)
-        # But don't upscale if subject is small? Maybe just center it.
-        # Let's try to fit height to 85% of background height
-        target_h = int(bg_h * 0.85)
-        aspect_ratio = s_w / s_h
-        target_w = int(target_h * aspect_ratio)
-        
-        subject_img_resized = subject_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
-        
-        # Position: Center horizontally, Bottom aligned (with small padding)
-        pos_x = (bg_w - target_w) // 2
-        pos_y = bg_h - target_h # Bottom aligned
-        
-        # Create a copy of background to paste onto
-        final_img = bg_img.copy()
-        final_img.paste(subject_img_resized, (pos_x, pos_y), subject_img_resized)
-        
-        # Save Result
-        final_img = final_img.convert("RGB") # Save as non-transparent for final result usually
-        final_img.save(output_path, quality=95)
-        
-        return True
+        user_img = Image.open(user_image_file).convert("RGBA")
     except Exception as e:
-        print(f"Error processing image: {e}")
-        return False
+        print(f"Error opening user image: {e}")
+        return None
+
+    # 2. Remove Background with Human Segmentation Model
+    try:
+        # Create a session with the specific model for human segmentation
+        session = new_session("u2net_human_seg")
+        user_img_no_bg = remove(user_img, session=session)
+    except Exception as e:
+        print(f"Error removing background: {e}")
+        return None
+
+    # 3. Halo Fix: Mask Erosion
+    try:
+        # Extract Alpha Channel
+        # split() returns (R, G, B, A)
+        r, g, b, a = user_img_no_bg.split()
+        
+        # Apply MinFilter (Erosion) to the Alpha channel
+        # This shrinks the white area of the mask by ~3 pixels
+        eroded_a = a.filter(ImageFilter.MinFilter(3))
+        
+        # Merge back
+        user_img_clean = Image.merge("RGBA", (r, g, b, eroded_a))
+    except Exception as e:
+        print(f"Error processing mask: {e}")
+        # Fallback to non-eroded if filter fails
+        user_img_clean = user_img_no_bg
+
+    # 4. Load Default Background
+    bg_path = os.path.join(settings.BASE_DIR, 'background remover', 'background 1.jpg.png')
+    
+    if not os.path.exists(bg_path):
+        print(f"Background file not found at: {bg_path}")
+        return None
+
+    try:
+        bg_img = Image.open(bg_path).convert("RGBA")
+    except Exception as e:
+        print(f"Error opening background image: {e}")
+        return None
+
+    bg_w, bg_h = bg_img.size
+
+    # 5. Resize User Image (65% height)
+    target_h = int(bg_h * 0.65) # 65% as requested
+    
+    user_w, user_h = user_img_clean.size
+    aspect_ratio = user_w / user_h
+    target_w = int(target_h * aspect_ratio)
+    
+    # Resize using LANCZOS for quality
+    user_img_resized = user_img_clean.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+    # 6. Position: Horizontally centered, Absolute Bottom
+    pos_x = (bg_w - target_w) // 2
+    pos_y = bg_h - target_h 
+    
+    # 7. Paste
+    final_img = bg_img.copy()
+    final_img.paste(user_img_resized, (pos_x, pos_y), user_img_resized)
+
+    # 8. Return Result as Bytes (JPEG)
+    output_io = io.BytesIO()
+    final_img = final_img.convert("RGB")
+    final_img.save(output_io, format='JPEG', quality=95)
+    output_io.seek(0)
+    
+    return output_io.getvalue()

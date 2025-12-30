@@ -1,0 +1,9 @@
+
+@echo off
+echo Killing Django runserver processes...
+wmic process where "CommandLine like '%manage.py runserver%'" call terminate
+timeout /t 2 /nobreak
+echo Restoring ticket_detail.html...
+python wipe_restore.py
+echo Verifying...
+python verify_fix.py

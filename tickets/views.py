@@ -6,9 +6,10 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 from django.db.models import Count, Q
 from django.http import HttpResponse
-from .models import Ticket, DeletedTicketLog
+from .models import Ticket, DeletedTicketLog, TicketAttachment
 from .forms import TicketForm
 from core.decorators import check_tool_access
+import waffle
 import csv
 import openpyxl
 from reportlab.pdfgen import canvas
@@ -26,6 +27,22 @@ def create_ticket(request):
             ticket = form.save(commit=False)
             ticket.user = request.user
             ticket.save()
+
+            # --- Safety Mode: Ticket Attachments ---
+            if waffle.flag_is_active(request, 'ticket_attachments'):
+                file = request.FILES.get('attachment')
+                if file:
+                    # Validate Size (10MB)
+                    if file.size > 10 * 1024 * 1024:
+                        messages.warning(request, f'File {file.name} is too large (Max 10MB). Ticket created without attachment.')
+                    else:
+                        TicketAttachment.objects.create(
+                            ticket=ticket,
+                            file=file,
+                            uploaded_by=request.user
+                        )
+            # ---------------------------------------
+
             messages.success(request, f'Ticket {ticket.ticket_id} created successfully.')
             return redirect('my_tickets')
     else:
@@ -425,8 +442,24 @@ def ticket_detail(request, ticket_id):
             text = request.POST.get('text')
             if text:
                 from .models import TicketComment
-                TicketComment.objects.create(ticket=ticket, user=request.user, text=text)
+                comment = TicketComment.objects.create(ticket=ticket, user=request.user, text=text)
                 messages.success(request, "Comment added.")
+
+                # --- Safety Mode: Comment Attachments ---
+                if waffle.flag_is_active(request, 'ticket_attachments'):
+                    file = request.FILES.get('attachment')
+                    if file:
+                        # Validate Size (10MB)
+                        if file.size > 10 * 1024 * 1024:
+                            messages.warning(request, f'File {file.name} is too large (Max 10MB). Comment added without attachment.')
+                        else:
+                            TicketAttachment.objects.create(
+                                ticket=ticket,
+                                comment=comment,
+                                file=file,
+                                uploaded_by=request.user
+                            )
+                # ---------------------------------------
         
         # Update Status (Assignee or Admin only)
         elif action == 'status':

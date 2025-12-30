@@ -92,3 +92,14 @@ class TicketComment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.ticket.ticket_id}"
+
+class TicketAttachment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='attachments')
+    # Comment is optional: If null, it's a direct ticket attachment (e.g. at creation)
+    comment = models.ForeignKey(TicketComment, on_delete=models.CASCADE, related_name='attachments', null=True, blank=True)
+    file = models.FileField(upload_to='attachments/%Y/%m/%d/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Attachment for {self.ticket.ticket_id} by {self.uploaded_by.username}"

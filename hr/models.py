@@ -12,11 +12,26 @@ class EmployeeSettings(models.Model):
     requires_timesheet = models.BooleanField(default=True, help_text="If True, this user must submit timesheets.")
     timesheet_enabled = models.BooleanField(default=False, help_text="If True, user can access the punch in/out system.")
     
+    # Strict Mode Settings
+    allow_punch = models.BooleanField(default=True, help_text="If False, user cannot punch (requires strict mode flag).")
+    allow_edit = models.BooleanField(default=True, help_text="If False, user cannot edit entries (requires strict mode flag).")
+    
     # Weekly Off Settings (Default Sat/Sun)
     # We can expand this later to be more flexible, but for now logic will handle it.
     
     def __str__(self):
         return f"HR Settings for {self.user.username}"
+
+class EmployeeFaceData(models.Model):
+    """
+    Stores biometric face data for an employee.
+    """
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='face_data')
+    face_descriptor = models.JSONField(help_text="128-float list representing the face encoding.")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Face Data for {self.user.username}"
 
 class PunchLog(models.Model):
     """

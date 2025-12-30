@@ -1,259 +1,485 @@
 {% extends 'core/base.html' %}
+{% load waffle_tags %}
 
 {% block content %}
 <div style="max-width: 1200px; margin: 0 auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 style="margin: 0;">👔 HR Control Panel</h1>
+
+        <div style="display: flex; gap: 1rem;">
+            {% if user.is_superuser %}
+            <a href="{% url 'admin_dashboard' %}" class="btn-secondary">Back to Main Admin</a>
+            {% else %}
+            <a href="{% url 'home' %}" class="btn-secondary">Back to Home</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <!-- Tab 1: Manage Timesheets (Pending, Approvals, Drafts) -->
+        {% if mode == 'pending' or mode == 'approvals' or mode == 'drafts' %}
+        <div class="glass-container transform-hover"
+            style="padding: 1.5rem; text-align: center; border: 1px solid #fbbf24; opacity: 1; flex: 1; cursor: pointer;"
+            onclick="window.location.href='?mode=pending'">
+            {% else %}
+            <a href="?mode=pending" style="text-decoration: none; flex: 1; color: inherit;">
+                <div class="glass-container transform-hover"
+                    style="padding: 1.5rem; text-align: center; border: 1px solid transparent; opacity: 0.6;">
+                    {% endif %}
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📝</div>
+                    <div style="font-weight: bold;">Manage Timesheets</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Approvals & Drafts</div>
+                </div>
+                {% if mode == 'pending' or mode == 'approvals' or mode == 'drafts' %}
+                {% else %}
+            </a>
+            {% endif %}
+
+            <!-- Tab 2: History & Reports -->
+            <a href="?mode=history" style="text-decoration: none; flex: 1; color: inherit;">
+                <div class="glass-container transform-hover"
+                    style="padding: 1.5rem; text-align: center; border: 1px solid {% if mode == 'history' %}#10b981{% else %}transparent{% endif %}; opacity: {% if mode == 'history' %}1{% else %}0.6{% endif %};">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                    <div style="font-weight: bold;">History & Reports</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Approved List & Attendance</div>
+                </div>
+            </a>
+
+            <!-- Tab 3: Access Control -->
+            <a href="?mode=access" style="text-decoration: none; flex: 1; color: inherit;">
+                <div class="glass-container transform-hover"
+                    style="padding: 1.5rem; text-align: center; border: 1px solid {% if mode == 'access' %}#818cf8{% else %}transparent{% endif %}; opacity: {% if mode == 'access' %}1{% else %}0.6{% endif %};">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">👥</div>
+                    <div style="font-weight: bold;">Employee Access</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Roles & Permissions</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- SECTION 1: MANAGE TIMESHEETS (Sub-Menu) -->
+        {% if mode == 'pending' or mode == 'approvals' or mode == 'drafts' %}
+
+        <!-- Sub-Menu Selection (Only visible in 'pending' mode) -->
+        {% if mode == 'pending' %}
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Button 1: Pending Approvals -->
+            <a href="?mode=approvals" style="text-decoration: none; color: inherit;">
+                <div class="glass-container transform-hover"
+                    style="padding: 2rem; display: flex; align-items: center; gap: 1.5rem; border: 1px solid rgba(251, 191, 36, 0.3);">
+                    <div
+                        style="font-size: 2.5rem; background: rgba(251, 191, 36, 0.1); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                        📝</div>
+                    <div>
+                        <h2 style="margin: 0; color: #fbbf24; font-size: 1.2rem;">Pending Approvals</h2>
+                        <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">Review and
+                            approve
+                            submitted timesheets.</p>
+                    </div>
+                    <div style="margin-left: auto; font-size: 1.5rem; color: var(--text-secondary);">→</div>
+                </div>
+            </a>
+
+            {% flag 'hr_pull_attendance' %}
+            <!-- Button 2: Drafts / Unsubmitted -->
+            <a href="?mode=drafts" style="text-decoration: none; color: inherit;">
+                <div class="glass-container transform-hover"
+                    style="padding: 2rem; display: flex; align-items: center; gap: 1.5rem; border: 1px solid rgba(96, 165, 250, 0.3);">
+                    <div
+                        style="font-size: 2.5rem; background: rgba(96, 165, 250, 0.1); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                        📂</div>
+                    <div>
+                        <h2 style="margin: 0; color: #60a5fa; font-size: 1.2rem;">Draft / Unsubmitted</h2>
+                        <p style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">View or pull
+                            in-progress timesheets.</p>
+                    </div>
+                    <div style="margin-left: auto; font-size: 1.5rem; color: var(--text-secondary);">→</div>
+                </div>
+            </a>
+            {% endflag %}
+        </div>
+        {% endif %}
+
+        <!-- SUB-PAGE: PENDING APPROVALS -->
+        {% if mode == 'approvals' %}
+        <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <a href="?mode=pending" class="btn-secondary" style="padding: 0.4rem 0.8rem;">← Back</a>
+                <h2 style="margin: 0; color: #fbbf24;">📝 Pending Approvals</h2>
+            </div>
+
+            <!-- Search Pending Form -->
+            <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <input type="hidden" name="mode" value="approvals">
+                <input type="text" name="search_pending" placeholder="Search pending approvals..."
+                    value="{{ search_pending|default:'' }}"
+                    style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
+                <button type="submit" class="btn-primary">Search</button>
+                {% if search_pending %}
+                <a href="?mode=approvals" class="btn-secondary">Clear</a>
+                {% endif %}
+            </form>
+
+            {% if submitted_timesheets %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 1rem;">Employee</th>
+                            <th style="padding: 1rem;">Month</th>
+                            <th style="padding: 1rem;">Submitted At</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ts in submitted_timesheets %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: bold;">{{ ts.employee.first_name }} {{ ts.employee.last_name }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ ts.employee.username }}</div>
+                            </td>
+                            <td style="padding: 1rem;">{{ ts.period_start|date:"F Y" }}</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">{{ ts.submitted_at|date:"M d, H:i" }}</td>
+                            <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <!-- Actions -->
+                                <a href="{% url 'hr_admin_view_timesheet' ts.id %}" target="_blank"
+                                    style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #818cf8; background: transparent; color: #818cf8; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>👁️</span> View
+                                    </button>
+                                </a>
+
+                                <a href="{% url 'hr_export_timesheet_excel' ts.id %}" style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #10b981; background: transparent; color: #10b981; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>📊</span> Export
+                                    </button>
+                                </a>
+
+                                <form method="post" action="{% url 'hr_handle_approval' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: none; background: #10b981; color: white; cursor: pointer;">
+                                        Approve
+                                    </button>
+                                </form>
+
+                                <form method="post" action="{% url 'hr_handle_approval' %}" style="display:inline;"
+                                    onsubmit="return prompt('Reason for rejection:')">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #ef4444; background: transparent; color: #ef4444; cursor: pointer;">
+                                        Reject
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                No pending timesheets for approval.
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- SUB-PAGE: DRAFTS / UNSUBMITTED -->
+        {% if mode == 'drafts' %}
+        {% flag 'hr_pull_attendance' %}
+        <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <a href="?mode=pending" class="btn-secondary" style="padding: 0.4rem 0.8rem;">← Back</a>
+                <h2 style="margin: 0; color: #60a5fa;">📂 Draft / Unsubmitted Timesheets</h2>
+            </div>
+
+            <!-- Search Unsubmitted Form -->
+            <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <input type="hidden" name="mode" value="drafts">
+                <input type="text" name="search_unsubmitted" placeholder="Search unsubmitted..."
+                    value="{{ search_unsubmitted|default:'' }}"
+                    style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
+                <button type="submit" class="btn-primary">Search</button>
+                {% if search_unsubmitted %}
+                <a href="?mode=drafts" class="btn-secondary">Clear</a>
+                {% endif %}
+            </form>
+
+            {% if unsubmitted_timesheets %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 1rem;">Employee</th>
+                            <th style="padding: 1rem;">Month</th>
+                            <th style="padding: 1rem;">Status</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ts in unsubmitted_timesheets %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: bold;">{{ ts.employee.first_name }} {{ ts.employee.last_name }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ ts.employee.username }}</div>
+                            </td>
+                            <td style="padding: 1rem;">{{ ts.period_start|date:"F Y" }}</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">{{ ts.get_status_display }}</td>
+                            <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <a href="{% url 'hr_admin_view_timesheet' ts.id %}" target="_blank"
+                                    style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #818cf8; background: transparent; color: #818cf8; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>👁️</span> View
+                                    </button>
+                                </a>
+                                <a href="{% url 'hr_export_timesheet_excel' ts.id %}" style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #10b981; background: transparent; color: #10b981; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>📊</span> Export
+                                    </button>
+                                </a>
+
+                                <form method="post" action="{% url 'hr_pull_timesheet' %}" style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to pull this timesheet for review? It will be marked as Submitted.')">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #f59e0b; background: transparent; color: #f59e0b; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>📥</span> Pull
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                No unsubmitted timesheets found.
+            </div>
+            {% endif %}
+        </div>
+        {% endflag %}
+        {% endif %}
+
+        {% endif %}
+
+        <!-- SECTION 2: HISTORY & REPORTS -->
+        {% if mode == 'history' %}
+
+        <!-- Reports Header -->
+        <div style="margin-bottom: 2rem;">
+            {% flag 'hr_attendance_report' %}
+            <a href="{% url 'hr_attendance_report' %}" class="btn-primary"
+                style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">📊</span>
+                <span>Open Master Attendance Report</span>
+            </a>
+            {% endflag %}
+        </div>
+
+        <!-- Approved Requests -->
+        <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
+            <h2 style="margin-top: 0; color: #10b981; margin-bottom: 1.5rem;">✅ Approved History</h2>
+
+            <!-- Search Approved Form -->
+            <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <input type="hidden" name="mode" value="history">
+                <input type="text" name="search_approved" placeholder="Search approved..."
+                    value="{{ search_approved|default:'' }}"
+                    style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 250px;">
+
+                <input type="month" name="date_approved" value="{{ date_approved|default:'' }}"
+                    style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+
+                <button type="submit" class="btn-primary">Search</button>
+                {% if search_approved or date_approved %}
+                <a href="{% url 'hr_admin_dashboard' %}?mode=history" class="btn-secondary">Clear</a>
+                {% endif %}
+            </form>
+
+            {% if approved_timesheets %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 1rem;">Employee</th>
+                            <th style="padding: 1rem;">Month</th>
+                            <th style="padding: 1rem;">Approved At</th>
+                            <th style="padding: 1rem;">Reviewed By</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ts in approved_timesheets %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: bold;">{{ ts.employee.first_name }} {{ ts.employee.last_name }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ ts.employee.username }}</div>
+                            </td>
+                            <td style="padding: 1rem;">{{ ts.period_start|date:"F Y" }}</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">{{ ts.reviewed_at|date:"M d, H:i" }}</td>
+                            <td style="padding: 1rem;">{{ ts.reviewed_by.username }}</td>
+                            <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <a href="{% url 'hr_admin_view_timesheet' ts.id %}" target="_blank"
+                                    style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #818cf8; background: transparent; color: #818cf8; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>👁️</span> View
+                                    </button>
+                                </a>
+                                <a href="{% url 'hr_export_timesheet_excel' ts.id %}" style="text-decoration: none;">
+                                    <button type="button"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #10b981; background: transparent; color: #10b981; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <span>📊</span> Export
+                                    </button>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                No approved requests found.
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- SECTION 3: ACCESS -->
+        {% if mode == 'access' %}
         {% if user.is_superuser %}
-        <a href="{% url 'admin_dashboard' %}" class="btn-secondary">Back to Main Admin</a>
-        {% else %}
-        <a href="{% url 'home' %}" class="btn-secondary">Back to Home</a>
-        {% endif %}
-    </div>
+        <!-- Access Management -->
+        <div class="glass-container" style="padding: 2rem;">
+            <h2 style="margin-top: 0; color: #818cf8; margin-bottom: 1.5rem;">👥 Employee Access Management</h2>
 
-    <!-- Timesheet Approvals -->
-    <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
-        <h2 style="margin-top: 0; color: #fbbf24; margin-bottom: 1.5rem;">📝 Pending Approvals</h2>
+            <!-- Search Bar -->
+            <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <input type="hidden" name="mode" value="access">
+                <input type="text" name="q" placeholder="Search employees..." value="{{ search_query|default:'' }}"
+                    style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
+                <button type="submit" class="btn-primary">Search</button>
+                {% if search_query %}
+                <a href="{% url 'hr_admin_dashboard' %}?mode=access" class="btn-secondary">Clear</a>
+                {% endif %}
+            </form>
 
-        <!-- Search Pending Form -->
-        <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-            <input type="text" name="search_pending" placeholder="Search pending approvals..."
-                value="{{ search_pending|default:'' }}"
-                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
-            <button type="submit" class="btn-primary">Search</button>
-            {% if search_pending %}
-            <a href="{% url 'hr_admin_dashboard' %}" class="btn-secondary">Clear</a>
-            {% endif %}
-        </form>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="padding: 1rem;">Employee</th>
+                            <th style="padding: 1rem;">Role</th>
+                            <th style="padding: 1rem;">Timesheet Access</th>
+                            <th style="padding: 1rem;">Punch Access</th>
+                            <th style="padding: 1rem;">Edit Access</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: bold;">{{ u.first_name }} {{ u.last_name }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ u.username }}</div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% if u.hr_settings.is_hr_admin %}
+                                <span
+                                    style="background: rgba(129, 140, 248, 0.2); color: #818cf8; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">HR
+                                    Admin</span>
+                                {% else %}
+                                <span style="color: var(--text-secondary);">Staff</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% if u.hr_settings.timesheet_enabled %}
+                                <span style="color: #4ade80;">✅ Enabled</span>
+                                {% else %}
+                                <span style="color: #f87171;">❌ Disabled</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% if u.hr_settings.allow_punch %}
+                                <span style="color: #4ade80;">✅ Allowed</span>
+                                {% else %}
+                                <span style="color: #f87171;">🔒 Restricted</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem;">
+                                {% if u.hr_settings.allow_edit %}
+                                <span style="color: #4ade80;">✅ Allowed</span>
+                                {% else %}
+                                <span style="color: #f87171;">🔒 Restricted</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <input type="hidden" name="action" value="toggle_timesheet">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                        {% if u.hr_settings.timesheet_enabled %}Disable TS{% else %}Enable TS{% endif %}
+                                    </button>
+                                </form>
 
-        {% if submitted_timesheets %}
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <th style="padding: 1rem;">Employee</th>
-                        <th style="padding: 1rem;">Month</th>
-                        <th style="padding: 1rem;">Submitted At</th>
-                        <th style="padding: 1rem;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ts in submitted_timesheets %}
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;">
-                            <div style="font-weight: bold;">{{ ts.employee.first_name }} {{ ts.employee.last_name }}
-                            </div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ ts.employee.username }}
-                            </div>
-                        </td>
-                        <td style="padding: 1rem;">{{ ts.period_start|date:"F Y" }}</td>
-                        <td style="padding: 1rem; color: var(--text-secondary);">{{ ts.submitted_at|date:"M d, H:i" }}
-                        </td>
-                        <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <!-- Improved Actions -->
-                            <a href="{% url 'hr_admin_view_timesheet' ts.id %}" target="_blank"
-                                style="text-decoration: none;">
-                                <button type="button"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #818cf8; background: transparent; color: #818cf8; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                    <span>👁️</span> View
-                                </button>
-                            </a>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <input type="hidden" name="action" value="toggle_punch">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                        {% if u.hr_settings.allow_punch %}Lock Punch{% else %}Unlock Punch{% endif %}
+                                    </button>
+                                </form>
 
-                            <a href="{% url 'hr_export_timesheet_excel' ts.id %}" style="text-decoration: none;">
-                                <button type="button"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #10b981; background: transparent; color: #10b981; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                    <span>📊</span> Export
-                                </button>
-                            </a>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <input type="hidden" name="action" value="toggle_edit">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                        {% if u.hr_settings.allow_edit %}Lock Edit{% else %}Unlock Edit{% endif %}
+                                    </button>
+                                </form>
 
-                            <form method="post" action="{% url 'hr_handle_approval' %}" style="display:inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
-                                <input type="hidden" name="action" value="approve">
-                                <button type="submit"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: none; background: #10b981; color: white; cursor: pointer;">
-                                    Approve
-                                </button>
-                            </form>
-
-                            <form method="post" action="{% url 'hr_handle_approval' %}" style="display:inline;"
-                                onsubmit="return prompt('Reason for rejection:')">
-                                {% csrf_token %}
-                                <input type="hidden" name="timesheet_id" value="{{ ts.id }}">
-                                <input type="hidden" name="action" value="reject">
-                                <button type="submit"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #ef4444; background: transparent; color: #ef4444; cursor: pointer;">
-                                    Reject
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <input type="hidden" name="action" value="toggle_hr">
+                                    <button type="submit"
+                                        style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
+                                        {% if u.hr_settings.is_hr_admin %}Revoke HR{% else %}Make HR{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% else %}
         <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-            No pending timesheets for approval.
+            Access Management is restricted to Superusers.
         </div>
         {% endif %}
-    </div>
-
-    <!-- Approved Requests -->
-    <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
-        <h2 style="margin-top: 0; color: #10b981; margin-bottom: 1.5rem;">✅ Approved Requests</h2>
-
-        <!-- Search Approved Form -->
-        <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-            <input type="text" name="search_approved" placeholder="Search approved..."
-                value="{{ search_approved|default:'' }}"
-                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 250px;">
-
-            <input type="month" name="date_approved" value="{{ date_approved|default:'' }}"
-                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
-
-            <button type="submit" class="btn-primary">Search</button>
-            {% if search_approved or date_approved %}
-            <a href="{% url 'hr_admin_dashboard' %}" class="btn-secondary">Clear</a>
-            {% endif %}
-        </form>
-
-        {% if approved_timesheets %}
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <th style="padding: 1rem;">Employee</th>
-                        <th style="padding: 1rem;">Month</th>
-                        <th style="padding: 1rem;">Approved At</th>
-                        <th style="padding: 1rem;">Reviewed By</th>
-                        <th style="padding: 1rem;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ts in approved_timesheets %}
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;">
-                            <div style="font-weight: bold;">{{ ts.employee.first_name }} {{ ts.employee.last_name }}
-                            </div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ ts.employee.username }}
-                            </div>
-                        </td>
-                        <td style="padding: 1rem;">{{ ts.period_start|date:"F Y" }}</td>
-                        <td style="padding: 1rem; color: var(--text-secondary);">{{ ts.reviewed_at|date:"M d, H:i" }}
-                        </td>
-                        <td style="padding: 1rem;">{{ ts.reviewed_by.username }}</td>
-                        <td style="padding: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <a href="{% url 'hr_admin_view_timesheet' ts.id %}" target="_blank"
-                                style="text-decoration: none;">
-                                <button type="button"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #818cf8; background: transparent; color: #818cf8; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                    <span>👁️</span> View
-                                </button>
-                            </a>
-                            <a href="{% url 'hr_export_timesheet_excel' ts.id %}" style="text-decoration: none;">
-                                <button type="button"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid #10b981; background: transparent; color: #10b981; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                    <span>📊</span> Export
-                                </button>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-            No approved requests found.
-        </div>
         {% endif %}
     </div>
-
-    {% if user.is_superuser %}
-    <!-- Access Management -->
-    <div class="glass-container" style="padding: 2rem;">
-        <h2 style="margin-top: 0; color: #818cf8; margin-bottom: 1.5rem;">👥 Employee Access Management</h2>
-
-        <!-- Search Bar -->
-        <form method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-            <input type="text" name="q" placeholder="Search employees..." value="{{ search_query|default:'' }}"
-                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; width: 100%; max-width: 300px;">
-            <button type="submit" class="btn-primary">Search</button>
-            {% if search_query %}
-            <a href="{% url 'hr_admin_dashboard' %}" class="btn-secondary">Clear</a>
-            {% endif %}
-        </form>
-
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <th style="padding: 1rem;">Employee</th>
-                        <th style="padding: 1rem;">Role</th>
-                        <th style="padding: 1rem;">Timesheet Access</th>
-                        <th style="padding: 1rem;">HR Admin Access</th>
-                        <th style="padding: 1rem;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;">
-                            <div style="font-weight: bold;">{{ u.first_name }} {{ u.last_name }}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ u.username }}</div>
-                        </td>
-                        <td style="padding: 1rem;">
-                            {% if u.hr_settings.is_hr_admin %}
-                            <span
-                                style="background: rgba(129, 140, 248, 0.2); color: #818cf8; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">HR
-                                Admin</span>
-                            {% else %}
-                            <span style="color: var(--text-secondary);">Staff</span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 1rem;">
-                            {% if u.hr_settings.timesheet_enabled %}
-                            <span style="color: #4ade80;">✅ Enabled</span>
-                            {% else %}
-                            <span style="color: #f87171;">❌ Disabled</span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 1rem;">
-                            {% if u.hr_settings.is_hr_admin %}
-                            <span style="color: #4ade80;">✅ Yes</span>
-                            {% else %}
-                            <span style="color: var(--text-secondary);">No</span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 1rem; display: flex; gap: 0.5rem;">
-                            <form method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ u.id }}">
-                                <input type="hidden" name="action" value="toggle_timesheet">
-                                <button type="submit"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
-                                    {% if u.hr_settings.timesheet_enabled %}Disable Timesheet{% else %}Enable
-                                    Timesheet{% endif %}
-                                </button>
-                            </form>
-
-                            <form method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ u.id }}">
-                                <input type="hidden" name="action" value="toggle_hr">
-                                <button type="submit"
-                                    style="padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; cursor: pointer;">
-                                    {% if u.hr_settings.is_hr_admin %}Revoke HR{% else %}Make HR{% endif %}
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
+    {% endblock %}

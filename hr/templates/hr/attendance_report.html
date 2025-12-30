@@ -1,0 +1,217 @@
+{% extends 'core/base.html' %}
+{% load waffle_tags %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding-bottom: 3rem;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin: 0;">📊 Attendance Report</h1>
+            <p style="color: var(--text-secondary); margin: 5px 0 0 0;">
+                Daily overview for <strong>{{ target_date|date:"l, d F Y" }}</strong>
+            </p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'hr_admin_dashboard' %}" class="btn-secondary">Back to Dashboard</a>
+            <button onclick="window.print()" class="btn-secondary">🖨️ Print / PDF</button>
+            <a href="?date={{ target_date|date:'Y-m-d' }}&export=excel" class="btn-primary"
+                style="background: #10b981; border-color: #10b981;">
+                📥 Export Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="glass-container" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; align-items: center; gap: 1rem;">
+            <label style="color: var(--text-secondary);">Select Date:</label>
+            <input type="date" name="date" value="{{ target_date|date:'Y-m-d' }}"
+                style="padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;">
+            <button type="submit" class="btn-primary">View Report</button>
+
+            {% if target_date != today %}
+            <a href="?date={% now 'Y-m-d' %}" style="margin-left: auto; color: #818cf8; text-decoration: none;">Reset to
+                Today</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <!-- Total (Reset Filter) -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; cursor: pointer; border: 1px solid {% if not current_filter %}#60a5fa{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold;">{{ metrics.total_employees }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Active</div>
+            </div>
+        </a>
+
+        <!-- Present -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}&filter=present" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; border-left: 4px solid #10b981; border: 1px solid {% if current_filter == 'present' %}#10b981{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold; color: #10b981;">{{ metrics.present }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Present</div>
+            </div>
+        </a>
+
+        <!-- Late -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}&filter=late" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; border-left: 4px solid #f59e0b; border: 1px solid {% if current_filter == 'late' %}#f59e0b{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;">{{ metrics.late }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Late Arrival</div>
+            </div>
+        </a>
+
+        <!-- Early Left -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}&filter=early_left" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; border-left: 4px solid #f97316; border: 1px solid {% if current_filter == 'early_left' %}#f97316{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold; color: #f97316;">{{ metrics.early_leaving }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Left Early</div>
+            </div>
+        </a>
+
+        <!-- Absent -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}&filter=absent" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; border-left: 4px solid #ef4444; border: 1px solid {% if current_filter == 'absent' %}#ef4444{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold; color: #ef4444;">{{ metrics.absent }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Absent</div>
+            </div>
+        </a>
+
+        <!-- On Leave -->
+        <a href="?date={{ target_date|date:'Y-m-d' }}&filter=on_leave" style="text-decoration: none; color: inherit;">
+            <div class="glass-container transform-hover"
+                style="padding: 1.5rem; text-align: center; border-left: 4px solid #8b5cf6; border: 1px solid {% if current_filter == 'on_leave' %}#8b5cf6{% else %}transparent{% endif %};">
+                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">{{ metrics.on_leave }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">On Leave</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Filter Status Banner -->
+    {% if current_filter %}
+    <div
+        style="margin-bottom: 1rem; padding: 0.5rem 1rem; background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; color: #60a5fa; display: flex; align-items: center; justify-content: space-between;">
+        <span>
+            Filtered by: <strong>
+                {% if current_filter == 'late' %}Late Arrivals
+                {% elif current_filter == 'early_left' %}Early Leavers
+                {% elif current_filter == 'present' %}Present
+                {% elif current_filter == 'absent' %}Absent
+                {% elif current_filter == 'on_leave' %}On Leave
+                {% else %}{{ current_filter }}{% endif %}
+            </strong>
+        </span>
+        <a href="?date={{ target_date|date:'Y-m-d' }}" style="color: white; text-decoration: none; font-size: 0.9rem;">✕
+            Clear Filter</a>
+    </div>
+    {% endif %}
+
+    <!-- Detail Table -->
+    <div class="glass-container" style="padding: 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr
+                    style="text-align: left; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <th style="padding: 1rem;">Employee</th>
+                    <th style="padding: 1rem;">Status</th>
+                    <th style="padding: 1rem;">In Time</th>
+                    <th style="padding: 1rem;">Out Time</th>
+                    <th style="padding: 1rem;">Total Hrs</th>
+                    <th style="padding: 1rem;">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in report_data %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem;">
+                        <div style="font-weight: bold;">{{ item.user.first_name }} {{ item.user.last_name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">@{{ item.user.username }}</div>
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if item.status == 'PRESENT' %}
+                        <span style="color: #10b981; font-weight: bold;">Present</span>
+                        {% elif item.status == 'ABSENT' %}
+                        <span style="color: #ef4444;">Absent</span>
+                        {% elif item.status == 'WEEK_OFF' %}
+                        <span style="color: var(--text-secondary);">Week Off</span>
+                        {% else %}
+                        <span style="color: #8b5cf6;">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if item.in_time %}
+                        <span {% if item.is_late %}style="color: #f59e0b; font-weight:bold;" title="Late" {% endif %}>
+                            {{ item.in_time|time:"H:i" }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-secondary);">--</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if item.out_time %}
+                        <span {% if item.is_early_left %}style="color: #f97316; font-weight:bold;" title="Early Leave"
+                            {% endif %}>
+                            {{ item.out_time|time:"H:i" }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-secondary);">--</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem;">
+                        {{ item.total_hours }}
+                    </td>
+                    <td style="padding: 1rem; font-size: 0.9rem;">
+                        {% if item.is_late %}
+                        <span
+                            style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">Late</span>
+                        {% endif %}
+                        {% if item.is_early_left %}
+                        <span
+                            style="background: rgba(249, 115, 22, 0.2); color: #f97316; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">Early
+                            Left</span>
+                        {% endif %}
+                        {% if item.notes %}
+                        <span style="color: var(--text-secondary);">{{ item.notes }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+            color: black !important;
+        }
+
+        .glass-container {
+            background: white !important;
+            border: 1px solid #ddd;
+            box-shadow: none;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        input[type="date"] {
+            display: none !important;
+        }
+
+        /* Hide navbar/sidebar if they exist in base */
+        nav,
+        aside {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

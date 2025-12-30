@@ -77,10 +77,10 @@ def generate_timesheet_entries(timesheet):
     today = timezone.now().date()
     
     while current_date <= timesheet.period_end:
-        # Skip future dates
-        if current_date > today:
-            current_date += datetime.timedelta(days=1)
-            continue
+        # Skip future dates? No, we want to show the whole month structure.
+        # if current_date > today:
+        #    current_date += datetime.timedelta(days=1)
+        #    continue
             
         day_logs = logs_by_date.get(current_date, [])
         

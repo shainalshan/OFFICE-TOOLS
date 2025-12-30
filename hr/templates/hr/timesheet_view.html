@@ -24,7 +24,8 @@
 
             <div class='glass-container' style='padding: 0.5rem 1rem; text-align: center;'>
                 <div style='font-size: 0.8rem; color: var(--text-secondary);'>Total Hours</div>
-                <div style='font-size: 1.2rem; font-weight: bold; color: #818cf8;'>{{ total_period_hours|default:'0.00' }}</div>
+                <!-- REMOVED DEFAULT FILTER -->
+                <div style='font-size: 1.2rem; font-weight: bold; color: #818cf8;'>{{ total_period_hours }}</div>
             </div>
             {% if not is_admin_view %}
             <a href="{% url 'hr_staff_portal' %}" class='btn-secondary'>Back to Punch</a>
@@ -50,13 +51,16 @@
             </thead>
             <tbody>
                 {% for entry in entries %}
-                <tr style='border-bottom: 1px solid rgba(255,255,255,0.05); {% if entry.date.weekday >= 5 %}background: rgba(0,0,0,0.2);{% endif %}'>
+                <tr
+                    style='border-bottom: 1px solid rgba(255,255,255,0.05); {% if entry.date.weekday >= 5 %}background: rgba(0,0,0,0.2);{% endif %}'>
                     <td style='padding: 1rem;'>
                         <span style='font-weight: bold;'>{{ entry.date|date:'d' }}</span>
                         <span style='color: var(--text-secondary); font-size: 0.9rem;'>{{ entry.date|date:'D' }}</span>
                     </td>
                     <td style='padding: 1rem;'>
-                        {% if entry.status == 'PRESENT' %}
+                        {% if entry.date > today %}
+                        <span style='color: var(--text-secondary); opacity: 0.5;'>--</span>
+                        {% elif entry.status == 'PRESENT' %}
                         <span style='color: #4ade80;'>Present</span>
                         {% elif entry.status == 'WEEK_OFF' %}
                         <span style='color: var(--text-secondary);'>Week Off</span>
@@ -70,16 +74,40 @@
                         <span title="Manually Edited" style="cursor: help;">📝</span>
                         {% endif %}
                     </td>
-                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.first_punch_in|default:'--' }}</td>
-                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.last_punch_out|default:'--' }}</td>
-                    <td style='padding: 1rem; font-weight: bold;'>{% if entry.total_hours > 0 %}{{ entry.total_hours }}h{% else %}--{% endif %}</td>
-                    <td style='padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);'>{{ entry.notes|default:'' }}</td>
+                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.first_punch_in }}</td>
+                    <td style='padding: 1rem; color: #cbd5e1;'>{{ entry.last_punch_out }}</td>
+                    <td style='padding: 1rem; font-weight: bold;'>
+                        {% if entry.total_hours > 0 %}
+                        {{ entry.total_hours|floatformat:2 }}h
+                        {% else %}
+                        --
+                        {% endif %}
+                    </td>
+                    <!-- REMOVED DEFAULT FILTER -->
+                    <td style='padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);'>{{ entry.notes }}</td>
                     <td style='padding: 1rem; text-align: right;'>
+                        {% load waffle_tags %}
+
+                        <!-- Master Edit Flag -->
+                        {% flag "enable_timesheet_editing" %}
+
+                        {% flag "timesheet_strict_mode" %}
+                        {% if settings.allow_edit %}
                         <button
                             onclick="openEditModal('{{ entry.id }}', '{{ entry.status }}', '{{ entry.date|date:'M d' }}', '{{ entry.first_punch_in|time:'H:i'|default:'' }}', '{{ entry.last_punch_out|time:'H:i'|default:'' }}')"
                             style="background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 1.1rem; opacity: 0.7; transition: 0.2s;">
                             ✏️
                         </button>
+                        {% endif %}
+                        {% else %}
+                        <button
+                            onclick="openEditModal('{{ entry.id }}', '{{ entry.status }}', '{{ entry.date|date:'M d' }}', '{{ entry.first_punch_in|time:'H:i'|default:'' }}', '{{ entry.last_punch_out|time:'H:i'|default:'' }}')"
+                            style="background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 1.1rem; opacity: 0.7; transition: 0.2s;">
+                            ✏️
+                        </button>
+                        {% endflag %}
+
+                        {% endflag %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -90,25 +118,27 @@
     <!-- Actions -->
     <div style='margin-top: 2rem; text-align: right;'>
         {% if timesheet.status == 'PENDING' or timesheet.status == 'REJECTED' %}
-        
-            {% if timesheet.status == 'REJECTED' %}
-            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: left;">
-                <strong style="color: #ef4444;">❌ Timesheet Rejected</strong>
-                <p style="margin: 0.5rem 0 0 0; color: #fca5a5;">Reason: {{ timesheet.rejection_reason|default:"No reason provided." }}</p>
-            </div>
-            {% endif %}
 
-            <form method="post" action="{% url 'hr_submit_timesheet' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-primary">
-                    {% if timesheet.status == 'REJECTED' %}Resubmit{% else %}Submit{% endif %} for Approval
-                </button>
-            </form>
-            
+        {% if timesheet.status == 'REJECTED' %}
+        <div
+            style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: left;">
+            <strong style="color: #ef4444;">❌ Timesheet Rejected</strong>
+            <p style="margin: 0.5rem 0 0 0; color: #fca5a5;">Reason: {{ timesheet.rejection_reason }}</p>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'hr_submit_timesheet' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary">
+                {% if timesheet.status == 'REJECTED' %}Resubmit{% else %}Submit{% endif %} for Approval
+            </button>
+        </form>
+
         {% else %}
-            <div style='background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 1rem; border-radius: 8px; color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.3);'>
-                Status: <b>{{ timesheet.get_status_display }}</b>
-            </div>
+        <div
+            style='background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 1rem; border-radius: 8px; color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.3);'>
+            Status: <b>{{ timesheet.get_status_display }}</b>
+        </div>
         {% endif %}
     </div>
 </div>

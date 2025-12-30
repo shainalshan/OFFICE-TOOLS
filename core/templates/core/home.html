@@ -68,6 +68,12 @@
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
+        {% elif tool.slug == 'converter' %}
+        <a href="{% url 'converter_home' %}" class="tool-card glass-container">
+            <div class="tool-icon">🔄</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
         {% elif tool.slug == 'pdf-to-word' %}
         <a href="{% url 'pdf_to_word' %}" class="tool-card glass-container">
             <div class="tool-icon">📄</div>
@@ -83,6 +89,13 @@
         {% elif tool.slug == 'device-tracker' %}
         <a href="{% url 'tracker_dashboard' %}" class="tool-card glass-container">
             <div class="tool-icon">📡</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+        {% elif tool.slug == 'background-changer' %}
+        <a href="{% url 'upload_photo' %}" class="tool-card glass-container">
+            <div class="tool-icon">📸</div>
             <div class="tool-title">{{ tool.name }}</div>
             <div class="tool-desc">{{ tool.description }}</div>
         </a>

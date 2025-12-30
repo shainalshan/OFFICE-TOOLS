@@ -4,3 +4,15 @@ requests
 psycopg2-binary
 openpyxl
 django-waffle
+rembg
+onnxruntime
+reportlab
+pdf2docx
+pdf2image
+python-pptx
+pandas
+weasyprint
+pdfplumber
+pypdf
+comtypes
+pywin32

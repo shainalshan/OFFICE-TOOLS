@@ -1,0 +1,276 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}File Converter & Compressor{% endblock %}
+
+{% block content %}
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* Override global font */
+    body {
+        font-family: 'Outfit', sans-serif;
+        /* Exact match from dashboard styles.css */
+        background-color: #0f172a !important;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%) !important;
+        background-attachment: fixed !important;
+        min-height: 100vh;
+        color: white;
+    }
+
+    /* Glass Effect Card - Matching Dashboard Cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        /* --card-bg */
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        /* --glass-border */
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: transparent;
+        padding: 2rem 1rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Inputs Matching Dashboard Forms */
+    .form-control,
+    .form-select {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white !important;
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+        color: white;
+    }
+
+    /* File Input Styling */
+    input[type="file"]::file-selector-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #e2e8f0;
+        padding: 8px 16px;
+        margin-right: 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Primary Start Button - using --primary-gradient */
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    /* Download Button */
+    .btn-download {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-download:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    h3 {
+        font-weight: 600;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="glass-card">
+                <div class="card-header-custom text-center">
+                    <h3 class="mb-0 text-white fw-bold">File Wizard</h3>
+                    <p class="text-white-50 mb-0 small">Convert & Compress with ease</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="fileInput" class="form-label text-white-50 small text-uppercase fw-bold">Select
+                                File</label>
+                            <input type="file" class="form-control" id="fileInput" name="file" required>
+                            <div class="form-text text-white-50 ms-1">Max size: 500MB</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="operationSelect"
+                                class="form-label text-white-50 small text-uppercase fw-bold">Action</label>
+                            <select class="form-select" id="operationSelect" name="operation" required>
+                                <option value="" selected disabled>Choose what to do...</option>
+                                <option value="pdf_to_docx">📄 PDF to Word</option>
+                                <option value="pdf_to_pptx">📊 PDF to PowerPoint</option>
+                                <option value="pptx_to_pdf">📑 PowerPoint to PDF</option>
+                                <option value="excel_to_pdf">📈 Excel to PDF</option>
+                                <option value="pdf_to_excel">📉 PDF to Excel</option>
+                                <hr>
+                                <option value="compress_pdf">🗜️ Compress PDF</option>
+                                <option value="compress_image">🖼️ Compress Image</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-gradient w-100">Start Processing</button>
+                    </form>
+
+                    <div id="progressSection" class="mt-4" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 id="statusText" class="text-white mb-0">Initializing...</h6>
+                            <span id="percentText" class="text-white-50 small">0%</span>
+                        </div>
+
+                        <div class="progress"
+                            style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                style="width: 0%; background: linear-gradient(90deg, #ec4899, #8b5cf6);"></div>
+                        </div>
+
+                        <div id="resultSection" class="mt-4 text-center" style="display: none;">
+                            <div class="mb-3">
+                                <span style="font-size: 3rem;">✨</span>
+                            </div>
+                            <h5 class="text-white mb-3">Your file is ready!</h5>
+                            <a id="downloadLink" href="#" class="btn btn-download">Download Result</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        var progressBar = document.getElementById('progressBar');
+        var statusText = document.getElementById('statusText');
+        var percentText = document.getElementById('percentText');
+        var progressSection = document.getElementById('progressSection');
+        var resultSection = document.getElementById('resultSection');
+        var downloadLink = document.getElementById('downloadLink');
+        var submitBtn = this.querySelector('button[type="submit"]');
+
+        progressSection.style.display = 'block';
+        resultSection.style.display = 'none';
+        progressBar.style.width = '10%';
+        percentText.innerText = '10%';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+        statusText.innerText = "Uploading file...";
+
+        fetch("{% url 'upload_file' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.task_id) {
+                    statusText.innerText = "Processing...";
+                    checkStatus(data.task_id);
+                } else {
+                    handleError(data.message || "Upload failed");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                handleError("Connection failed");
+            });
+
+        function handleError(msg) {
+            statusText.innerText = "Error: " + msg;
+            statusText.className = "text-danger fw-bold";
+            progressBar.className = "progress-bar bg-danger";
+            progressBar.style.width = "100%";
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Start Processing";
+        }
+
+        function checkStatus(taskId) {
+            var intervalId = setInterval(function () {
+                fetch(`/tools/converter/status/${taskId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        statusText.innerText = data.message;
+                        statusText.className = "text-white mb-0";
+
+                        if (data.status === 'completed') {
+                            clearInterval(intervalId);
+                            progressBar.style.width = '100%';
+                            percentText.innerText = '100%';
+                            progressBar.classList.remove('progress-bar-animated');
+
+                            submitBtn.innerHTML = 'Start Processing';
+                            // Keeping submit disabled until they refresh or we reset? 
+                            // Better allow new upload.
+                            submitBtn.disabled = false;
+
+                            if (data.download_url) {
+                                downloadLink.href = data.download_url;
+                                resultSection.style.display = 'block';
+                                // statusText.innerText = "Completed!";
+                            }
+                        } else if (data.status === 'failed') {
+                            clearInterval(intervalId);
+                            handleError(data.message);
+                        } else {
+                            // Processing simulation
+                            let currentWidth = parseInt(progressBar.style.width);
+                            if (currentWidth < 90) {
+                                let newWidth = currentWidth + 5;
+                                progressBar.style.width = newWidth + '%';
+                                percentText.innerText = newWidth + '%';
+                            }
+                        }
+                    });
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %}

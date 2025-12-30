@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     'image_compressor',
     'three_d_view',
     'device_tracker',
+    'background_changer',
     'waffle',
+    'file_converter',
 
 ]
 
@@ -221,3 +223,7 @@ LOGGING = {
         },
     },
 }
+
+# File Upload Settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
