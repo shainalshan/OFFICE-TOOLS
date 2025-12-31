@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/notifications/delete/<int:notification_id>/', views.delete_notification, name='delete_notification'),
     path('api/notifications/clear-all/', views.clear_all_notifications, name='clear_all_notifications'),
     path('test-error/', views.test_error, name='test_error'),
+    path('profile/', views.profile_view, name='profile_view'),
 ]

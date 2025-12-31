@@ -48,8 +48,8 @@ class Ticket(models.Model):
         if not self.ticket_id:
             # First save to get the DB-assigned ID (AutoIncrement)
             super().save(*args, **kwargs)
-            # Generate ID based on the primary key: PIXL00001
-            self.ticket_id = f'PIXL{self.id:05d}'
+            # Generate ID based on the primary key: PIXL0000001
+            self.ticket_id = f'PIXL{self.id:07d}'
             # Save again to update the ticket_id
             kwargs['force_insert'] = False # Ensure we update, don't insert again
             return super().save(*args, **kwargs)

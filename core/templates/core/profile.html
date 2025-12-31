@@ -1,0 +1,218 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load waffle_tags %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="glass-container" style="max-width: 900px; margin: 2rem auto; padding: 2rem;">
+    <h2 style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">My Profile
+    </h2>
+
+    <div class="tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <button onclick="showTab('personal')" class="tab-btn active" id="btn-personal">Personal Details</button>
+        <button onclick="showTab('security')" class="tab-btn" id="btn-security">Security</button>
+        <button onclick="showTab('face-bio')" class="tab-btn" id="btn-face-bio">Face Bio</button>
+    </div>
+
+    <!-- Personal Details Tab -->
+    <div id="tab-personal" class="tab-content">
+        <form method="POST" action="{% url 'profile_view' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_personal">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" value="{{ user.first_name }}" class="glass-input">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" value="{{ user.email }}" class="glass-input" disabled
+                        style="opacity: 0.6; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" class="glass-input" disabled
+                        style="opacity: 0.6; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="birth_date" value="{{ profile.birth_date|date:'Y-m-d' }}"
+                        class="glass-input">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="text" name="mobile_number" value="{{ profile.mobile_number }}" class="glass-input">
+                </div>
+                <div class="form-group">
+                    <label>Whatsapp Number</label>
+                    <input type="text" name="whatsapp_number" value="{{ profile.whatsapp_number }}" class="glass-input">
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit" class="glass-button">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Security Tab -->
+    <div id="tab-security" class="tab-content" style="display: none;">
+        <form method="POST" action="{% url 'profile_view' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Current Password</label>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="password" name="old_password" class="glass-input" required style="flex: 1;">
+                    <button type="submit" name="action" value="reset_password_email" formnovalidate
+                        style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;"
+                        title="We will email you a temporary password to use here.">
+                        Forgot?
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>New Password</label>
+                <input type="password" name="new_password" class="glass-input" required>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirm_password" class="glass-input" required>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit" class="glass-button"
+                    style="background: rgba(239, 68, 68, 0.2); border-color: #b91c1c; color: #fca5a5;">Change
+                    Password</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Face Bio Tab -->
+    <div id="tab-face-bio" class="tab-content" style="display: none;">
+        <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+            <h3 style="margin-top: 0;">Face Recognition Status</h3>
+            {% if is_face_enrolled %}
+            <div style="display: flex; align-items: center; gap: 1rem; color: #34d399;">
+                <span style="font-size: 1.5rem;">✓</span>
+                <div>
+                    <strong>Enrolled</strong>
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Your face data is registered in the system.
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <div style="display: flex; align-items: center; gap: 1rem; color: #fbbf24;">
+                <span style="font-size: 1.5rem;">⚠</span>
+                <div>
+                    <strong>Not Enrolled</strong>
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Please upload a photo to enable face
+                        recognition features.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="POST" action="{% url 'profile_view' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_face">
+
+            <div class="form-group">
+                <label>Upload New Photo</label>
+                <input type="file" name="face_image" accept="image/*" class="glass-input" required>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;">
+                    Please upload a clear photo of your face. Ensure good lighting and look directly at the camera.
+                </p>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit" class="glass-button">Update Face Data</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.8rem 1.5rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px 8px 0 0;
+    }
+
+    .tab-btn.active {
+        color: #6366f1;
+        border-bottom-color: #6366f1;
+    }
+
+    .glass-input {
+        width: 100%;
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        margin-top: 0.5rem;
+    }
+
+    .glass-input:focus {
+        outline: none;
+        border-color: #6366f1;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .glass-button {
+        padding: 0.8rem 1.5rem;
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .glass-button:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+</style>
+
+<script>
+    function showTab(tabName) {
+        // Hide all contents
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        // Deactivate all buttons
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        // Show target
+        document.getElementById('tab-' + tabName).style.display = 'block';
+        document.getElementById('btn-' + tabName).classList.add('active');
+
+        // Update URL hash without scroll
+        history.pushState(null, null, '#' + tabName);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+            const btn = document.getElementById('btn-' + hash);
+            if (btn) showTab(hash);
+        }
+    });
+</script>
+{% endblock %}

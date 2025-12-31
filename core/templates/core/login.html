@@ -12,6 +12,10 @@
     </form>
 
     <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+        {% if show_forgot_password %}
+        <p style="margin-bottom: 0.5rem;"><a href="{% url 'forgot_password' %}" style="color: #667eea;">Forgot
+                Password?</a></p>
+        {% endif %}
         <p>Don't have an account? <a href="{% url 'register' %}" style="color: #667eea;">Create one</a></p>
     </div>
 </div>

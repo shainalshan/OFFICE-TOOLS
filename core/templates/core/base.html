@@ -108,6 +108,11 @@
                 </div>
 
                 <span style="color: var(--text-secondary); font-size: 0.9rem;">{{ user.username }}</span>
+                {% load waffle_tags %}
+                {% flag 'profile' %}
+                <a href="{% url 'profile_view' %}" style="color: #34d399; text-decoration: none; font-size: 0.9rem;">My
+                    Profile</a>
+                {% endflag %}
                 <a href="{% url 'logout' %}"
                     style="color: #ff6b6b; text-decoration: none; font-size: 0.9rem;">Logout</a>
                 {% else %}

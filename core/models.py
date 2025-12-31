@@ -21,6 +21,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     mobile_number = models.CharField(max_length=20, blank=True)
     whatsapp_number = models.CharField(max_length=20, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"Profile for {self.user.username}"

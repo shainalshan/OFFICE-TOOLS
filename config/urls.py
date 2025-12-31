@@ -47,6 +47,8 @@ urlpatterns = [
     path('api/notifications/clear-all/', core_views.clear_all_notifications, name='clear_all_notifications'),
     path('api/tools/set/', core_views.set_user_tools, name='set_user_tools'),
     path('restore/<int:log_id>/', core_views.restore_item, name='restore_item'),
+    path('profile/', core_views.profile_view, name='profile_view'),
+    path('forgot-password/', core_views.forgot_password, name='forgot_password'),
 ]
 
 from django.conf import settings

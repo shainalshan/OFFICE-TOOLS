@@ -72,7 +72,12 @@ def user_login(request):
             return redirect('home')
     else:
         form = AuthenticationForm()
-    return render(request, 'core/login.html', {'form': form})
+        
+    show_forgot_password = waffle.flag_is_active(request, 'profile')
+    return render(request, 'core/login.html', {
+        'form': form,
+        'show_forgot_password': show_forgot_password
+    })
 
 def user_logout(request):
     logout(request)
@@ -609,3 +614,178 @@ def group_chat(request):
 @check_tool_access('pdf-to-word')
 def pdf_to_word(request):
     return render(request, 'core/tool_placeholder.html', {'tool_name': 'PDF to Word Converter'})
+
+@login_required
+def profile_view(request):
+    if not waffle.flag_is_active(request, 'profile'):
+        messages.error(request, "Profile feature is currently disabled.")
+        return redirect('home')
+
+    user = request.user
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    
+    # Check if EmployeeFaceData exists (soft dependency on HR app)
+    is_face_enrolled = False
+    try:
+        from hr.models import EmployeeFaceData
+        if EmployeeFaceData.objects.filter(user=user).exists():
+            is_face_enrolled = True
+    except ImportError:
+        pass
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'update_personal':
+            first_name = request.POST.get('full_name')
+            mobile = request.POST.get('mobile_number')
+            whatsapp = request.POST.get('whatsapp_number')
+            dob = request.POST.get('birth_date')
+            
+            user.first_name = first_name
+            user.save()
+            
+            profile.mobile_number = mobile
+            profile.whatsapp_number = whatsapp
+            if dob:
+                profile.birth_date = dob
+            profile.save()
+            
+            messages.success(request, "Personal details updated.")
+            return redirect('/profile/#personal')
+            
+        elif action == 'reset_password_email':
+            # Generate Temp Password
+            import random
+            import string
+            temp_pass = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            
+            user.set_password(temp_pass)
+            user.save()
+            
+            # Keep user logged in
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, user)
+            
+            # Send Email
+            try:
+                send_dynamic_email(
+                    subject="Password Reset - Office Portal",
+                    message=f"Hello {user.username},\n\nYour temporary password is: {temp_pass}\n\nPlease use this as your 'Current Password' to set a new one.",
+                    recipient_list=[user.email]
+                )
+                messages.success(request, "Temporary password sent to your email.")
+            except Exception as e:
+                messages.error(request, f"Failed to send email: {e}")
+            
+            return redirect('/profile/#security')
+
+        elif action == 'change_password':
+            old_pass = request.POST.get('old_password')
+            new_pass = request.POST.get('new_password')
+            confirm_pass = request.POST.get('confirm_password')
+            
+            if not user.check_password(old_pass):
+                messages.error(request, "Incorrect current password.")
+                return redirect('/profile/#security')
+                
+            if new_pass != confirm_pass:
+                messages.error(request, "New passwords do not match.")
+                return redirect('/profile/#security')
+                
+            if len(new_pass) < 6:
+                messages.error(request, "Password must be at least 6 characters.")
+                return redirect('/profile/#security')
+                
+            user.set_password(new_pass)
+            user.save()
+            
+            # Keep user logged in
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, user)
+            
+            messages.success(request, "Password changed successfully.")
+            return redirect('/profile/#security')
+
+        elif action == 'update_face':
+            if 'face_image' not in request.FILES:
+                messages.error(request, "No image uploaded.")
+                return redirect('/profile/#face-bio')
+                
+            image_file = request.FILES['face_image']
+            
+            try:
+                import face_recognition
+                
+                # Load image
+                image = face_recognition.load_image_file(image_file)
+                encodings = face_recognition.face_encodings(image)
+                
+                if len(encodings) == 0:
+                    messages.error(request, "No face detected in the photo. Please try again.")
+                    return redirect('/profile/#face-bio')
+                    
+                if len(encodings) > 1:
+                    messages.error(request, "Multiple faces detected. Please upload a photo with only you.")
+                    return redirect('/profile/#face-bio')
+                    
+                # Store encoding
+                descriptor = encodings[0].tolist() # Convert numpy array to list
+                
+                from hr.models import EmployeeFaceData
+                face_data, _ = EmployeeFaceData.objects.get_or_create(user=user)
+                face_data.face_descriptor = descriptor
+                face_data.save()
+                
+                messages.success(request, "Face data updated successfully.")
+                
+            except ImportError:
+                messages.error(request, "Face recognition system is not installed on this server.")
+            except Exception as e:
+                messages.error(request, f"Error processing image: {str(e)}")
+                
+            return redirect('/profile/#face-bio')
+
+    return render(request, 'core/profile.html', {
+        'profile': profile,
+        'is_face_enrolled': is_face_enrolled
+    })
+
+def forgot_password(request):
+    if not waffle.flag_is_active(request, 'profile'):
+        messages.error(request, "Feature disabled.")
+        return redirect('login')
+        
+    if request.method == 'POST':
+        identifier = request.POST.get('identifier', '').strip()
+        
+        # Security: Always show the same success message to prevent user enumeration
+        success_msg = "If an account exists with those details, a temporary password has been sent to the registered email."
+        
+        user = User.objects.filter(Q(username__iexact=identifier) | Q(email__iexact=identifier)).first()
+        
+        if user:
+            # Generate Temp Password
+            import random
+            import string
+            temp_pass = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+            
+            user.set_password(temp_pass)
+            user.save()
+            
+            # Send Email
+            try:
+                send_dynamic_email(
+                    subject="Password Reset - Office Portal",
+                    message=f"Hello {user.username},\n\nYour temporary password is: {temp_pass}\n\nPlease login and change your password immediately in My Profile -> Security.",
+                    recipient_list=[user.email]
+                )
+            except Exception as e:
+                # Log error but don't show user? Or show error if email fails?
+                # For this tool, better to show error if email fails so they know.
+                print(f"Email failed: {e}")
+                
+        messages.success(request, success_msg)
+        return redirect('login')
+        
+    return render(request, 'core/forgot_password.html')
