@@ -129,7 +129,14 @@
         </div>
         {% endif %}
 
-        <!-- Recovery Card -->
+        <!-- Backup & Restore Card -->
+        {% flag "new_backup_tool" %}
+        <div class="tool-card" onclick="location.href='{% url 'backup_dashboard' %}'">
+            <div class="tool-icon">💾</div>
+            <div class="tool-title">Backup & Restore</div>
+            <div class="tool-desc">Manage system backups and restoration</div>
+        </div>
+        {% endflag %}
         <div class="tool-card" onclick="showSection('recovery-section')">
             <div class="tool-icon">♻️</div>
             <div class="tool-title">Recovery</div>
@@ -282,23 +289,30 @@
             style="width: auto; margin-bottom: 1rem; background: #475569;">←
             Back to Menu</button>
         <section>
-            <h2 style="color: #6366f1; margin-bottom: 1rem;">📧 Email Notification System</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                Manage subscribers for ticket events.
-                <br>
-                <small><em>Note: Users only receive emails if they are <strong>Subscribed</strong> below AND overlap
-                        with the ticket (Creator or Assignee).</em></small>
-            </p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h2 style="color: #818cf8; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        📩 Email Notification System
+                        {% flag "dynamic_email_config" %}
+                        <span
+                            style="font-size: 0.8rem; background: #10b981; color: #fff; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">Dynamic</span>
+                        {% endflag %}
+                    </h2>
+                    <p style="color: var(--text-secondary); margin: 0.5rem 0 0 0;">Manage who receives email updates for
+                        various system events.</p>
+                </div>
+            </div>
 
             {% flag "dynamic_email_config" %}
-            <div class="glass-container"
-                style="padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(16, 185, 129, 0.3);">
-                <h3 style="margin-top: 0; color: #34d399; margin-bottom: 1rem;">⚙️ SMTP Configuration</h3>
+            <!-- Configuration Box -->
+            <div class="glass-container" style="padding: 1.5rem; margin-bottom: 2rem; border-left: 4px solid #818cf8;">
+                <h3 style="margin-top: 0; color: #cbf9ff; font-size: 1.1rem; margin-bottom: 1rem;">⚙️ SMTP Configuration
+                </h3>
                 <form method="post" style="display: flex; flex-direction: column; gap: 1rem;">
                     {% csrf_token %}
-                    <div style="display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;">
-                        <input type="hidden" name="action" value="update_email_config">
+                    <input type="hidden" name="action" value="update_email_config">
 
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                         <div style="flex: 1; min-width: 250px;">
                             <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">Email
                                 ID</label>
@@ -306,11 +320,10 @@
                                 placeholder="notifications@example.com" required
                                 style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
                         </div>
-
                         <div style="flex: 1; min-width: 250px;">
                             <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem;">App
                                 Password</label>
-                            <input type="text" name="app_password"
+                            <input type="password" name="app_password"
                                 value="{{ email_config.email_host_password|default:'' }}"
                                 placeholder="xxxx xxxx xxxx xxxx" required
                                 style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white;">
@@ -328,44 +341,162 @@
             </div>
             {% endflag %}
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-                {% for setting in email_notification_settings %}
-                <div class="glass-container" style="padding: 1.5rem;">
-                    <h3
-                        style="margin-top: 0; color: #e2e8f0; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                        {{ setting.get_event_type_display }}
-                    </h3>
+            <!-- MAIN CONTENT (Folder List) -->
+            <div id="email-notification-main-content">
+                <!-- TABS NAVIGATION -->
+                <div
+                    style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; overflow-x: auto;">
+                    <button onclick="openTab('tab-ticket')" class="tab-btn active" id="btn-tab-ticket">🎫 Ticket
+                        Management</button>
+                    <button onclick="openTab('tab-hr')" class="tab-btn" id="btn-tab-hr">👥 HR & Timesheets</button>
+                    <button onclick="openTab('tab-user')" class="tab-btn" id="btn-tab-user">👤 User Accounts</button>
+                    <button onclick="openTab('tab-system')" class="tab-btn" id="btn-tab-system">🖥️ System
+                        Health</button>
+                </div>
 
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-                        {% for sub in setting.subscribers.all %}
-                        <div
-                            style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.9rem; color: #a5b4fc; display: flex; align-items: center; gap: 0.5rem;">
-                            {{ sub.username }}
-                            <form method="post" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="remove_subscriber">
-                                <input type="hidden" name="event_type" value="{{ setting.event_type }}">
-                                <input type="hidden" name="sub_user_id" value="{{ sub.id }}">
-                                <button type="submit"
-                                    style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1;">&times;</button>
-                            </form>
-                        </div>
+                <!-- TICKET TAB -->
+                <div id="tab-ticket" class="tab-content" style="display: block;">
+                    <h3 style="color: #93c5fd; margin-bottom: 1rem;">Ticket Events</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        {% for setting in ticket_settings %}
+                        {% include "core/partials/notification_card.html" with setting=setting %}
                         {% empty %}
-                        <span style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">No
-                            subscribers</span>
+                        <p style="color: var(--text-secondary);">No ticket settings found.</p>
                         {% endfor %}
                     </div>
-
-                    <button
-                        onclick="openAddSubscriber('{{ setting.event_type }}', '{{ setting.get_event_type_display }}')"
-                        style="width: 100%; background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.3); color: var(--text-secondary); padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                        + Add Subscriber
-                    </button>
                 </div>
-                {% endfor %}
+
+                <!-- HR TAB -->
+                <div id="tab-hr" class="tab-content" style="display: none;">
+                    <h3 style="color: #fca5a5; margin-bottom: 1rem;">HR & Timesheet Events</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        {% for setting in hr_settings %}
+                        {% include "core/partials/notification_card.html" with setting=setting %}
+                        {% empty %}
+                        <p style="color: var(--text-secondary);">No HR settings found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- USER TAB -->
+                <div id="tab-user" class="tab-content" style="display: none;">
+                    <h3 style="color: #86efac; margin-bottom: 1rem;">User Account Events</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        {% for setting in user_settings %}
+                        {% include "core/partials/notification_card.html" with setting=setting %}
+                        {% empty %}
+                        <p style="color: var(--text-secondary);">No User settings found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- SYSTEM TAB -->
+                <div id="tab-system" class="tab-content" style="display: none;">
+                    <h3 style="color: #d8b4fe; margin-bottom: 1rem;">System Health & Tools</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        {% for setting in system_settings %}
+                        {% include "core/partials/notification_card.html" with setting=setting %}
+                        {% empty %}
+                        <p style="color: var(--text-secondary);">No System settings found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- NOTIFICATION DETAIL SECTION (Folder View) -->
+    <div id="notification-detail-section" style="display: none;">
+        <button onclick="closeNotificationDetail()" class="btn-primary"
+            style="width: auto; margin-bottom: 1rem; background: #475569;">←
+            Back to Settings</button>
+
+        <section>
+            <h2 style="color: #6366f1; margin: 0; margin-bottom: 0.5rem;" id="detail-section-title">Manage Subscribers
+            </h2>
+            <p style="color: var(--text-secondary); margin-top: 0; margin-bottom: 1.5rem; font-size: 0.9rem;"
+                id="detail-section-subtitle"></p>
+
+            <div class="glass-container" style="padding: 2rem;">
+                <div style="margin-bottom: 1.5rem;">
+                    <label
+                        style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Add
+                        New Subscriber</label>
+                    <input type="text" id="detail-user-search-input" placeholder="Search user by name..."
+                        style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px;"
+                        oninput="searchUsers(this.value, 'detail-user-results')">
+                </div>
+
+                <div id="detail-user-results"
+                    style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing above to
+                        search...</div>
+                </div>
+
+                <div id="detail-current-subscribers-container" style="margin-bottom: 2rem; display: none;">
+                    <h4
+                        style="color: #e2e8f0; margin-bottom: 1rem; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                        Current Subscribers</h4>
+                    <div id="detail-current-subscribers-list" style="display: flex; flex-wrap: wrap; gap: 0.8rem;">
+                    </div>
+                </div>
+
+                <!-- Hidden form to submit -->
+                <form id="detail-add-subscriber-form" method="post" style="display: none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_subscriber">
+                    <input type="hidden" name="event_type" id="detail-event-type">
+                    <input type="hidden" name="sub_user_id" id="detail-sub-user-id">
+                </form>
             </div>
         </section>
     </div>
+
+    <style>
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        function openTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected
+            document.getElementById(tabId).style.display = 'block';
+            // Activate button (simple ID match logic)
+            const btnId = 'btn-' + tabId;
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
+        }
+    </script>
 
     <!-- ADD SUBSCRIBER MODAL -->
     <div id="add-subscriber-modal"
@@ -374,11 +505,20 @@
             <button type="button" onclick="document.getElementById('add-subscriber-modal').style.display = 'none'"
                 style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
 
-            <h2 style="color: #6366f1; margin-top: 0; margin-bottom: 0.5rem;">Add Subscriber</h2>
+            <h2 style="color: #6366f1; margin-top: 0; margin-bottom: 0.5rem;">Manage Subscribers</h2>
             <p id="modal-event-title"
                 style="color: var(--text-secondary); margin-top: 0; margin-bottom: 1.5rem; font-size: 0.9rem;"></p>
 
+            <div id="modal-current-subscribers-container" style="margin-bottom: 1.5rem; display: none;">
+                <h4 style="color: #e2e8f0; margin-bottom: 0.5rem; font-size: 0.9rem;">Current Subscribers</h4>
+                <div id="modal-current-subscribers-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                </div>
+            </div>
+
             <div style="margin-bottom: 1.5rem;">
+                <label
+                    style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Add
+                    New Subscriber</label>
                 <input type="text" id="user-search-input" placeholder="Search user by name..."
                     style="width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px;"
                     onkeyup="searchUsers(this.value)">
@@ -1030,15 +1170,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
         document.getElementById('edit-contact-modal').style.display = 'flex';
     }
 
-    // --- Notification Logic ---
-    function openAddSubscriber(eventType, eventTitle) {
-        document.getElementById('modal-event-type').value = eventType;
-        document.getElementById('modal-event-title').innerText = "For: " + eventTitle;
-        document.getElementById('user-search-input').value = '';
-        document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing to search...</div>';
-        document.getElementById('add-subscriber-modal').style.display = 'flex';
-        document.getElementById('user-search-input').focus();
-    }
+
 
     // --- Permission Search Logic ---
     function filterContacts() {
@@ -1073,18 +1205,23 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
     }
 
     let searchTimeout;
-    function searchUsers(query) {
+    function searchUsers(query, resultsContainerId = 'user-results') {
         clearTimeout(searchTimeout);
-        console.log("Searching for:", query); // Debug
 
-        if (query.length < 1) { // Changed to 1 to allow broader search if needed, or keep 2
-            document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Type to search...</div>';
+        const container = document.getElementById(resultsContainerId);
+        if (!container) {
+            console.error("Search container not found:", resultsContainerId);
+            return;
+        }
+
+        if (query.length < 1) {
+            container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Type to search...</div>';
             return;
         }
 
         searchTimeout = setTimeout(() => {
             const searchUrl = "{% url 'search_users_notification' %}";
-            console.log("Fetching:", searchUrl + `?q=${encodeURIComponent(query)}`);
+            console.log("Searching users via:", searchUrl, "Query:", query); // Debug
 
             fetch(searchUrl + `?q=${encodeURIComponent(query)}`)
                 .then(res => {
@@ -1092,8 +1229,7 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                     return res.json();
                 })
                 .then(data => {
-                    console.log("Search Results:", data); // Debug
-                    const container = document.getElementById('user-results');
+                    console.log("Users found:", data.users.length); // Debug
                     container.innerHTML = '';
 
                     if (!data.users || data.users.length === 0) {
@@ -1113,20 +1249,144 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
                             </div>
                             <span style='color: #6366f1; font-size: 1.2rem;'>+</span>
                         `;
-                        div.onclick = () => selectUserForSub(user.id);
+                        // Determine which context we are in based on container ID
+                        if (resultsContainerId === 'detail-user-results') {
+                            div.onclick = () => selectUserForSub(user.id, 'detail');
+                        } else {
+                            // Default to modal
+                            div.onclick = () => selectUserForSub(user.id, 'modal');
+                        }
                         container.appendChild(div);
                     });
                 })
                 .catch(err => {
                     console.error("Search failed:", err);
-                    document.getElementById('user-results').innerHTML = '<div style="text-align: center; color: #ef4444; padding: 1rem;">Error searching users.</div>';
+                    container.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 1rem;">Error searching users.</div>';
                 });
         }, 300);
     }
 
-    function selectUserForSub(userId) {
-        document.getElementById('modal-sub-user-id').value = userId;
-        document.getElementById('add-subscriber-form').submit();
+    function selectUserForSub(userId, context = 'modal') {
+        if (context === 'detail') {
+            // AJAX Submit for Detail View to prevent reload
+            const form = document.getElementById('detail-add-subscriber-form');
+            const eventType = document.getElementById('detail-event-type').value;
+            const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            // Prepare form data manually
+            const formData = new FormData();
+            formData.append('action', 'add_subscriber');
+            formData.append('event_type', eventType);
+            formData.append('sub_user_id', userId);
+            formData.append('is_ajax', 'true');
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch("{% url 'admin_dashboard' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update UI Dynamically
+                        addSubscriberToDom(data.user, eventType);
+                        // Clear search
+                        document.getElementById('detail-user-search-input').value = '';
+                        document.getElementById('detail-user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing above to search...</div>';
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding subscriber:', error);
+                    alert("Failed to add subscriber. Please try again.");
+                });
+
+        } else {
+            // Old Modal Behavior (Standard Submit)
+            document.getElementById('modal-sub-user-id').value = userId;
+            document.getElementById('add-subscriber-form').submit();
+        }
+    }
+
+    function removeSubscriber(userId, eventType) {
+        // We need csrf token, can get from any form
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+        const formData = new FormData();
+        formData.append('action', 'remove_subscriber');
+        formData.append('event_type', eventType);
+        formData.append('sub_user_id', userId);
+        formData.append('is_ajax', 'true');
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch("{% url 'admin_dashboard' %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove from DOM
+                    // We need to find the element. The easiest way is to re-render or give ID.
+                    // Let's reload current content logic or just remove parent element if we can reference it.
+                    // For now, let's just close/reopen or simple remove event target parent? 
+                    // Updating openNotificationDetail to parse updated list is hard without reload.
+                    // Better: find the element by text content or ID if we assigned one.
+                    // The list loop didn't assign IDs to the div tags. 
+
+                    // Quick fix: Remove the clicked element's parent. 
+                    // But this function is called from onclick. 
+                    // We need to pass the element to removeSubscriber or handle it here.
+                    // Let's update `openNotificationDetail` to assign IDs to rows: `sub-row-${userId}`
+                    const row = document.getElementById(`sub-row-${userId}`);
+                    if (row) row.remove();
+
+                    // Check if empty
+                    const listContainer = document.getElementById('detail-current-subscribers-list');
+                    if (listContainer.children.length === 0) {
+                        listContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic; padding: 0.5rem 0;">No active subscribers.</div>';
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error("Remove failed", err));
+    }
+
+    function addSubscriberToDom(user, eventType) {
+        const listContainer = document.getElementById('detail-current-subscribers-list');
+        const mainContainer = document.getElementById('detail-current-subscribers-container');
+
+        // Remove "No subscribers" text if present
+        if (listContainer.innerText.includes('No active subscribers')) {
+            listContainer.innerHTML = '';
+        }
+
+        const tag = document.createElement('div');
+        tag.id = `sub-row-${user.id}`;
+        tag.style.cssText = "background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;";
+
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = user.username;
+        tag.appendChild(nameSpan);
+
+        const removeBtn = document.createElement('span');
+        removeBtn.innerHTML = '🗑️';
+        removeBtn.title = "Remove Subscriber";
+        removeBtn.style.cssText = "cursor: pointer; opacity: 0.7; font-size: 0.9rem;";
+        removeBtn.onmouseover = () => removeBtn.style.opacity = '1';
+        removeBtn.onmouseout = () => removeBtn.style.opacity = '0.7';
+
+        removeBtn.onclick = function () { removeSubscriber(user.id, eventType); };
+        tag.appendChild(removeBtn);
+
+        listContainer.appendChild(tag);
+        mainContainer.style.display = 'block';
     }
 
     function toggleLocal(btn) {
@@ -1339,6 +1599,87 @@ display: flex; align-items: center; justify-content: center;">Create Account</bu
 
 
 
+
+    function openSubscriberModal(element) {
+        // Alias to new folder-view function for compatibility
+        openNotificationDetail(element);
+    }
+
+    function openNotificationDetail(element) {
+        const eventType = element.getAttribute('data-event-type');
+        const eventTitle = element.getAttribute('data-event-title');
+        let subscribers = [];
+        try {
+            subscribers = JSON.parse(element.getAttribute('data-subscribers'));
+        } catch (e) {
+            console.error("Failed to parse subscribers", e);
+        }
+
+        // populate content
+        document.getElementById('detail-event-type').value = eventType;
+        document.getElementById('detail-section-title').innerText = eventTitle; // "For: " + ... removed, cleaner title
+        document.getElementById('detail-section-subtitle').innerText = "Manage notifications for " + eventTitle;
+
+        // Populate Current Subscribers List
+        const listContainer = document.getElementById('detail-current-subscribers-list');
+        const mainContainer = document.getElementById('detail-current-subscribers-container');
+
+        listContainer.innerHTML = '';
+        mainContainer.style.display = 'block'; // Always show container
+
+        if (subscribers && subscribers.length > 0) {
+            subscribers.forEach(sub => {
+                const tag = document.createElement('div');
+                tag.id = `sub-row-${sub.id}`;
+                tag.style.cssText = "background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; color: #e0e7ff; display: flex; align-items: center; gap: 0.8rem; transition: background 0.2s;";
+                tag.onmouseover = () => tag.style.background = 'rgba(99, 102, 241, 0.3)';
+                tag.onmouseout = () => tag.style.background = 'rgba(99, 102, 241, 0.2)';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.innerText = sub.username;
+                tag.appendChild(nameSpan);
+
+                const removeBtn = document.createElement('span');
+                removeBtn.innerHTML = '🗑️';
+                removeBtn.title = "Remove Subscriber";
+                removeBtn.style.cssText = "cursor: pointer; opacity: 0.7; font-size: 0.9rem;";
+                removeBtn.onmouseover = () => removeBtn.style.opacity = '1';
+                removeBtn.onmouseout = () => removeBtn.style.opacity = '0.7';
+
+                removeBtn.onclick = function () { removeSubscriber(sub.id, eventType); };
+                tag.appendChild(removeBtn);
+
+                listContainer.appendChild(tag);
+            });
+        } else {
+            listContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic; padding: 0.5rem 0;">No active subscribers.</div>';
+        }
+
+        // Clear search
+        document.getElementById('detail-user-search-input').value = '';
+        document.getElementById('detail-user-results').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Start typing to search...</div>';
+
+        // Toggle Views (Hide Main Tab Section, Show Detail Section)
+        // We need to hide the ENTIRE email settings section content or just the grid?
+        // Let's assume hiding the internal part of 'email-notification-settings-section' is best.
+        // Actually, we should probably hide the TABS and the GRIDS.
+        // The simplest way given the structure 'email-notification-settings-section' -> 'section' -> TABS + GRIDS
+
+        // Let's find the parent container of the tabs/grids. 
+        // Based on lines ~300-400, inside #email-notification-settings-section > section
+
+        // I will add an ID to the main settings container effectively. 
+        // But for now, let's just toggle visibility of the "Manage Subscribers" section vs "All Settings".
+
+        // HACK: I will hide all tab-content and the tab-nav.
+        document.getElementById('email-notification-main-content').style.display = 'none';
+        document.getElementById('notification-detail-section').style.display = 'block';
+    }
+
+    function closeNotificationDetail() {
+        document.getElementById('notification-detail-section').style.display = 'none';
+        document.getElementById('email-notification-main-content').style.display = 'block';
+    }
 
 </script>
 {% endblock %}
