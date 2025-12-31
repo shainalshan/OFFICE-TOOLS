@@ -10,37 +10,52 @@
 
         <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
             <!-- OS Stats -->
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            <a href="?tab={{ current_tab }}&filter=MAC" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'MAC' %}border-color: #60a5fa; background: rgba(96, 165, 250, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #60a5fa;">{{ mac_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Mac</div>
-            </div>
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            </a>
+            <a href="?tab={{ current_tab }}&filter=WINDOWS" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'WINDOWS' %}border-color: #38bdf8; background: rgba(56, 189, 248, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #38bdf8;">{{ windows_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Windows</div>
-            </div>
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            </a>
+            <a href="?tab={{ current_tab }}&filter=IPHONE" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'IPHONE' %}border-color: #a78bfa; background: rgba(167, 139, 250, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #a78bfa;">{{ phone_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">iPhones</div>
-            </div>
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            </a>
+            <a href="?tab={{ current_tab }}&filter=OTHER" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'OTHER' %}border-color: #f472b6; background: rgba(244, 114, 182, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #f472b6;">{{ other_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Other Device</div>
-            </div>
+            </a>
 
             <!-- Inventory Stats -->
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            <a href="?tab={{ current_tab }}&filter=AVAILABLE" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'AVAILABLE' %}border-color: #4ade80; background: rgba(74, 222, 128, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #4ade80;">{{ laptops_remaining }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Available</div>
-            </div>
-            <div class="glass-container" style="padding: 1rem; text-align: center;">
+            </a>
+            <a href="?tab={{ current_tab }}&filter=DAMAGED" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'DAMAGED' %}border-color: #ef4444; background: rgba(239, 68, 68, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #ef4444;">{{ damaged_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Damaged</div>
-            </div>
-            <div class="glass-container" style="padding: 1.5rem; text-align: center;">
+            </a>
+            <a href="?tab={{ current_tab }}&filter=REPLACEMENT" class="glass-container"
+                style="padding: 1.5rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'REPLACEMENT' %}border-color: #fbbf24; background: rgba(251, 191, 36, 0.1);{% endif %}">
                 <div style="font-size: 2rem; color: #fbbf24;">{{ replacements_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.9rem;">Replacements</div>
-            </div>
+            </a>
         </div>
+
+        <!-- Clear Filter Link -->
+        {% if filter_type %}
+        <div style="margin-top: 1rem; text-align: right;">
+            <a href="?tab={{ current_tab }}" style="color: #ef4444; font-size: 0.9rem; text-decoration: none;">✕ Clear
+                Filter ({{ filter_type|title }})</a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Actions & Tabs Container -->
@@ -136,6 +151,7 @@
                     <th class="excel-th">SIGNED</th>
                     <th class="excel-th">Date Issued</th>
                     <th class="excel-th">Status/Remarks</th>
+                    <th class="excel-th">Editor Name</th>
                 </tr>
             </thead>
             <tbody id="assets-table-body" style="background: white; color: black;">
@@ -170,10 +186,12 @@
                         {% if asset.date_issued %}{{ asset.date_issued|date:"d-M-Y" }}{% else %}-{% endif %}
                     </td>
                     <td class="excel-td" style="color: #475569;">{{ asset.remarks|default:"-" }}</td>
+                    <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">{{ asset.last_edited_by|default:"-"
+                        }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="10" style="padding: 2rem; text-align: center; color: #64748b;">No assets logic for {{
+                    <td colspan="11" style="padding: 2rem; text-align: center; color: #64748b;">No assets logic for {{
                         current_tab }}.</td>
                 </tr>
                 {% endfor %}
@@ -184,6 +202,10 @@
 </div>
 
 <style>
+    .main-container {
+        max-width: 98% !important;
+    }
+
     .excel-tab {
         background: rgba(255, 255, 255, 0.05);
         /* Dark background inactive */
@@ -221,6 +243,12 @@
     .excel-td {
         padding: 0.5rem 0.8rem;
         border-right: 1px solid #e2e8f0;
+        max-width: 200px;
+        /* Reduced to safer 200px */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
     }
 
     /* Excel Status Styles within White Table */
@@ -306,7 +334,7 @@
         const statusOptions = document.getElementById('status-options').innerHTML;
 
         row.innerHTML = `
-        <td class="excel-td"><input type="text" id="new-mni" class="inline-input" placeholder="MNI"></td>
+        <td class="excel-td"><input type="text" id="new-mni" class="inline-input" placeholder="Auto" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
         <td class="excel-td"><input type="text" id="new-staff" class="inline-input" placeholder="Staff Name"></td>
         <td class="excel-td"><select id="new-device" class="inline-input">${deviceOptions}</select></td>
         <td class="excel-td"><input type="text" id="new-brand" class="inline-input" placeholder="Brand"></td>
@@ -316,12 +344,13 @@
         <td class="excel-td" style="text-align: center;"><input type="checkbox" id="new-signed"></td>
         <td class="excel-td"><input type="date" id="new-date" class="inline-input"></td>
         <td class="excel-td">
-            <input type="text" id="new-remarks" class="inline-input" placeholder="Remarks">
+            <input type="text" id="new-remarks" class="inline-input" placeholder="Remarks" maxlength="10">
             <div style="margin-top: 5px;">
                 <button onclick="saveAsset('add')" class="btn-xs btn-save">Save</button>
                 <button onclick="cancelAdd()" class="btn-xs btn-cancel">Cancel</button>
             </div>
         </td>
+        <td class="excel-td" style="color: #cbd5e1; font-style: italic;">Auto</td>
     `;
 
         tbody.insertBefore(row, tbody.firstChild);
@@ -396,18 +425,24 @@
                     // But user also said "No page reloads." -> Tricky.
 
                     // Reconstructing HTML:
-                    if (action === 'add') {
-                        document.getElementById('new-asset-row').remove();
-                        // We need to append the real row now. 
-                        // Because we can't easily fetch the full Django template row from JS without HTMX
-                        // We will manually build it.
-                        // Insert new row at top
-                        insertRowHtml(data.asset, true);
-                    } else {
-                        // Update existing row
-                        const row = document.getElementById(`row-${rowId}`);
-                        row.outerHTML = buildRowHtml(data.asset);
+                    try {
+                        if (action === 'add') {
+                            document.getElementById('new-asset-row').remove();
+                            // We need to append the real row now. 
+                            // Because we can't easily fetch the full Django template row from JS without HTMX
+                            // We will manually build it.
+                            // Insert new row at top
+                            insertRowHtml(data.asset, true);
+                        } else {
+                            // Update existing row
+                            const row = document.getElementById(`row-${rowId}`);
+                            row.outerHTML = buildRowHtml(data.asset);
+                        }
+                    } catch (e) {
+                        console.error("Error updating row HTML:", e);
+                        alert("Saved, but UI update failed. Please refresh.");
                     }
+
                     isEditing = false;
                     // Update counters? We'd need to fetch them. 
                     // For MVP "No page reloads" implies client-side update or partial fetch.
@@ -476,6 +511,7 @@
         const signed = cells[7].innerText.includes('####');
         const dateText = cells[8].innerText.trim();
         const remarks = cells[9].innerText.trim() === '-' ? '' : cells[9].innerText.trim();
+        const editorName = cells[10].innerText.trim();
 
         const deviceOptions = document.getElementById('device-type-options').innerHTML;
         const statusOptions = document.getElementById('status-options').innerHTML;
@@ -490,7 +526,7 @@
 
         row.classList.add('editing-row');
         row.innerHTML = `
-        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}"></td>
+        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
         <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}"></td>
         <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input">${deviceOptions}</select></td>
         <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}"></td>
@@ -500,12 +536,13 @@
         <td class="excel-td" style="text-align: center;"><input type="checkbox" id="edit-signed-${rowId}" ${signed ? 'checked' : ''}></td>
         <td class="excel-td"><input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}"></td>
         <td class="excel-td">
-            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}">
+            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}" maxlength="10">
             <div style="margin-top: 5px;">
                 <button onclick="saveAsset('edit', '${rowId}')" class="btn-xs btn-save">Save</button>
                 <button onclick="cancelEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
             </div>
         </td>
+        <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">${editorName}</td>
     `;
 
         const devSelect = document.getElementById(`edit-device-${rowId}`);
@@ -556,6 +593,7 @@
         <td class="excel-td" style="text-align: center;">${signedHtml}</td>
         <td class="excel-td">${asset.date_issued || '-'}</td>
         <td class="excel-td" style="color: #475569;">${asset.remarks}</td>
+        <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">${asset.last_edited_by || '-'}</td>
     </tr>
     `;
     }

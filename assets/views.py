@@ -13,9 +13,28 @@ def asset_dashboard(request):
     current_tab = request.GET.get('tab', 'DUBAI').upper()
     
     search_query = request.GET.get('q', '')
+    filter_type = request.GET.get('filter', '')
     
     # Filter assets by location
     assets = Asset.objects.filter(location=current_tab).order_by('-created_at')
+
+    # Apply Category Filter
+    if filter_type:
+        if filter_type == 'MAC':
+            assets = assets.filter(device_type='MAC')
+        elif filter_type == 'WINDOWS':
+            assets = assets.filter(device_type='WINDOWS')
+        elif filter_type == 'IPHONE':
+            assets = assets.filter(device_type='IPHONE')
+        elif filter_type == 'OTHER':
+            assets = assets.filter(device_type='OTHER')
+        elif filter_type == 'AVAILABLE':
+            # "Available" = Windows/Mac in Store (as per previous logic)
+            assets = assets.filter(device_type__in=['WINDOWS', 'MAC'], status='IN_STORE')
+        elif filter_type == 'DAMAGED':
+            assets = assets.filter(device_type='DAMAGED')
+        elif filter_type == 'REPLACEMENT':
+            assets = assets.filter(device_type='REPLACEMENT')
 
     if search_query:
         assets = assets.filter(
@@ -85,7 +104,9 @@ def asset_dashboard(request):
             'laptops_remaining': laptops_remaining,
             'damaged_count': damaged_count,
             'replacements_count': replacements_count,
+            'replacements_count': replacements_count,
             'search_query': search_query,
+            'filter_type': filter_type,
         }
         return render(request, 'assets/dashboard.html', context)
 
@@ -100,6 +121,7 @@ def asset_dashboard(request):
         'damaged_count': damaged_count,
         'replacements_count': replacements_count,
         'search_query': search_query,
+        'filter_type': filter_type,
     }
     return render(request, 'assets/dashboard.html', context)
 
@@ -200,6 +222,9 @@ def api_manage_asset(request):
         remarks = data.get('remarks', '')
         location = data.get('location', 'DUBAI') # Default/Active Tab
         
+        # Get Editor Name
+        editor_name = request.user.first_name if request.user.first_name else request.user.username
+        
         if action == 'add':
             # Validation
             existing_with_sn = Asset.objects.filter(serial_number=serial_number).first()
@@ -215,11 +240,7 @@ def api_manage_asset(request):
                 status = 'IN_USE' # Resigned means it was with someone, so logically IN_USE/inactive.
             
             asset = Asset.objects.create(
-                mni=mni,
-                # For simplicity, storing staff name in assigned_to_email temporarily if no user matched
-                # Or we can try to match User. For now, let's use assigned_to_email as a text field fallback 
-                # effectively or just use it for the name display. 
-                # Re-reading requirements: "Staff in Possession" - input control.
+                # mni is set after creation
                 assigned_to_email=staff_name, 
                 device_type=device_type,
                 brand=brand,
@@ -229,8 +250,13 @@ def api_manage_asset(request):
                 is_signed=is_signed,
                 date_issued=date_issued,
                 remarks=remarks,
-                location=location
+                location=location,
+                last_edited_by=editor_name
             )
+            # Auto-generate MNI
+            asset.mni = str(asset.id).zfill(5)
+            asset.save()
+            
             message = "Asset created successfully."
 
         elif action == 'edit':
@@ -250,7 +276,7 @@ def api_manage_asset(request):
                     return JsonResponse({'status': 'error', 'message': 'Staff in Possession is mandatory for Resigned assets.'}, status=400)
                 status = 'IN_USE'
                 
-            asset.mni = mni
+            # asset.mni = mni # MNI is auto-generated and immutable
             asset.assigned_to_email = staff_name # Using email field for free text name currently
             asset.device_type = device_type
             asset.brand = brand
@@ -264,6 +290,7 @@ def api_manage_asset(request):
             # But let's allow it if sent
             # asset.location = location 
             
+            asset.last_edited_by = editor_name
             asset.save()
             message = "Asset updated successfully."
             
@@ -316,7 +343,10 @@ def api_manage_asset(request):
                 'is_signed': asset.is_signed,
                 'date_issued': asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else None,
                 'remarks': asset.remarks,
-                'location': asset.location
+                'date_issued': asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else None,
+                'remarks': asset.remarks,
+                'location': asset.location,
+                'last_edited_by': asset.last_edited_by
             },
             'stats': {
                 'mac_count': Asset.objects.filter(location=location, device_type='MAC').count(),

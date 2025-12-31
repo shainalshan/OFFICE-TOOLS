@@ -55,6 +55,7 @@ class Asset(models.Model):
     date_issued = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_edited_by = models.CharField(max_length=150, blank=True, help_text="User who last edited this asset")
 
     def __str__(self):
         return f"{self.brand} {self.model_detail} ({self.serial_number})"
