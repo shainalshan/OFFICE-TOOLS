@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'background_changer',
     'waffle',
     'file_converter',
-
+    'backup_restore',
 ]
 
 MIDDLEWARE = [

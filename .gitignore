@@ -24,3 +24,14 @@ env/
 # Large Files > 100MB
 media/3d_models/leadenhall_building.glb
 media/3d_models/leadenhall_building_kEXGvBm.glb
+
+temp_restore.zip
+temp_db_dump.sql
+
+backups/
+
+*.glb
+*.pyd
+*.dll
+venv/
+.venv/

@@ -10,5 +10,6 @@ urlpatterns = [
     path('manage-access/', views.manage_ticket_access, name='manage_ticket_access'),
     path('manage-assignees/', views.manage_ticket_assignees, name='manage_ticket_assignees'),
     path('<str:ticket_id>/', views.ticket_detail, name='ticket_detail'),
+    path('reset-sequence/', views.reset_ticket_sequence, name='reset_ticket_sequence'),
     path('', views.my_tickets, name='my_tickets'),
 ]

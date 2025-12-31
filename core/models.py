@@ -30,14 +30,29 @@ class NotificationEventSetting(models.Model):
         ('USER_ADDED', 'New User Added'),
         ('ASSET_UPDATE', 'Asset Added/Updated'),
         ('SIG_CREATED', 'Email Signature Created'),
+        
+        # HR / Timesheet Events
         ('TIMESHEET_SUBMITTED', 'Timesheet Submitted'),
         ('TIMESHEET_REJECTED', 'Timesheet Rejected'),
         ('TIMESHEET_APPROVED', 'Timesheet Approved'),
-        # Email Notification System Events
+        
+        # Ticket Events
         ('TICKET_CREATED', 'Ticket Created'),
         ('TICKET_ASSIGNED', 'Ticket Assigned'),
         ('TICKET_STATUS_CHANGED', 'Ticket Status Changed'),
         ('TICKET_COMMENTED', 'Ticket Commented'),
+        ('TICKET_BREACHED', 'Ticket SLA Breached'),
+        ('TICKET_BREACH_WARNING', 'Ticket Breach Warning (1h Before)'),
+        
+        # User Account Events
+        ('USER_APPROVED', 'User Account Approved'),
+        ('USER_REJECTED', 'User Account Rejected'),
+        ('USER_TOOL_ACCESS', 'User Tool Permission Granted'),
+        
+        # System Health Events
+        ('SYSTEM_HIGH_LOAD', 'High System Load (>500 Users)'),
+        ('SYSTEM_ERROR_SPIKE', 'System Error Spike'),
+        ('SYSTEM_DOWNTIME', 'System App Issue/Downtime'),
     ]
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, unique=True)
     subscribers = models.ManyToManyField(User, related_name='notification_subscriptions', blank=True)

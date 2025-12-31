@@ -13,6 +13,10 @@
             <button onclick="toggleAccessModal()" class="btn-primary"
                 style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">👥 Manage
                 Access</button>
+            <button onclick="toggleResetSequenceModal()" class="btn-primary"
+                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #ef4444; border: 1px solid #dc2626;">⚠️
+                Reset
+                Sequence</button>
             {% endif %}
             <a href="{% url 'ticket_reports' %}" class="btn-primary"
                 style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">📊 View Reports</a>
@@ -161,6 +165,33 @@
 </div>
 {% endblock %}
 
+
+<!-- Reset Sequence Modal -->
+<div id="resetSequenceModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container" style="width: 400px; padding: 2rem; position: relative; border: 1px solid #ef4444;">
+        <button onclick="toggleResetSequenceModal()"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
+        <h2 style="margin-top: 0; color: #ef4444;">⚠️ Danger Zone</h2>
+        <p style="color: #fda4af; font-weight: bold;">This action will PERMANENTLY DELETE ALL TICKETS and reset the ID
+            counter to PIXL00001.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">This cannot be undone.</p>
+
+        <form method="post" action="{% url 'reset_ticket_sequence' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Confirm Admin Password:</label>
+                <input type="password" name="password" required
+                    style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+            </div>
+            <button type="submit"
+                style="width: 100%; padding: 0.75rem; background: #ef4444; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer;">
+                CONFIRM RESET
+            </button>
+        </form>
+    </div>
+</div>
+
 {% block extra_js %}
 <!-- Access Management Modal -->
 <div id="accessModal"
@@ -263,6 +294,33 @@
         </div>
     </div>
 </div>
+</div>
+
+<!-- Reset Sequence Modal -->
+<div id="resetSequenceModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="glass-container" style="width: 400px; padding: 2rem; position: relative; border: 1px solid #ef4444;">
+        <button onclick="toggleResetSequenceModal()"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
+        <h2 style="margin-top: 0; color: #ef4444;">⚠️ Danger Zone</h2>
+        <p style="color: #fda4af; font-weight: bold;">This action will PERMANENTLY DELETE ALL TICKETS and reset the ID
+            counter to PIXL00001.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">This cannot be undone.</p>
+
+        <form method="post" action="{% url 'reset_ticket_sequence' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem;">Confirm Admin Password:</label>
+                <input type="password" name="password" required
+                    style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+            </div>
+            <button type="submit"
+                style="width: 100%; padding: 0.75rem; background: #ef4444; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer;">
+                CONFIRM RESET
+            </button>
+        </form>
+    </div>
+</div>
 
 <script>
     function toggleAccessModal() {
@@ -295,6 +353,12 @@
     document.getElementById('assigneeModal').addEventListener('click', function (e) {
         if (e.target === this) {
             toggleAssigneeModal();
+        }
+    });
+
+    document.getElementById('resetSequenceModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            toggleResetSequenceModal();
         }
     });
 
@@ -389,5 +453,19 @@
     setInterval(updateCountdowns, 1000);
     // Initial call after small delay to let render finish
     setTimeout(updateCountdowns, 100);
+    function toggleResetSequenceModal() {
+        const modal = document.getElementById('resetSequenceModal');
+        if (modal.style.display === 'none') {
+            modal.style.display = 'flex';
+        } else {
+            modal.style.display = 'none';
+        }
+    }
+
+    document.getElementById('resetSequenceModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            toggleResetSequenceModal();
+        }
+    });
 </script>
 {% endblock %}

@@ -32,6 +32,7 @@ urlpatterns = [
     path('tracker/', include('device_tracker.urls')),
     path('tools/background-remover/', include('background_changer.urls')),
     path('tools/converter/', include('file_converter.urls')),
+    path('backup/', include('backup_restore.urls')),
 
 
     # APIs

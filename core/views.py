@@ -276,31 +276,45 @@ def admin_dashboard(request):
         elif action == 'add_subscriber':
             event_type = request.POST.get('event_type')
             sub_user_id = request.POST.get('sub_user_id')
+            is_ajax = request.POST.get('is_ajax') == 'true'
             
             setting, _ = NotificationEventSetting.objects.get_or_create(event_type=event_type)
             
             if not sub_user_id:
+                if is_ajax: return JsonResponse({'status': 'error', 'message': 'Please select a user.'})
                 messages.error(request, 'Please select a user to add.')
             else:
                 user_to_add = User.objects.filter(id=sub_user_id).first()
                 if user_to_add:
                     setting.subscribers.add(user_to_add)
-                    messages.success(request, f'Added {user_to_add.username} to {setting.get_event_type_display()}.')
+                    msg = f'Added {user_to_add.username} to {setting.get_event_type_display()}.'
+                    if is_ajax: 
+                        return JsonResponse({
+                            'status': 'success', 
+                            'message': msg,
+                            'user': {'id': user_to_add.id, 'username': user_to_add.username}
+                        })
+                    messages.success(request, msg)
                 else:
+                    if is_ajax: return JsonResponse({'status': 'error', 'message': 'User not found.'})
                     messages.error(request, 'User not found.')
             return redirect('admin_dashboard')
 
         elif action == 'remove_subscriber':
             event_type = request.POST.get('event_type')
             sub_user_id = request.POST.get('sub_user_id')
+            is_ajax = request.POST.get('is_ajax') == 'true'
             
             setting = get_object_or_404(NotificationEventSetting, event_type=event_type)
             user_to_remove = User.objects.filter(id=sub_user_id).first()
             
             if user_to_remove:
                 setting.subscribers.remove(user_to_remove)
-                messages.warning(request, f'Removed {user_to_remove.username} from {setting.get_event_type_display()}.')
+                msg = f'Removed {user_to_remove.username} from {setting.get_event_type_display()}.'
+                if is_ajax: return JsonResponse({'status': 'success', 'message': msg})
+                messages.warning(request, msg)
             else:
+                if is_ajax: return JsonResponse({'status': 'error', 'message': 'User not found.'})
                 messages.error(request, 'User to remove not found.')
             return redirect('admin_dashboard')
 
@@ -312,46 +326,10 @@ def admin_dashboard(request):
             user.save()
             access, _ = UserToolAccess.objects.get_or_create(user=user)
             
-            # Auto-assign ticketing
-            ticketing = Tool.objects.filter(slug='ticketing').first()
-            if ticketing:
-                access.tools.add(ticketing)
-                
-            messages.success(request, f'User {user.username} approved.')
+            # Notification
+            send_event_notification('USER_APPROVED', {'user': user}, functional_recipients=[user])
             
-            # Send Email Notification
-            try:
-                if waffle.flag_is_active(request, 'dynamic_email_config'):
-                    send_dynamic_email(
-                        'Account Approved - Office Portal',
-                        f'Hello {user.username},\n\nYour account has been approved by the administrator. You can now login using your credentials.\n\nBest regards,\nOffice Admin',
-                        [user.email]
-                    )
-                else:
-                    send_mail(
-                        'Account Approved - Office Portal',
-                        f'Hello {user.username},\n\nYour account has been approved by the administrator. You can now login using your credentials.\n\nBest regards,\nOffice Admin',
-                        'admin@officeportal.local',
-                        [user.email],
-                        fail_silently=True,
-                    )
-            except Exception:
-                pass # Fail silently for local dev if config issues
-        
-        elif action == 'reject':
-            username = user.username
-            user.delete()
-            messages.warning(request, f'User request for {username} was rejected and deleted.')
-
-        elif action == 'suspend':
-            user.is_active = False
-            user.save()
-            messages.warning(request, f'User {user.username} has been suspended (access disabled).')
-
-        elif action == 'reactivate':
-            user.is_active = True
-            user.save()
-            messages.success(request, f'User {user.username} has been reactivated.')
+            messages.success(request, f'User {user.username} has been approved and activated.')
 
         elif action == 'delete_user':
             username = user.username
@@ -391,10 +369,23 @@ def admin_dashboard(request):
     all_settings = NotificationEventSetting.objects.all()
     
     # Split into two groups
-    email_notification_types = ['TICKET_CREATED', 'TICKET_ASSIGNED', 'TICKET_STATUS_CHANGED', 'TICKET_COMMENTED']
+    # Categorize Settings
+    ticket_types = [
+        'TICKET_CREATED', 'TICKET_ASSIGNED', 'TICKET_STATUS_CHANGED', 'TICKET_COMMENTED', 
+        'TICKET_BREACHED', 'TICKET_BREACH_WARNING'
+    ]
+    hr_types = ['TIMESHEET_SUBMITTED', 'TIMESHEET_REJECTED', 'TIMESHEET_APPROVED']
+    user_types = ['USER_ADDED', 'USER_APPROVED', 'USER_REJECTED', 'USER_TOOL_ACCESS']
+    system_types = ['SYSTEM_HIGH_LOAD', 'SYSTEM_ERROR_SPIKE', 'SYSTEM_DOWNTIME', 'ASSET_UPDATE', 'SIG_CREATED']
+
+    ticket_settings = all_settings.filter(event_type__in=ticket_types)
+    hr_settings = all_settings.filter(event_type__in=hr_types)
+    user_settings = all_settings.filter(event_type__in=user_types)
+    system_settings = all_settings.filter(event_type__in=system_types)
     
-    email_notification_settings = all_settings.filter(event_type__in=email_notification_types)
-    system_notification_settings = all_settings.exclude(event_type__in=email_notification_types)
+    # Catch-all for anything else not categorized
+    # categorized_types = ticket_types + hr_types + user_types + system_types
+    # other_settings = all_settings.exclude(event_type__in=categorized_types)
 
     # Waffle Flags Access Logic
     # Superusers ALWAYS have access (Safety Net), or if the flag is enabled
@@ -413,12 +404,15 @@ def admin_dashboard(request):
         'managed_users': managed_users,
         'all_tools': all_tools,
         'all_contacts': all_contacts,
-        'system_notification_settings': system_notification_settings,
-        'email_notification_settings': email_notification_settings,
+        'ticket_settings': ticket_settings,
+        'hr_settings': hr_settings,
+        'user_settings': user_settings,
+        'system_settings': system_settings,
         'audit_logs': audit_logs,
         'waffle_flags': waffle_flags,
         'email_config': email_config,
         'can_manage_flags': can_manage_flags,
+        'system_notification_settings': all_settings,
     })
 
 @login_required

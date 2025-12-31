@@ -453,6 +453,8 @@ def update_timesheet_entry(request):
     
     return JsonResponse({'status': 'success', 'message': 'Entry updated'})
 
+from core.notifications import send_event_notification
+
 @login_required
 def submit_timesheet(request):
     if request.method == 'POST':
@@ -465,17 +467,7 @@ def submit_timesheet(request):
             timesheet.save()
             
             # Trigger Notification
-            try:
-                setting = NotificationEventSetting.objects.get(event_type='TIMESHEET_SUBMITTED')
-                for sub in setting.subscribers.all():
-                    SystemNotification.objects.create(
-                        recipient=sub,
-                        title='Timesheet Submitted',
-                        message=f"{request.user.first_name} {request.user.last_name} submitted timesheet for {timesheet.period_start.strftime('%B %Y')}.",
-                        link=f"/hr/timesheet/view/{timesheet.id}/"
-                    )
-            except Exception as e:
-                print(f"Notification Error: {e}")
+            send_event_notification('TIMESHEET_SUBMITTED', {'timesheet': timesheet})
 
             messages.success(request, "Timesheet submitted for approval.")
         else:
@@ -506,15 +498,7 @@ def handle_timesheet_approval(request):
             timesheet.save()
 
             # Notification (Direct to Employee)
-            try:
-                SystemNotification.objects.create(
-                    recipient=timesheet.employee,
-                    title='Timesheet Approved',
-                    message=f"Your timesheet for {timesheet.period_start.strftime('%B %Y')} has been approved by {request.user.first_name} {request.user.last_name}.",
-                    link=f"/hr/timesheet/view/{timesheet.id}/"
-                )
-            except Exception as e:
-                print(f"Notification Error: {e}")
+            send_event_notification('TIMESHEET_APPROVED', {'timesheet': timesheet}, functional_recipients=[timesheet.employee])
 
             messages.success(request, f"Timesheet for {timesheet.employee.username} APPROVED.")
             
@@ -526,15 +510,7 @@ def handle_timesheet_approval(request):
             timesheet.save()
 
             # Notification (Direct to Employee)
-            try:
-                SystemNotification.objects.create(
-                    recipient=timesheet.employee,
-                    title='Timesheet Rejected',
-                    message=f"Your timesheet for {timesheet.period_start.strftime('%B %Y')} was rejected. Reason: {rejection_reason}",
-                    link=f"/hr/timesheet/view/{timesheet.id}/"
-                )
-            except Exception as e:
-                print(f"Notification Error: {e}")
+            send_event_notification('TIMESHEET_REJECTED', {'timesheet': timesheet}, functional_recipients=[timesheet.employee])
 
             messages.warning(request, f"Timesheet for {timesheet.employee.username} REJECTED.")
             
@@ -565,15 +541,7 @@ def pull_timesheet(request):
             timesheet.save()
             
             # Notify Employee
-            try:
-                SystemNotification.objects.create(
-                    recipient=timesheet.employee,
-                    title='Timesheet Pulled by HR',
-                    message=f"Your timesheet for {timesheet.period_start.strftime('%B %Y')} was pulled for review by {request.user.first_name}.",
-                    link=f"/hr/timesheet/view/{timesheet.id}/"
-                )
-            except Exception as e:
-                print(f"Notification Error: {e}")
+            send_event_notification('TIMESHEET_SUBMITTED', {'timesheet': timesheet}, functional_recipients=[timesheet.employee])
                 
             messages.success(request, f"Successfully pulled timesheet for {timesheet.employee.username}.")
         else:

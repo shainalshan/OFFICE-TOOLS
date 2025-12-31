@@ -36,25 +36,23 @@ class Ticket(models.Model):
     resolution = models.TextField(blank=True, null=True, help_text="Admin resolution notes")
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
     deadline = models.DateTimeField(null=True, blank=True, help_text="Deadline for the ticket")
+    
+    SLA_STATUS_CHOICES = [
+        ('NORMAL', 'Normal'),
+        ('WARNING', 'Warning Sent'),
+        ('BREACHED', 'Breach Notified'),
+    ]
+    sla_status = models.CharField(max_length=20, choices=SLA_STATUS_CHOICES, default='NORMAL')
 
     def save(self, *args, **kwargs):
         if not self.ticket_id:
-            # 1. Check for recycled ID (deleted within last 3 days)
-            three_days_ago = timezone.now() - timedelta(days=3)
-            recycled = DeletedTicketLog.objects.filter(deleted_at__gte=three_days_ago).order_by('deleted_at').first()
-
-            if recycled:
-                self.ticket_id = recycled.ticket_id
-                recycled.delete() # Consume the ID so it's not used again
-            else:
-                # 2. Generate new ID: PIXL00001
-                last_ticket = Ticket.objects.order_by('-id').first()
-                if last_ticket:
-                    last_id = int(last_ticket.id)
-                    new_id = last_id + 1
-                else:
-                    new_id = 1
-                self.ticket_id = f'PIXL{new_id:05d}'
+            # First save to get the DB-assigned ID (AutoIncrement)
+            super().save(*args, **kwargs)
+            # Generate ID based on the primary key: PIXL00001
+            self.ticket_id = f'PIXL{self.id:05d}'
+            # Save again to update the ticket_id
+            kwargs['force_insert'] = False # Ensure we update, don't insert again
+            return super().save(*args, **kwargs)
         
         # Handle completion timestamp
         if self.status == 'COMPLETED' and not self.completed_at:
