@@ -198,6 +198,33 @@
             </tbody>
         </table>
         {% endif %}
+
+        <!-- Pagination -->
+        {% if assets.has_other_pages %}
+        <div
+            style="padding: 1rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 0.85rem; color: #64748b;">
+                Showing page {{ assets.number }} of {{ assets.paginator.num_pages }}
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                {% if assets.has_previous %}
+                <a href="?page={{ assets.previous_page_number }}&tab={{ current_tab }}&filter={{ filter_type }}&q={{ search_query }}"
+                    class="btn-primary"
+                    style="height: 32px; padding: 0 0.8rem; font-size: 0.8rem; background: #64748b; text-decoration: none; color: white; border-radius: 4px; display: inline-flex; align-items: center;">
+                    Previous
+                </a>
+                {% endif %}
+
+                {% if assets.has_next %}
+                <a href="?page={{ assets.next_page_number }}&tab={{ current_tab }}&filter={{ filter_type }}&q={{ search_query }}"
+                    class="btn-primary"
+                    style="height: 32px; padding: 0 0.8rem; font-size: 0.8rem; background: #0f766e; text-decoration: none; color: white; border-radius: 4px; display: inline-flex; align-items: center;">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -244,10 +271,11 @@
         padding: 0.5rem 0.8rem;
         border-right: 1px solid #e2e8f0;
         max-width: 200px;
-        /* Reduced to safer 200px */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        /* Fixed width to prevent enlargement */
+        white-space: normal;
+        /* Wrap text */
+        word-wrap: break-word;
+        /* Break long words */
         vertical-align: middle;
     }
 

@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Asset
+from contacts.models import Contact
 from django.db.models import Count, Q
+from django.core.paginator import Paginator
 from core.decorators import check_tool_access
 import openpyxl
 from django.http import HttpResponse
@@ -110,8 +112,13 @@ def asset_dashboard(request):
         }
         return render(request, 'assets/dashboard.html', context)
 
+    # Pagination
+    paginator = Paginator(assets, 100)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'assets': assets,
+        'assets': page_obj,
         'current_tab': current_tab,
         'mac_count': mac_count,
         'windows_count': windows_count,
@@ -126,54 +133,67 @@ def asset_dashboard(request):
     return render(request, 'assets/dashboard.html', context)
 
 @login_required
+@login_required
 @check_tool_access('assets')
 def export_assets(request):
-    current_tab = request.GET.get('tab', 'DUBAI').upper()
-    search_query = request.GET.get('q', '')
+    # Ignoring current_tab and search_query to export absolute ALL data as requested
+    # "All data below under the filter should export as excel as single file - DUBAI... INDIA... PAKISTAN... STAFF"
     
-    # Filter Same as Dashboard
-    assets = Asset.objects.filter(location=current_tab).order_by('-created_at')
-    if search_query:
-        assets = assets.filter(
-            Q(mni__icontains=search_query) |
-            Q(assigned_to__username__icontains=search_query) |
-            Q(assigned_to_email__icontains=search_query) |
-            Q(brand__icontains=search_query) |
-            Q(model_detail__icontains=search_query) |
-            Q(serial_number__icontains=search_query) |
-            Q(remarks__icontains=search_query)
-        )
-        
-    # Create Excel
     wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = f"{current_tab} Assets"
-    
-    # Headers
-    headers = ['MNI', 'Staff in Possession', 'Device Type', 'Brand', 'Model/Detail', 'Serial Number', 'Status', 'Signed', 'Date Issued', 'Remarks']
-    ws.append(headers)
-    
-    for asset in assets:
-        staff = asset.assigned_to.username if asset.assigned_to else (asset.assigned_to_email or '-')
-        signed = 'Yes' if asset.is_signed else 'No'
-        date_str = asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else '-'
+    # Remove default sheet
+    if 'Sheet' in wb.sheetnames:
+        wb.remove(wb['Sheet'])
         
-        ws.append([
-            asset.mni,
-            staff,
-            asset.get_device_type_display(),
-            asset.brand,
-            asset.model_detail,
-            asset.serial_number,
-            asset.get_status_display(),
-            signed,
-            date_str,
-            asset.remarks
+    locations = ['DUBAI', 'INDIA', 'PAKISTAN']
+    
+    # 1. Export Locations
+    for loc in locations:
+        ws = wb.create_sheet(title=f"{loc} DEVICE LIST")
+        
+        # Headers
+        headers = ['MNI', 'Staff in Possession', 'Device Type', 'Brand', 'Model/Detail', 'Serial Number', 'Status', 'Signed', 'Date Issued', 'Remarks', 'Editor Name']
+        ws.append(headers)
+        
+        assets = Asset.objects.filter(location=loc).order_by('-created_at')
+        
+        for asset in assets:
+            staff = asset.assigned_to.username if asset.assigned_to else (asset.assigned_to_email or '-')
+            signed = 'Yes' if asset.is_signed else 'No'
+            date_str = asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else '-'
+             
+            ws.append([
+                asset.mni,
+                staff,
+                asset.get_device_type_display(),
+                asset.brand,
+                asset.model_detail,
+                asset.serial_number,
+                asset.get_status_display(),
+                signed,
+                date_str,
+                asset.remarks,
+                asset.last_edited_by or '-'
+            ])
+            
+    # 2. Export Staff List
+    ws_staff = wb.create_sheet(title="STAFF LIST")
+    staff_headers = ['Staff No', 'Staff Name', 'Total Pixl Devices', 'Personal Devices', 'Total']
+    ws_staff.append(staff_headers)
+    
+    staff_qs = Contact.objects.all().order_by('name')
+    for s in staff_qs:
+        pixl_count = Asset.objects.filter(assigned_to_email__iexact=s.name).count()
+        ws_staff.append([
+            s.staff_no or '-',
+            s.name,
+            pixl_count,
+            s.personal_devices or '-',
+            pixl_count # Total logic
         ])
     
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="Assets_{current_tab}.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="Global_Assets_Export.xlsx"'
     wb.save(response)
     return response
 
