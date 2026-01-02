@@ -10,20 +10,30 @@
 
         <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
             <!-- OS Stats -->
-            <a href="?tab={{ current_tab }}&filter=MAC" class="glass-container"
-                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'MAC' %}border-color: #60a5fa; background: rgba(96, 165, 250, 0.1);{% endif %}">
+            <a href="?tab={{ current_tab }}&filter=MACBOOK" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'MACBOOK' %}border-color: #60a5fa; background: rgba(96, 165, 250, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #60a5fa;">{{ mac_count }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.8rem;">Mac</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Mac Book</div>
             </a>
-            <a href="?tab={{ current_tab }}&filter=WINDOWS" class="glass-container"
-                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'WINDOWS' %}border-color: #38bdf8; background: rgba(56, 189, 248, 0.1);{% endif %}">
-                <div style="font-size: 1.5rem; color: #38bdf8;">{{ windows_count }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.8rem;">Windows</div>
+            <a href="?tab={{ current_tab }}&filter=LAPTOP" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'LAPTOP' %}border-color: #38bdf8; background: rgba(56, 189, 248, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #38bdf8;">{{ laptop_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Laptop</div>
             </a>
             <a href="?tab={{ current_tab }}&filter=IPHONE" class="glass-container"
                 style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'IPHONE' %}border-color: #a78bfa; background: rgba(167, 139, 250, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #a78bfa;">{{ phone_count }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.8rem;">iPhones</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">iPhone</div>
+            </a>
+            <a href="?tab={{ current_tab }}&filter=ANDROID" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'ANDROID' %}border-color: #a3e635; background: rgba(163, 230, 53, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #a3e635;">{{ android_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Android</div>
+            </a>
+            <a href="?tab={{ current_tab }}&filter=KEYBOARD_MOUSE" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'KEYBOARD_MOUSE' %}border-color: #fb923c; background: rgba(251, 146, 60, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #fb923c;">{{ accessory_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">K.Board/Mouse</div>
             </a>
             <a href="?tab={{ current_tab }}&filter=OTHER" class="glass-container"
                 style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'OTHER' %}border-color: #f472b6; background: rgba(244, 114, 182, 0.1);{% endif %}">
@@ -32,20 +42,36 @@
             </a>
 
             <!-- Inventory Stats -->
+            <a href="?tab={{ current_tab }}&filter=IN_USE" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'IN_USE' %}border-color: #2563eb; background: rgba(37, 99, 235, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #2563eb;">{{ in_use_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Company Asset</div>
+            </a>
+            <a href="?tab={{ current_tab }}&filter=IN_STORE" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'IN_STORE' %}border-color: #16a34a; background: rgba(22, 163, 74, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #16a34a;">{{ in_store_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">In Store</div>
+            </a>
+
             <a href="?tab={{ current_tab }}&filter=AVAILABLE" class="glass-container"
                 style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'AVAILABLE' %}border-color: #4ade80; background: rgba(74, 222, 128, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #4ade80;">{{ laptops_remaining }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.8rem;">Available</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Available (Laptop)</div>
             </a>
             <a href="?tab={{ current_tab }}&filter=DAMAGED" class="glass-container"
                 style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'DAMAGED' %}border-color: #ef4444; background: rgba(239, 68, 68, 0.1);{% endif %}">
                 <div style="font-size: 1.5rem; color: #ef4444;">{{ damaged_count }}</div>
                 <div style="color: var(--text-secondary); font-size: 0.8rem;">Damaged</div>
             </a>
-            <a href="?tab={{ current_tab }}&filter=REPLACEMENT" class="glass-container"
-                style="padding: 1.5rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'REPLACEMENT' %}border-color: #fbbf24; background: rgba(251, 191, 36, 0.1);{% endif %}">
-                <div style="font-size: 2rem; color: #fbbf24;">{{ replacements_count }}</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Replacements</div>
+            <a href="?tab={{ current_tab }}&filter=RESIGNED" class="glass-container"
+                style="padding: 1rem; text-align: center; text-decoration: none; color: inherit; {% if filter_type == 'RESIGNED' %}border-color: #64748b; background: rgba(100, 116, 139, 0.1);{% endif %}">
+                <div style="font-size: 1.5rem; color: #64748b;">{{ resigned_count }}</div>
+                <div style="color: var(--text-secondary); font-size: 0.8rem;">Resigned Employee</div>
+            </a>
+            <a href="{% url 'audit_dashboard' %}" class="glass-container"
+                style="padding: 1.5rem; text-align: center; text-decoration: none; color: inherit; border-color: #fbbf24; background: rgba(251, 191, 36, 0.1);">
+                <div style="font-size: 2rem; color: #fbbf24;">🛡️</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Audit</div>
             </a>
         </div>
 
@@ -77,7 +103,7 @@
             <form method="get" action="." style="display: flex; gap: 8px; align-items: center; margin: 0;">
                 <input type="hidden" name="tab" value="{{ current_tab }}">
                 <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search..."
-                    style="height: 36px; padding: 0 0.8rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: black; outline: none; width: 220px; box-sizing: border-box;"
+                    style="height: 36px; padding: 0 0.8rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: white; outline: none; width: 220px; box-sizing: border-box;"
                     class="glass-input">
                 <button type="submit" class="btn-primary"
                     style="height: 36px; padding: 0 1rem; font-size: 0.85rem; background: #0f766e; border: none; cursor: pointer; color: white; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">
@@ -141,7 +167,7 @@
             style="width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <thead style="background: #0f766e; color: white;">
                 <tr>
-                    <th class="excel-th">MNI</th>
+                    <th class="excel-th">NOs</th>
                     <th class="excel-th">Staff in Possession</th>
                     <th class="excel-th">Device Type</th>
                     <th class="excel-th">Brand</th>
@@ -157,8 +183,9 @@
             <tbody id="assets-table-body" style="background: white; color: black;">
                 {% for asset in assets %}
                 <tr id="row-{{ asset.id }}" onclick="enableEditRow('{{ asset.id }}')"
-                    style="border-bottom: 1px solid #e2e8f0; cursor: pointer;" title="Click to Edit">
-                    <td class="excel-td" style="color: #64748b;">{{ asset.mni }}</td>
+                    style="{% if asset.device_type == 'RESIGNED' %}background: #f3f4f6; color: #9ca3af;{% else %}border-bottom: 1px solid #e2e8f0; cursor: pointer;{% endif %}"
+                    title="{% if asset.device_type == 'RESIGNED' %}Resigned Asset{% else %}Click to Edit{% endif %}">
+                    <td class="excel-td" style="color: #64748b; white-space: nowrap !important;">{{ asset.mni }}</td>
                     <td class="excel-td" style="font-weight: 500;">
                         {% if asset.assigned_to %}
                         {{ asset.assigned_to.username }}
@@ -184,15 +211,22 @@
                     </td>
                     <td class="excel-td">
                         {% if asset.date_issued %}{{ asset.date_issued|date:"d-M-Y" }}{% else %}-{% endif %}
+                        {% if asset.returned_at %}
+                        <div style="font-size: 0.7rem; color: #ef4444; margin-top: 2px;">
+                            Ret: {{ asset.returned_at|date:"d-M-Y" }}
+                        </div>
+                        {% endif %}
                     </td>
                     <td class="excel-td" style="color: #475569;">{{ asset.remarks|default:"-" }}</td>
-                    <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">{{ asset.last_edited_by|default:"-"
-                        }}</td>
+                    <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">
+                        {{ asset.last_edited_by|default:"-" }}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="11" style="padding: 2rem; text-align: center; color: #64748b;">No assets logic for {{
-                        current_tab }}.</td>
+                    <td colspan="11" style="padding: 2rem; text-align: center; color: #64748b;">
+                        No assets logic for {{ current_tab }}.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -275,6 +309,9 @@
         white-space: normal;
         /* Wrap text */
         word-wrap: break-word;
+        overflow-wrap: break-word;
+        /* Ensure long words break */
+        word-break: break-word;
         /* Break long words */
         vertical-align: middle;
     }
@@ -308,12 +345,11 @@
 
 <!-- HIDDEN PRE-RENDERED OPTIONS FOR JS -->
 <select id="device-type-options" hidden>
-    <option value="WINDOWS">Windows</option>
-    <option value="MAC">Mac</option>
+    <option value="LAPTOP">Laptop</option>
+    <option value="MACBOOK">Mac book</option>
     <option value="IPHONE">iPhone</option>
-    <option value="DAMAGED">Damaged</option>
-    <option value="REPLACEMENT">Replacement</option>
-    <option value="RESIGNED">Resigned</option>
+    <option value="ANDROID">Android Phone</option>
+    <option value="KEYBOARD_MOUSE">Keyboard and Mouse</option>
     <option value="OTHER">Other</option>
 </select>
 
@@ -321,6 +357,8 @@
     <option value="IN_STORE">In Store</option>
     <option value="IN_USE">Company Asset</option>
     <option value="DAMAGED">Damaged</option>
+    <option value="REPLACEMENT">Replacement</option>
+    <option value="RESIGNED">Resigned</option>
     <option value="REPAIR">Under Repair</option>
 </select>
 
@@ -362,7 +400,7 @@
         const statusOptions = document.getElementById('status-options').innerHTML;
 
         row.innerHTML = `
-        <td class="excel-td"><input type="text" id="new-mni" class="inline-input" placeholder="Auto" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
+        <td class="excel-td" style="white-space: nowrap !important;"><input type="text" id="new-mni" class="inline-input" placeholder="Auto" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
         <td class="excel-td"><input type="text" id="new-staff" class="inline-input" placeholder="Staff Name"></td>
         <td class="excel-td"><select id="new-device" class="inline-input">${deviceOptions}</select></td>
         <td class="excel-td"><input type="text" id="new-brand" class="inline-input" placeholder="Brand"></td>
@@ -379,7 +417,7 @@
             </div>
         </td>
         <td class="excel-td" style="color: #cbd5e1; font-style: italic;">Auto</td>
-    `;
+        `;
 
         tbody.insertBefore(row, tbody.firstChild);
     }
@@ -397,19 +435,6 @@
         let statusVal = 'IN_STORE'; // Default
         const statusEl = document.getElementById(`${prefix}-status${suffix}`);
         if (statusEl) statusVal = statusEl.value;
-        // For new row, status might be auto text "Auto" in HTML
-        // but in my previous code I just put "Auto" text for add row.
-        // Wait, for 'Add' row, the HTML was:
-        // <td class="excel-td" style="color: #cbd5e1; font-style: italic;">Auto</td>
-        // So user CANNOT select status on Add?
-        // If user wants to add as "Company Asset", they can't.
-        // I should change Add Row to have a dropdown too.
-
-        // Let's check Add Row HTML in showAddRow()
-        // It has: <td ...>Auto</td>
-        // I should probably change that too, but let's fix Edit first as that's where the dropdown is visible.
-        // For Edit:
-        // <select id="edit-status-${rowId}" ...>
 
         const payload = {
             action: action,
@@ -495,12 +520,18 @@
                                 const statsGrid = document.querySelector('.tools-grid');
                                 const statsCards = statsGrid.querySelectorAll('.glass-container div:first-child');
                                 if (statsCards[0]) statsCards[0].innerText = data.stats.mac_count;
-                                if (statsCards[1]) statsCards[1].innerText = data.stats.windows_count;
+                                if (statsCards[1]) statsCards[1].innerText = data.stats.laptop_count;
                                 if (statsCards[2]) statsCards[2].innerText = data.stats.phone_count;
-                                if (statsCards[3]) statsCards[3].innerText = data.stats.other_count;
-                                if (statsCards[4]) statsCards[4].innerText = data.stats.laptops_remaining;
-                                if (statsCards[5]) statsCards[5].innerText = data.stats.damaged_count;
-                                if (statsCards[6]) statsCards[6].innerText = data.stats.replacements_count;
+                                if (statsCards[3]) statsCards[3].innerText = data.stats.android_count;
+                                if (statsCards[4]) statsCards[4].innerText = data.stats.accessory_count;
+                                if (statsCards[5]) statsCards[5].innerText = data.stats.other_count;
+                                if (statsCards[6]) statsCards[6].innerText = data.stats.in_use_count;
+                                if (statsCards[7]) statsCards[7].innerText = data.stats.in_store_count;
+                                if (statsCards[8]) statsCards[8].innerText = data.stats.laptops_remaining;
+                                if (statsCards[9]) statsCards[9].innerText = data.stats.damaged_count;
+                                if (statsCards[10]) statsCards[10].innerText = data.stats.resigned_count;
+                                // New index: 0=Mac, 1=Laptop, 2=Phone, 3=Android, 4=KBM, 5=Other, 
+                                // 6=InUse, 7=InStore, 8=Avail(Laptops), 9=Damage, 10=Resigned, 11=Audit
                             };
                             updateStat();
                         } catch (e) { console.error("Stats update failed", e); }
@@ -553,18 +584,25 @@
         }
 
         row.classList.add('editing-row');
+        const isLocked = ['RESIGNED', 'DAMAGED', 'REPLACEMENT'].includes(statusText) || ['RESIGNED', 'DAMAGED', 'REPLACEMENT'].includes(deviceTypeDisplay);
+        const lockStyle = isLocked ? 'background: #e5e5e5; color: #a1a1aa; cursor: not-allowed;' : '';
+        const lockAttr = isLocked ? 'disabled' : '';
+
         row.innerHTML = `
-        <td class="excel-td"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
-        <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}"></td>
-        <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input">${deviceOptions}</select></td>
-        <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}"></td>
-        <td class="excel-td"><input type="text" id="edit-detail-${rowId}" class="inline-input" value="${detail}"></td>
-        <td class="excel-td"><input type="text" id="edit-serial-${rowId}" class="inline-input" value="${serial}"></td>
+        <td class="excel-td" style="white-space: nowrap !important;"><input type="text" id="edit-mni-${rowId}" class="inline-input" value="${mni}" disabled style="background: #f3f4f6; cursor: not-allowed;"></td>
+        <td class="excel-td"><input type="text" id="edit-staff-${rowId}" class="inline-input" value="${staff}" ${lockAttr} style="${lockStyle}"></td>
+        <td class="excel-td"><select id="edit-device-${rowId}" class="inline-input" ${lockAttr} style="${lockStyle}">${deviceOptions}</select></td>
+        <td class="excel-td"><input type="text" id="edit-brand-${rowId}" class="inline-input" value="${brand}" ${lockAttr} style="${lockStyle}"></td>
+        <td class="excel-td"><input type="text" id="edit-detail-${rowId}" class="inline-input" value="${detail}" ${lockAttr} style="${lockStyle}"></td>
+        <td class="excel-td"><input type="text" id="edit-serial-${rowId}" class="inline-input" value="${serial}" ${lockAttr} style="${lockStyle}"></td>
         <td class="excel-td"><select id="edit-status-${rowId}" class="inline-input">${statusOptions}</select></td>
         <td class="excel-td" style="text-align: center;"><input type="checkbox" id="edit-signed-${rowId}" ${signed ? 'checked' : ''}></td>
-        <td class="excel-td"><input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}"></td>
         <td class="excel-td">
-            <input type="text" id="edit-remarks-${rowId}" class="inline-input" value="${remarks}" maxlength="10">
+            <input type="date" id="edit-date-${rowId}" class="inline-input" value="${dateValue}">
+            ${(isLocked && dateText) ? `<div style="font-size: 0.7rem; color: #ef4444; margin-top:2px;">Returned</div>` : ''} 
+        </td>
+        <td class="excel-td">
+            <textarea id="edit-remarks-${rowId}" class="inline-input" rows="2" style="resize: vertical; min-height: 24px;">${remarks}</textarea>
             <div style="margin-top: 5px;">
                 <button onclick="saveAsset('edit', '${rowId}')" class="btn-xs btn-save">Save</button>
                 <button onclick="cancelEdit('${rowId}')" class="btn-xs btn-cancel">Cancel</button>
@@ -607,9 +645,13 @@
             : 'border-bottom: 1px solid #e2e8f0; cursor: pointer;';
         const title = asset.device_type === 'RESIGNED' ? 'Resigned Asset' : 'Click to Edit';
 
+        const returnedHtml = asset.returned_at
+            ? `<div style="font-size: 0.7rem; color: #ef4444; margin-top: 2px;">Ret: ${asset.returned_at.split(' ')[0]}</div>`
+            : '';
+
         return `
     <tr id="row-${asset.id}" onclick="enableEditRow('${asset.id}')" style="${rowStyle}" title="${title}">
-        <td class="excel-td" style="color: #64748b;">${asset.mni}</td>
+        <td class="excel-td" style="color: #64748b; white-space: nowrap !important;">${asset.mni}</td>
         <td class="excel-td" style="font-weight: 500;">${asset.staff_name}</td>
         <td class="excel-td">${asset.device_type_display}</td>
         <td class="excel-td">${asset.brand}</td>
@@ -619,7 +661,10 @@
             <span class="status-cell status-${asset.status}">${asset.status_display}</span>
         </td>
         <td class="excel-td" style="text-align: center;">${signedHtml}</td>
-        <td class="excel-td">${asset.date_issued || '-'}</td>
+        <td class="excel-td">
+            ${asset.date_issued || '-'}
+            ${returnedHtml}
+        </td>
         <td class="excel-td" style="color: #475569;">${asset.remarks}</td>
         <td class="excel-td" style="color: #64748b; font-size: 0.8rem;">${asset.last_edited_by || '-'}</td>
     </tr>

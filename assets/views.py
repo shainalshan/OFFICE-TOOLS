@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Asset
+from .models import Asset, AuditSession, AuditLog
 from contacts.models import Contact
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from core.decorators import check_tool_access
 import openpyxl
+from django.utils import timezone
 from django.http import HttpResponse
 
 @login_required
@@ -21,22 +22,35 @@ def asset_dashboard(request):
     assets = Asset.objects.filter(location=current_tab).order_by('-created_at')
 
     # Apply Category Filter
+    # Apply Category Filter
     if filter_type:
-        if filter_type == 'MAC':
-            assets = assets.filter(device_type='MAC')
-        elif filter_type == 'WINDOWS':
-            assets = assets.filter(device_type='WINDOWS')
+        if filter_type == 'MACBOOK':
+            assets = assets.filter(device_type='MACBOOK')
+        elif filter_type == 'LAPTOP':
+            assets = assets.filter(device_type='LAPTOP')
         elif filter_type == 'IPHONE':
             assets = assets.filter(device_type='IPHONE')
+        elif filter_type == 'ANDROID':
+            assets = assets.filter(device_type='ANDROID')
+        elif filter_type == 'KEYBOARD_MOUSE':
+            assets = assets.filter(device_type='KEYBOARD_MOUSE')
         elif filter_type == 'OTHER':
             assets = assets.filter(device_type='OTHER')
+        elif filter_type == 'IN_STORE':
+            # In Store includes pure IN_STORE and RESIGNED items (as they are back in custody/history)
+            assets = assets.filter(status__in=['IN_STORE', 'RESIGNED'])
+        elif filter_type == 'IN_USE':
+            # "Company Asset" button now shows ALL assets regardless of status
+            pass # No filter applies
         elif filter_type == 'AVAILABLE':
-            # "Available" = Windows/Mac in Store (as per previous logic)
-            assets = assets.filter(device_type__in=['WINDOWS', 'MAC'], status='IN_STORE')
+            # "Available" = In Store (Laptop, Macbook, iPhone, Android)
+            assets = assets.filter(status='IN_STORE', device_type__in=['LAPTOP', 'MACBOOK', 'IPHONE', 'ANDROID'])
         elif filter_type == 'DAMAGED':
-            assets = assets.filter(device_type='DAMAGED')
+            assets = assets.filter(status='DAMAGED')
         elif filter_type == 'REPLACEMENT':
-            assets = assets.filter(device_type='REPLACEMENT')
+            assets = assets.filter(status='REPLACEMENT')
+        elif filter_type == 'RESIGNED':
+            assets = assets.filter(status='RESIGNED')
 
     if search_query:
         assets = assets.filter(
@@ -52,24 +66,34 @@ def asset_dashboard(request):
     # Stats (Filtered by current location)
     base_qs = Asset.objects.filter(location=current_tab)
     
-    mac_count = base_qs.filter(device_type='MAC').count()
-    windows_count = base_qs.filter(device_type='WINDOWS').count()
+    mac_count = base_qs.filter(device_type='MACBOOK').count()
+    laptop_count = base_qs.filter(device_type='LAPTOP').count()
     phone_count = base_qs.filter(device_type='IPHONE').count()
+    android_count = base_qs.filter(device_type='ANDROID').count()
+    accessory_count = base_qs.filter(device_type='KEYBOARD_MOUSE').count()
     other_count = base_qs.filter(device_type='OTHER').count()
     
-    # "Laptops Remaining" logic needs review. Is "Laptop" still a thing? 
-    # User said: "Device Type... Windows, Mac, iPhone, Other".
-    # So "Available" probably means "Windows + Mac" in store? Or just all IN_STORE?
-    # Original logic: device_type='LAPTOP', status='IN_STORE'.
-    # I'll update to: (device_type='WINDOWS' OR device_type='MAC') AND status='IN_STORE'.
-    # Assuming iPhone/Other don't count as "Laptops Remaining".
-    laptops_remaining = base_qs.filter(device_type__in=['WINDOWS', 'MAC'], status='IN_STORE').count()
+    # Status Counts
+    in_store_count = base_qs.filter(status='IN_STORE').count()
+    # "Company Asset" count -> Total Assets in this location
+    in_use_count = base_qs.count()
     
-    # "Damaged" -> Device Type Damaged
-    damaged_count = base_qs.filter(device_type='DAMAGED').count()
+    # "Laptops Remaining" -> Now "Total Available" (Specific types)
+    laptops_remaining = base_qs.filter(status='IN_STORE', device_type__in=['LAPTOP', 'MACBOOK', 'IPHONE', 'ANDROID']).count()
     
-    # "Replacement" -> Device Type Replacement
-    replacements_count = base_qs.filter(device_type='REPLACEMENT').count()
+    # "Damaged" -> Status Damaged
+    damaged_count = base_qs.filter(status='DAMAGED').count()
+    
+    # "Replacement" -> Status Replacement
+    replacements_count = base_qs.filter(status='REPLACEMENT').count()
+
+    # "Resigned" -> Status Resigned
+    resigned_count = base_qs.filter(status='RESIGNED').count()
+    
+    # "Resigned" count if needed? User didn't ask for tile, but nice to have.
+    # But wait, original code didn't have Resigned Count tile. 
+    # Just used in filters?
+    # I'll keep damaged/replacement counts as they are used in tiles.
 
     if current_tab == 'STAFF LIST':
         # Fetch from Contact DB model which is now synced
@@ -100,13 +124,17 @@ def asset_dashboard(request):
             'staff_list': staff_data, 
             'current_tab': current_tab,
             'mac_count': mac_count,
-            'windows_count': windows_count,
+            'laptop_count': laptop_count,
             'phone_count': phone_count,
+            'android_count': android_count,
+            'accessory_count': accessory_count,
             'other_count': other_count,
+            'in_store_count': in_store_count,
+            'in_use_count': in_use_count,
             'laptops_remaining': laptops_remaining,
             'damaged_count': damaged_count,
             'replacements_count': replacements_count,
-            'replacements_count': replacements_count,
+            'resigned_count': resigned_count,
             'search_query': search_query,
             'filter_type': filter_type,
         }
@@ -121,12 +149,17 @@ def asset_dashboard(request):
         'assets': page_obj,
         'current_tab': current_tab,
         'mac_count': mac_count,
-        'windows_count': windows_count,
+        'laptop_count': laptop_count,
         'phone_count': phone_count,
+        'android_count': android_count,
+        'accessory_count': accessory_count,
         'other_count': other_count,
+        'in_store_count': in_store_count,
+        'in_use_count': in_use_count,
         'laptops_remaining': laptops_remaining,
         'damaged_count': damaged_count,
         'replacements_count': replacements_count,
+        'resigned_count': resigned_count,
         'search_query': search_query,
         'filter_type': filter_type,
     }
@@ -200,6 +233,7 @@ def export_assets(request):
 from django.http import JsonResponse
 import json
 from django.views.decorators.http import require_POST
+from django.utils.dateparse import parse_date
 
 @login_required
 @require_POST
@@ -220,6 +254,9 @@ def api_manage_asset(request):
         # We can still accept it if needed, but per requirements "Intelligent Logic", we derive it.
         # status = data.get('status', 'IN_STORE') 
         
+        if not serial_number:
+            return JsonResponse({'status': 'error', 'message': 'Serial Number is required.'}, status=400)
+
         # Determine Status
         # Priority: Manual Input > Auto Derived
         provided_status = data.get('status')
@@ -233,13 +270,16 @@ def api_manage_asset(request):
             # Fallback Auto Logic
             if device_type == 'DAMAGED':
                 status = 'DAMAGED'
-            elif device_type == 'REPLACEMENT':
-                status = 'REPAIR'
-            else:
                 status = 'IN_STORE'
+        
         is_signed = data.get('is_signed', False)
-        date_issued = data.get('date_issued') or None
+        # Parse Dates
+        date_issued_str = data.get('date_issued')
+        date_issued = parse_date(date_issued_str) if date_issued_str else None
+        
         remarks = data.get('remarks', '')
+        # Clean staff email/name
+        staff_name = staff_name.strip() if staff_name else ''
         location = data.get('location', 'DUBAI') # Default/Active Tab
         
         # Get Editor Name
@@ -247,18 +287,39 @@ def api_manage_asset(request):
         
         if action == 'add':
             # Validation
-            existing_with_sn = Asset.objects.filter(serial_number=serial_number).first()
-            if existing_with_sn:
-                # Exception Rule: Allow reuse only if existing is 'REPLACEMENT'
-                if existing_with_sn.device_type != 'REPLACEMENT':
-                     return JsonResponse({'status': 'error', 'message': 'This serial number already exists and is currently assigned. You cannot add this device again until it is replaced or properly released.'}, status=400)
+            # Validation
+            # (Legacy duplicate check removed here, using new unified check below)
             
             # Resigned Validation
             if device_type == 'RESIGNED':
                 if not staff_name:
                     return JsonResponse({'status': 'error', 'message': 'Staff in Possession is mandatory for Resigned assets.'}, status=400)
                 status = 'IN_USE' # Resigned means it was with someone, so logically IN_USE/inactive.
-            
+            # Check for duplicate serial number if creating new
+            # Check for duplicate serial number if creating new
+            existing_asset = Asset.objects.filter(serial_number=serial_number).first()
+            if existing_asset:
+                owner_name = existing_asset.assigned_to.username if existing_asset.assigned_to else existing_asset.assigned_to_email or "Unknown"
+                
+                if existing_asset.status == 'RESIGNED':
+                    # Auto-archive the old resigned asset to free up the Serial Number
+                    existing_asset.serial_number = f"{existing_asset.serial_number}_RESIGNED_{existing_asset.id}"
+                    existing_asset.remarks = f"{existing_asset.remarks} (Archived for reuse on {timezone.now().date()})"
+                    existing_asset.save()
+                    # Proceed with creating new asset
+                
+                elif existing_asset.status == 'IN_USE':
+                     return JsonResponse({
+                        'status': 'error', 
+                        'message': f"This device ({serial_number}) belongs to {owner_name}. Please change status to Resigned first."
+                    }, status=400)
+                else:
+                    # In Store, Damaged etc.
+                    return JsonResponse({
+                        'status': 'error', 
+                        'message': f"Asset with this S/N already exists ({existing_asset.get_status_display()}). Please edit the existing record."
+                    }, status=400)
+
             asset = Asset.objects.create(
                 # mni is set after creation
                 assigned_to_email=staff_name, 
@@ -284,25 +345,58 @@ def api_manage_asset(request):
             asset = get_object_or_404(Asset, id=asset_id)
             
             # Check unique serial if changed
+            # Check unique serial if changed
             if serial_number != asset.serial_number:
                 existing_with_sn = Asset.objects.filter(serial_number=serial_number).exclude(id=asset_id).first()
                 if existing_with_sn:
-                     if existing_with_sn.device_type != 'REPLACEMENT':
-                        return JsonResponse({'status': 'error', 'message': 'This serial number already exists and is currently assigned.'}, status=400)
+                    owner_name = existing_with_sn.assigned_to.username if existing_with_sn.assigned_to else existing_with_sn.assigned_to_email or "Unknown"
+                    
+                    if existing_with_sn.status == 'RESIGNED':
+                        # Auto-archive
+                        existing_with_sn.serial_number = f"{existing_with_sn.serial_number}_RESIGNED_{existing_with_sn.id}"
+                        existing_with_sn.remarks = f"{existing_with_sn.remarks} (Archived for reuse on {timezone.now().date()})"
+                        existing_with_sn.save()
+                        # Proceed with update
+                        
+                    elif existing_with_sn.status == 'IN_USE':
+                         return JsonResponse({
+                            'status': 'error', 
+                            'message': f"This device ({serial_number}) belongs to {owner_name}. Please change the status first."
+                        }, status=400)
+                    else:
+                        return JsonResponse({'status': 'error', 'message': f"Asset with this S/N already exists ({existing_with_sn.get_status_display()})."}, status=400)
 
-            # Resigned Validation
+            # Auto-set returned_at if status changes to terminal
+            if status in ['RESIGNED', 'DAMAGED', 'REPLACEMENT']:
+                 if asset.status not in ['RESIGNED', 'DAMAGED', 'REPLACEMENT']:
+                    asset.returned_at = timezone.now()
+            else:
+                 # If moving back to IN_STORE, IN_USE, etc., clear the returned date
+                 asset.returned_at = None
+
+             # Resigned Validation
             if device_type == 'RESIGNED':
                 if not staff_name:
                     return JsonResponse({'status': 'error', 'message': 'Staff in Possession is mandatory for Resigned assets.'}, status=400)
-                status = 'IN_USE'
+                # Resigned status override? The user might have selected 'Resigned' status in dropdown.
+                # If device_type is Resigned (legacy), status should be Resigned or In Use?
+                # Actually, we keep status as RESIGNED if device_type is RESIGNED.
+                # But wait, original code forced IN_USE.
+                # Let's respect the status passed from UI if it's RESIGNED.
+                pass 
                 
             # asset.mni = mni # MNI is auto-generated and immutable
-            asset.assigned_to_email = staff_name # Using email field for free text name currently
+            asset.assigned_to_email = staff_name 
             asset.device_type = device_type
             asset.brand = brand
             asset.model_detail = model_detail
             asset.serial_number = serial_number
-            asset.status = status
+            # Only update status if explicitly passed, or if legacy device type logic applies
+            if provided_status:
+                asset.status = status
+            elif device_type == 'DAMAGED':
+                asset.status = 'DAMAGED'
+            
             asset.is_signed = is_signed
             asset.date_issued = date_issued
             asset.remarks = remarks
@@ -362,22 +456,128 @@ def api_manage_asset(request):
                 'status_display': asset.get_status_display(),
                 'is_signed': asset.is_signed,
                 'date_issued': asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else None,
+                'returned_at': str(asset.returned_at) if asset.returned_at else None,
                 'remarks': asset.remarks,
-                'date_issued': asset.date_issued.strftime('%Y-%m-%d') if asset.date_issued else None,
-                'remarks': asset.remarks,
+                'last_edited_by': asset.last_edited_by,
                 'location': asset.location,
-                'last_edited_by': asset.last_edited_by
+                'last_edited_by': asset.last_edited_by,
+                'returned_at': asset.returned_at.strftime('%Y-%m-%d %H:%M') if asset.returned_at else ''
             },
             'stats': {
-                'mac_count': Asset.objects.filter(location=location, device_type='MAC').count(),
-                'windows_count': Asset.objects.filter(location=location, device_type='WINDOWS').count(),
+                'mac_count': Asset.objects.filter(location=location, device_type='MACBOOK').count(),
+                'laptop_count': Asset.objects.filter(location=location, device_type='LAPTOP').count(),
                 'phone_count': Asset.objects.filter(location=location, device_type='IPHONE').count(),
+                'android_count': Asset.objects.filter(location=location, device_type='ANDROID').count(),
+                'accessory_count': Asset.objects.filter(location=location, device_type='KEYBOARD_MOUSE').count(),
                 'other_count': Asset.objects.filter(location=location, device_type='OTHER').count(),
-                'laptops_remaining': Asset.objects.filter(location=location, device_type__in=['WINDOWS', 'MAC'], status='IN_STORE').count(),
-                'damaged_count': Asset.objects.filter(location=location, device_type='DAMAGED').count(),
-                'replacements_count': Asset.objects.filter(location=location, device_type='REPLACEMENT').count()
+                'in_store_count': Asset.objects.filter(location=location, status__in=['IN_STORE', 'RESIGNED']).count(),
+                'in_use_count': Asset.objects.filter(location=location).count(),
+                'in_use_count': Asset.objects.filter(location=location, status='IN_USE').count(),
+                'in_use_count': Asset.objects.filter(location=location, status='IN_USE').count(),
+                'laptops_remaining': Asset.objects.filter(location=location, status='IN_STORE', device_type__in=['LAPTOP', 'MACBOOK', 'IPHONE', 'ANDROID']).count(),
+                'damaged_count': Asset.objects.filter(location=location, status='DAMAGED').count(),
+                'replacements_count': Asset.objects.filter(location=location, status='REPLACEMENT').count(),
+                'resigned_count': Asset.objects.filter(location=location, status='RESIGNED').count()
             }
         })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+@check_tool_access('assets')
+def audit_dashboard(request):
+    sessions = AuditSession.objects.all().order_by('-start_date')
+    return render(request, 'assets/audit_dashboard.html', {'sessions': sessions})
+
+@login_required
+@check_tool_access('assets')
+def start_audit(request):
+    location = request.GET.get('location', 'DUBAI')
+    # Check if open session exists
+    existing = AuditSession.objects.filter(location=location, status='IN_PROGRESS').first()
+    if existing:
+        return redirect('audit_session', session_id=existing.id)
+    
+    session = AuditSession.objects.create(
+        location=location,
+        initiated_by=request.user,
+        status='IN_PROGRESS'
+    )
+    return redirect('audit_session', session_id=session.id)
+
+@login_required
+@check_tool_access('assets')
+def audit_session(request, session_id):
+    session = get_object_or_404(AuditSession, id=session_id)
+    
+    # Get all assets for this location
+    all_assets = Asset.objects.filter(location=session.location)
+    total_assets = all_assets.count()
+    
+    # Get logs for this session
+    logs = AuditLog.objects.filter(session=session)
+    audited_ids = logs.values_list('asset_id', flat=True)
+    
+    # Classify
+    verified_ids = logs.filter(status__in=['VERIFIED', 'DAMAGED']).values_list('asset_id', flat=True)
+    missing_ids = logs.filter(status='MISSING').values_list('asset_id', flat=True)
+    
+    # Pending Assets (Not yet in logs)
+    pending_assets = all_assets.exclude(id__in=audited_ids)
+    
+    # Calculate progress
+    audited_count = logs.count()
+    progress_percent = int((audited_count / total_assets) * 100) if total_assets > 0 else 0
+    
+    context = {
+        'session': session,
+        'pending_assets': pending_assets,
+        'verified_logs': logs.filter(status='VERIFIED'),
+        'missing_logs': logs.filter(status='MISSING'),
+        'damaged_logs': logs.filter(status='DAMAGED'),
+        'progress': progress_percent,
+        'total': total_assets,
+        'audited_count': audited_count
+    }
+    return render(request, 'assets/audit_session.html', context)
+
+@login_required
+@require_POST
+def api_audit_action(request):
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        asset_id = data.get('asset_id')
+        status = data.get('status', 'VERIFIED')
+        
+        session = get_object_or_404(AuditSession, id=session_id)
+        asset = get_object_or_404(Asset, id=asset_id)
+        
+        # update or create log
+        log, created = AuditLog.objects.update_or_create(
+            session=session,
+            asset=asset,
+            defaults={
+                'status': status,
+                'scanned_at': timezone.now()
+            }
+        )
+        
+        # Update Asset last_audited if verified
+        if status in ['VERIFIED', 'DAMAGED']:
+            asset.last_audited = timezone.now()
+            asset.save()
+            
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+@check_tool_access('assets')
+def complete_audit(request, session_id):
+    session = get_object_or_404(AuditSession, id=session_id)
+    session.status = 'COMPLETED'
+    session.completed_date = timezone.now()
+    session.save()
+    return redirect('audit_dashboard')

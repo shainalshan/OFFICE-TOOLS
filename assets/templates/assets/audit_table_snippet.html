@@ -1,0 +1,72 @@
+<table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+    <thead>
+        <tr style="text-align: left; background: rgba(0,0,0,0.2); color: var(--text-secondary);">
+            <th style="padding: 0.8rem;">Reference / MNI</th>
+            <th style="padding: 0.8rem;">Device</th>
+            <th style="padding: 0.8rem;">User</th>
+            <th style="padding: 0.8rem;">S/N</th>
+            <th style="padding: 0.8rem;">Current Status</th>
+            <th style="padding: 0.8rem;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if mode == 'pending' %}
+        {% for asset in assets %}
+        <tr id="row-{{ asset.id }}" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.8rem; color: #94a3b8;">{{ asset.mni }}</td>
+            <td style="padding: 0.8rem;">
+                <div style="font-weight: 500;">{{ asset.brand }} {{ asset.model_detail }}</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">{{ asset.get_device_type_display }}</div>
+            </td>
+            <td style="padding: 0.8rem;">
+                {{ asset.assigned_to.username|default:asset.assigned_to_email|default:"-" }}
+            </td>
+            <td style="padding: 0.8rem; font-family: monospace;">{{ asset.serial_number }}</td>
+            <td style="padding: 0.8rem;">{{ asset.get_status_display }}</td>
+            <td style="padding: 0.8rem;">
+                {% if session.status == 'IN_PROGRESS' %}
+                <button onclick="auditAction('{{ asset.id }}', 'VERIFIED')" class="btn-primary"
+                    style="padding: 4px 8px; font-size: 0.75rem; background: #10b981;">Verify</button>
+                <button onclick="auditAction('{{ asset.id }}', 'MISSING')" class="btn-primary"
+                    style="padding: 4px 8px; font-size: 0.75rem; background: #ef4444;">Missing</button>
+                <button onclick="auditAction('{{ asset.id }}', 'DAMAGED')" class="btn-primary"
+                    style="padding: 4px 8px; font-size: 0.75rem; background: #f59e0b;">Damaged</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" style="padding: 2rem; text-align: center; color: #64748b;">No pending items! All audited.
+            </td>
+        </tr>
+        {% endfor %}
+
+        {% else %}
+        {% for item in items %} <!-- item is AuditLog -->
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.8rem; color: #94a3b8;">{{ item.asset.mni }}</td>
+            <td style="padding: 0.8rem;">
+                <div style="font-weight: 500;">{{ item.asset.brand }} {{ item.asset.model_detail }}</div>
+            </td>
+            <td style="padding: 0.8rem;">{{
+                item.asset.assigned_to.username|default:item.asset.assigned_to_email|default:"-" }}</td>
+            <td style="padding: 0.8rem; font-family: monospace;">{{ item.asset.serial_number }}</td>
+            <td style="padding: 0.8rem;">
+                {{ item.get_status_display }}
+                <span style="font-size: 0.75rem; color: #94a3b8;">({{ item.scanned_at|date:"H:i" }})</span>
+            </td>
+            <td style="padding: 0.8rem;">
+                {% if session.status == 'IN_PROGRESS' %}
+                <button onclick="auditAction('{{ item.asset.id }}', 'VERIFIED')"
+                    style="background: none; border: none; color: #10b981; cursor: pointer;">✏️ Change</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" style="padding: 2rem; text-align: center; color: #64748b;">No items in this category.</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>

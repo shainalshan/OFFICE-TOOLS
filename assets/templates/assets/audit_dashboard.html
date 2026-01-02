@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="margin-bottom: 2rem;">
+        <h1 style="margin-bottom: 0.5rem;">🛡️ Audit Management</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Audit history and new sessions.</p>
+    </div>
+
+    <div class="glass-container" style="padding: 2rem;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+            <h2>Refreshed Audit Sessions</h2>
+            <div style="flex-grow: 1;"></div>
+            <div class="dropdown">
+                <button class="btn-primary" style="background: #0f766e;">Start New Audit ▼</button>
+                <div class="dropdown-content">
+                    <a href="{% url 'start_audit' %}?location=DUBAI">Dubai</a>
+                    <a href="{% url 'start_audit' %}?location=INDIA">India</a>
+                    <a href="{% url 'start_audit' %}?location=PAKISTAN">Pakistan</a>
+                </div>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <th style="padding: 1rem;">Date</th>
+                    <th style="padding: 1rem;">Location</th>
+                    <th style="padding: 1rem;">Status</th>
+                    <th style="padding: 1rem;">Initiated By</th>
+                    <th style="padding: 1rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 1rem;">{{ session.start_date|date:"d M Y" }}</td>
+                    <td style="padding: 1rem;">{{ session.get_location_display }}</td>
+                    <td style="padding: 1rem;">
+                        <span
+                            class="status-badge {% if session.status == 'IN_PROGRESS' %}status-pending{% else %}status-success{% endif %}">
+                            {{ session.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem;">{{ session.initiated_by.username }}</td>
+                    <td style="padding: 1rem;">
+                        <a href="{% url 'audit_session' session.id %}" class="btn-primary"
+                            style="padding: 0.4rem 1rem; font-size: 0.8rem;">
+                            {% if session.status == 'IN_PROGRESS' %}Continue{% else %}View Report{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                        No audits found. Start one above.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: #1e293b;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dropdown-content a {
+        color: white;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #334155;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .status-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+
+    .status-success {
+        background: rgba(52, 211, 153, 0.2);
+        color: #34d399;
+    }
+</style>
+{% endblock %}
