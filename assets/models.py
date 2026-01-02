@@ -8,6 +8,7 @@ class Asset(models.Model):
         ('IPHONE', 'iPhone'),
         ('ANDROID', 'Android Phone'),
         ('KEYBOARD_MOUSE', 'Keyboard and Mouse'),
+        ('MONITOR', 'Monitor'),
         ('OTHER', 'Other'),
     ]
 

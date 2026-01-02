@@ -39,6 +39,8 @@ def asset_dashboard(request):
         elif filter_type == 'IN_STORE':
             # In Store includes pure IN_STORE and RESIGNED items (as they are back in custody/history)
             assets = assets.filter(status__in=['IN_STORE', 'RESIGNED'])
+        elif filter_type == 'MONITOR':
+            assets = assets.filter(device_type='MONITOR')
         elif filter_type == 'IN_USE':
             # "Company Asset" button now shows ALL assets regardless of status
             pass # No filter applies
@@ -71,6 +73,7 @@ def asset_dashboard(request):
     phone_count = base_qs.filter(device_type='IPHONE').count()
     android_count = base_qs.filter(device_type='ANDROID').count()
     accessory_count = base_qs.filter(device_type='KEYBOARD_MOUSE').count()
+    monitor_count = base_qs.filter(device_type='MONITOR').count()
     other_count = base_qs.filter(device_type='OTHER').count()
     
     # Status Counts
@@ -135,6 +138,7 @@ def asset_dashboard(request):
             'damaged_count': damaged_count,
             'replacements_count': replacements_count,
             'resigned_count': resigned_count,
+            'monitor_count': monitor_count,
             'search_query': search_query,
             'filter_type': filter_type,
         }
@@ -156,6 +160,7 @@ def asset_dashboard(request):
         'other_count': other_count,
         'in_store_count': in_store_count,
         'in_use_count': in_use_count,
+        'monitor_count': monitor_count,
         'laptops_remaining': laptops_remaining,
         'damaged_count': damaged_count,
         'replacements_count': replacements_count,
@@ -469,6 +474,7 @@ def api_manage_asset(request):
                 'phone_count': Asset.objects.filter(location=location, device_type='IPHONE').count(),
                 'android_count': Asset.objects.filter(location=location, device_type='ANDROID').count(),
                 'accessory_count': Asset.objects.filter(location=location, device_type='KEYBOARD_MOUSE').count(),
+                'monitor_count': Asset.objects.filter(location=location, device_type='MONITOR').count(),
                 'other_count': Asset.objects.filter(location=location, device_type='OTHER').count(),
                 'in_store_count': Asset.objects.filter(location=location, status__in=['IN_STORE', 'RESIGNED']).count(),
                 'in_use_count': Asset.objects.filter(location=location).count(),
