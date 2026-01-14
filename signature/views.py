@@ -6,6 +6,9 @@ from .utils import compress_html
 from core.models import Tool
 from core.decorators import check_tool_access
 import base64
+import io
+import waffle
+from PIL import Image
 
 @check_tool_access('signature')
 def create_signature(request):
@@ -25,14 +28,61 @@ def create_signature(request):
 
             # Validate photo size (50KB = 51200 bytes)
             if photo:
-                if photo.size > 51200:
-                    return render(request, 'signature/form.html', {
-                        'error': 'Image file is too large. Please upload an image smaller than 50KB.'
-                    })
-                
-                # Read and encode image
-                photo_data = photo.read()
-                photo_base64 = base64.b64encode(photo_data).decode('utf-8')
+                # Check for auto-crop feature flag
+                if waffle.flag_is_active(request, 'signature_photo_crop'):
+                    try:
+                         # Open image using Pillow
+                        img = Image.open(photo)
+                        
+                        # Convert to RGB if necessary (e.g. for PNGs with transparency)
+                        if img.mode in ('RGBA', 'P'):
+                            img = img.convert('RGB')
+
+                        # Calculate center crop for square aspect ratio
+                        width, height = img.size
+                        new_size = min(width, height)
+                        
+                        # Apply a small trim to remove potential edge artifacts (e.g. black lines) from source
+                        # Trimming 4 pixels total (2px from each side)
+                        trim = 4 
+                        if new_size > trim:
+                             new_size -= trim
+
+                        left = (width - new_size) / 2
+                        top = (height - new_size) / 2
+                        right = (width + new_size) / 2
+                        bottom = (height + new_size) / 2
+
+                        img = img.crop((left, top, right, bottom))
+                        
+                        # Resize to fixed dimension (e.g., 150x150)
+                        img = img.resize((150, 150), Image.Resampling.LANCZOS)
+                        
+                        # Save to buffer
+                        buffer = io.BytesIO()
+                        img.save(buffer, format="JPEG", quality=90)
+                        photo_data = buffer.getvalue()
+                        
+                        # Base64 encode
+                        photo_base64 = base64.b64encode(photo_data).decode('utf-8')
+                        
+                    except Exception as e:
+                        print(f"Image processing error: {e}")
+                        # Fallback to original behavior if processing fails
+                        photo.seek(0)
+                        photo_data = photo.read()
+                        photo_base64 = base64.b64encode(photo_data).decode('utf-8')
+
+                else:
+                    # Original Logic (Flag OFF)
+                    if photo.size > 51200:
+                        return render(request, 'signature/form.html', {
+                            'error': 'Image file is too large. Please upload an image smaller than 50KB.'
+                        })
+                    
+                    # Read and encode image
+                    photo_data = photo.read()
+                    photo_base64 = base64.b64encode(photo_data).decode('utf-8')
             else:
                 photo_base64 = None
 
