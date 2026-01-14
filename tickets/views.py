@@ -32,6 +32,19 @@ def create_ticket(request):
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.user = request.user
+            
+            # --- Safety Mode: Approval Workflow ---
+            if waffle.flag_is_active(request, 'ticket_approval_workflow'):
+                approver = form.cleaned_data.get('approver')
+                if approver:
+                    ticket.approver = approver
+                    ticket.approval_status = 'PENDING'
+                else:
+                    ticket.approval_status = 'APPROVED'
+            else:
+                ticket.approval_status = 'APPROVED'
+            # --------------------------------------
+
             ticket.save()
 
             # --- Safety Mode: Ticket Attachments ---
@@ -107,12 +120,46 @@ def ticket_detail(request, ticket_id):
     is_assignee = ticket.assigned_to == request.user
     is_admin = is_ticket_admin(request.user)
     
-    if not (is_owner or is_assignee or is_admin):
+    # --- Safety Mode: Approval Workflow ---
+    is_approver = False
+    requires_approval = False
+    approval_pending = False
+    
+    if waffle.flag_is_active(request, 'ticket_approval_workflow'):
+        is_approver = ticket.approver == request.user
+        approval_pending = ticket.approval_status == 'PENDING'
+        
+    if not (is_owner or is_assignee or is_admin or is_approver):
         messages.error(request, "You do not have permission to view this ticket.")
         return redirect('my_tickets')
         
     if request.method == 'POST':
         action = request.POST.get('action')
+        
+        # --- Safety Mode: Approval Actions ---
+        if waffle.flag_is_active(request, 'ticket_approval_workflow'):
+            if action == 'approve':
+                if is_approver or is_admin:
+                    ticket.approval_status = 'APPROVED'
+                    ticket.save()
+                    messages.success(request, "Ticket Approved. Assignee can now proceed.")
+                    send_event_notification('TICKET_APPROVED', {'ticket': ticket}, functional_recipients=[ticket.user, ticket.assigned_to])
+                else:
+                    messages.error(request, "Permission denied.")
+                return redirect('ticket_detail', ticket_id=ticket.ticket_id)
+                
+            elif action == 'reject':
+                if is_approver or is_admin:
+                    ticket.approval_status = 'REJECTED'
+                    ticket.status = 'CANCELLED'
+                    ticket.resolution = "Rejected by Approver"
+                    ticket.save()
+                    messages.warning(request, "Ticket Rejected and Cancelled.")
+                    send_event_notification('TICKET_REJECTED', {'ticket': ticket}, functional_recipients=[ticket.user])
+                else:
+                    messages.error(request, "Permission denied.")
+                return redirect('ticket_detail', ticket_id=ticket.ticket_id)
+        # --------------------------------------
         
         if action == 'comment':
             text = request.POST.get('text')
@@ -172,7 +219,9 @@ def ticket_detail(request, ticket_id):
         'comments': comments,
         'is_owner': is_owner,
         'is_assignee': is_assignee, 
-        'is_admin': is_admin
+        'is_admin': is_admin,
+        'is_approver': is_approver,
+        'approval_pending': approval_pending,
     })
 
 @user_passes_test(is_ticket_admin)

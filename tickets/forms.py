@@ -15,9 +15,16 @@ class TicketForm(forms.ModelForm):
         label="Assign To (Optional)"
     )
 
+    # Approver field (used if flag is active)
+    approver = UserModelChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="Approver (Optional)"
+    )
+
     class Meta:
         model = Ticket
-        fields = ['issue', 'priority', 'deadline', 'assigned_to']
+        fields = ['issue', 'priority', 'deadline', 'assigned_to', 'approver']
         widgets = {
             'issue': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe your issue here...'}),
             'deadline': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -33,4 +40,7 @@ class TicketForm(forms.ModelForm):
         self.fields['assigned_to'].queryset = User.objects.filter(
             Q(groups__name='Ticket Admin') | Q(groups__name='Ticket Support')
         ).distinct()
+        
+        # Enable approver for all users
+        self.fields['approver'].queryset = User.objects.all().order_by('username')
 

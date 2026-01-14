@@ -10,6 +10,55 @@
         </a>
     </div>
 
+    {% flag "ticket_approval_workflow" %}
+    {% if approval_pending %}
+    <div
+        style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h3 style="color: #fbbf24; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                ⚠️ Approval Pending
+            </h3>
+            <p style="color: #d1d5db; margin: 0;">
+                This ticket requires approval from <strong>{{ ticket.approver.username }}</strong> before work can
+                begin.
+            </p>
+        </div>
+
+        {% if is_approver or is_admin %}
+        <div style="display: flex; gap: 1rem;">
+            <form method="post" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit"
+                    style="background: #10b981; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    ✓ Approve
+                </button>
+            </form>
+            <form method="post" style="margin: 0;"
+                onsubmit="return confirm('Rejecting this ticket will cancel it. Continue?');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <button type="submit"
+                    style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    ✗ Reject
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if is_assignee and not is_approver and not is_admin and not is_owner %}
+    <div
+        style="text-align: center; padding: 4rem; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+        <h2 style="color: var(--text-secondary);">🔒 Access Restricted</h2>
+        <p style="color: var(--text-secondary);">You cannot view the details of this ticket until it has been approved.
+        </p>
+    </div>
+    {% endif %}
+    {% endif %}
+    {% endflag %}
+
+    {% if not approval_pending or not is_assignee or is_approver or is_admin or is_owner %}
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
         <!-- Left Column: Ticket Details & Comments -->
         <div>
@@ -54,7 +103,8 @@
                 {% if ticket.assigned_to %}
                 <div
                     style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
-                    <span>👤 Assigned to: <strong style="color: white;">{{ ticket.assigned_to.username }}</strong></span>
+                    <span>👤 Assigned to: <strong style="color: white;">{{ ticket.assigned_to.username
+                            }}</strong></span>
                 </div>
                 {% endif %}
             </div>
@@ -73,7 +123,8 @@
                         <div style="flex: 1;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
                                 <span style="font-weight: 600;">{{ comment.user.username }}</span>
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ comment.created_at|timesince }} ago</span>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">{{
+                                    comment.created_at|timesince }} ago</span>
                             </div>
                             <div
                                 style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0 12px 12px 12px; border: 1px solid rgba(255,255,255,0.1); word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
@@ -132,61 +183,7 @@
             </div>
         </div>
 
-        <!-- Right Column: Actions -->
-        <div>
-            <div class="glass-container" style="padding: 1.5rem; position: sticky; top: 2rem;">
-                <h3 style="margin-top: 0; margin-bottom: 1rem;">Actions</h3>
-
-                <!-- Status Update (Assignee/Admin) -->
-                {% if is_assignee or is_admin %}
-                {% if ticket.status != 'COMPLETED' and ticket.status != 'CANCELLED' %}
-                <form method="post" style="margin-bottom: 1.5rem;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="status">
-                    <label
-                        style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Update
-                        Status</label>
-                    <select name="new_status"
-                        style="width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; margin-bottom: 0.8rem;">
-                        <option value="PENDING" {% if ticket.status == 'PENDING' %}selected{% endif %}>Pending</option>
-                        <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress
-                        </option>
-                        <option value="COMPLETED" {% if ticket.status == 'COMPLETED' %}selected{% endif %}>Completed
-                        </option>
-                    </select>
-                    <button type="submit" class="btn-primary" style="width: 100%; padding: 0.5rem;">Update
-                        Status</button>
-                </form>
-                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5rem 0;">
-                {% endif %}
-                {% endif %}
-
-                <!-- Cancel Ticket -->
-                {% if ticket.status != 'COMPLETED' and ticket.status != 'CANCELLED' %}
-                <form method="post" onsubmit="return confirm('Are you sure you want to cancel this ticket?');">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="cancel">
-                    <button type="submit"
-                        style="width: 100%; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
-                        Cancel Ticket
-                    </button>
-                </form>
-                {% endif %}
-
-                <!-- Info -->
-                <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary);">
-                    <p style="margin-bottom: 0.5rem;"><strong>Priority:</strong> <span
-                            class="dot-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></p>
-                    {% if ticket.resolution %}
-                    <div
-                        style="margin-top: 1rem; background: rgba(16, 185, 129, 0.1); padding: 0.8rem; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
-                        <strong style="color: #34d399; display: block; margin-bottom: 0.3rem;">Resolution:</strong>
-                        {{ ticket.resolution }}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -20,6 +20,7 @@ def create_signature(request):
             phone_office = request.POST.get('phone_office')
             website = request.POST.get('website')
             address = request.POST.get('address')
+            calendar_link = request.POST.get('calendar_link')
             photo = request.FILES.get('photo')
 
             # Validate photo size (50KB = 51200 bytes)
@@ -44,12 +45,15 @@ def create_signature(request):
                 'phone_office': phone_office,
                 'website': website,
                 'address': address,
-                'photo_base64': photo_base64
+                'photo_base64': photo_base64,
+                'calendar_link': calendar_link
             }
             
             template_name = 'signature/signature_template.html'
             if signature_model == 'invespy':
                 template_name = 'signature/signature_invespy.html'
+            elif signature_model == 'pixl_calendar':
+                template_name = 'signature/signature_pixl_calendar.html'
                 
             raw_html = render_to_string(template_name, context)
             compressed_html = compress_html(raw_html)

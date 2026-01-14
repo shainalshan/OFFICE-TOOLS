@@ -14,6 +14,7 @@ from .decorators import check_tool_access
 import waffle
 from waffle.models import Flag
 from .email_utils import send_dynamic_email
+from .notifications import send_event_notification
 from .models import Tool, UserToolAccess, User, UserProfile, NotificationEventSetting, AuditLog, EmailConfiguration
 
 @login_required
@@ -122,6 +123,9 @@ def admin_dashboard(request):
                 config.email_host_user = email_user
                 config.email_host_password = app_password
                 config.save()
+                messages.success(request, 'Email Configuration Updated.')
+                return redirect('admin_dashboard')
+
                 messages.success(request, 'Email Configuration Updated.')
                 return redirect('admin_dashboard')
 
@@ -324,40 +328,44 @@ def admin_dashboard(request):
             return redirect('admin_dashboard')
 
         user_id = request.POST.get('user_id')
-        user = get_object_or_404(User, id=user_id)
-        
-        if action == 'approve':
-            user.is_active = True
-            user.save()
-            access, _ = UserToolAccess.objects.get_or_create(user=user)
+        if not user_id:
+             # Fallback or pass (if action is not user-related but not caught above)
+             pass
+        else:
+            user = get_object_or_404(User, id=user_id)
             
-            # Notification
-            send_event_notification('USER_APPROVED', {'user': user}, functional_recipients=[user])
-            
-            messages.success(request, f'User {user.username} has been approved and activated.')
+            if action == 'approve':
+                user.is_active = True
+                user.save()
+                access, _ = UserToolAccess.objects.get_or_create(user=user)
+                
+                # Notification
+                send_event_notification('USER_APPROVED', {'user': user}, functional_recipients=[user])
+                
+                messages.success(request, f'User {user.username} has been approved and activated.')
 
-        elif action == 'delete_user':
-            username = user.username
-            user.delete()
-            messages.success(request, f'User {username} has been permanently deleted.')
+            elif action == 'delete_user':
+                username = user.username
+                user.delete()
+                messages.success(request, f'User {username} has been permanently deleted.')
 
-        elif action == 'reset_password':
-            new_password = request.POST.get('custom_password', 'temp1234')
-            user.set_password(new_password)
-            user.save()
-            messages.success(request, f"Password for {user.username} reset successfully.")
+            elif action == 'reset_password':
+                new_password = request.POST.get('custom_password', 'temp1234')
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, f"Password for {user.username} reset successfully.")
 
-        if action == 'assign_tool':
-            tool_slug = request.POST.get('tool_slug')
-            tool = get_object_or_404(Tool, slug=tool_slug)
-            
-            access, _ = UserToolAccess.objects.get_or_create(user=user)
-            if tool in access.tools.all():
-                access.tools.remove(tool)
-                messages.info(request, f'Removed {tool.name} from {user.username}.')
-            else:
-                access.tools.add(tool)
-                messages.success(request, f'Assigned {tool.name} to {user.username}.')
+            elif action == 'assign_tool':
+                tool_slug = request.POST.get('tool_slug')
+                tool = get_object_or_404(Tool, slug=tool_slug)
+                
+                access, _ = UserToolAccess.objects.get_or_create(user=user)
+                if tool in access.tools.all():
+                    access.tools.remove(tool)
+                    messages.info(request, f'Removed {tool.name} from {user.username}.')
+                else:
+                    access.tools.add(tool)
+                    messages.success(request, f'Assigned {tool.name} to {user.username}.')
 
         # --- WAFFLE FLAG MANAGEMENT ---
 
@@ -400,6 +408,14 @@ def admin_dashboard(request):
     if can_manage_flags:
         waffle_flags = Flag.objects.all().order_by('name')
 
+    # Optimization: Get user's tool slugs for template checks
+    user_tool_slugs = []
+    if request.user.is_authenticated:
+        try:
+             user_tool_slugs = list(request.user.tool_access.tools.values_list('slug', flat=True))
+        except UserToolAccess.DoesNotExist:
+             pass
+
     email_config = None
     if waffle.flag_is_active(request, 'dynamic_email_config'):
         email_config = EmailConfiguration.objects.first()
@@ -418,6 +434,8 @@ def admin_dashboard(request):
         'email_config': email_config,
         'can_manage_flags': can_manage_flags,
         'system_notification_settings': all_settings,
+        'user_tool_slugs': user_tool_slugs,
+        'user_tool_slugs': user_tool_slugs,
     })
 
 @login_required

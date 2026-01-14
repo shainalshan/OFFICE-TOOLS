@@ -15,6 +15,7 @@
             <label for="signature_model">Signature Model</label>
             <select id="signature_model" name="signature_model" required>
                 <option value="pixl">Pixl Email Signature</option>
+                <option value="pixl_calendar">Pixl Email Signature - with Calendar</option>
                 <option value="invespy">Invespy Email Signature</option>
             </select>
         </div>
@@ -57,6 +58,11 @@
                 value="38th Floor, Al Habtoor Business Tower, King Salman Bin Abdulaziz Al Saud St, Dubai Marina, Dubai, UAE">
         </div>
 
+        <div class="form-group" id="calendar-link-group" style="display: none;">
+            <label for="calendar_link">Calendar Link</label>
+            <input type="url" id="calendar_link" name="calendar_link" placeholder="https://calendly.com/your-name">
+        </div>
+
         <div class="form-group">
             <label for="photo">Profile Photo (Max 50KB)</label>
             <input type="file" id="photo" name="photo" accept="image/*" required>
@@ -97,6 +103,22 @@
                 addressInput.value = defaults[selected].address;
             }
         });
+
+        // Toggle Calendar Link visibility
+        function toggleCalendarInput() {
+            const calendarGroup = document.getElementById('calendar-link-group');
+            const calendarInput = document.getElementById('calendar_link');
+            if (modelSelect.value === 'pixl_calendar') {
+                calendarGroup.style.display = 'block';
+                calendarInput.required = true;
+            } else {
+                calendarGroup.style.display = 'none';
+                calendarInput.required = false;
+            }
+        }
+
+        modelSelect.addEventListener('change', toggleCalendarInput);
+        toggleCalendarInput(); // Run on load
     });
 </script>
 {% endblock %}

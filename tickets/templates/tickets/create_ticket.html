@@ -74,6 +74,17 @@
         </div>
         {% endif %}
 
+        {% flag "ticket_approval_workflow" %}
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="id_approver">Approver (Optional)</label>
+            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">
+                {{ form.approver }}
+                <small style="color: var(--text-secondary);">If selected, this person must approve the ticket before
+                    work begins.</small>
+            </div>
+        </div>
+        {% endflag %}
+
         <div class="form-group">
             <label for="id_issue">Issue Description</label>
             {{ form.issue }}

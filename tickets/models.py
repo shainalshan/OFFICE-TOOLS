@@ -44,6 +44,15 @@ class Ticket(models.Model):
     ]
     sla_status = models.CharField(max_length=20, choices=SLA_STATUS_CHOICES, default='NORMAL')
 
+    # Approval Workflow
+    APPROVAL_STATUS_CHOICES = [
+        ('PENDING', 'Pending Approval'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='APPROVED')
+    approver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_to_approve')
+
     def save(self, *args, **kwargs):
         if not self.ticket_id:
             # First save to get the DB-assigned ID (AutoIncrement)

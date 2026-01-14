@@ -4,8 +4,30 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from core.decorators import check_tool_access
 from .models import Contact
+import waffle
 import zipfile
 import io
+import re
+
+def normalize_phone(number):
+    """
+    Normalizes a phone number for comparison.
+    - Removes all non-digit characters.
+    - Treats leading '0' as equivalent to '971'.
+    - If number starts with '0', it is replaced with '971'.
+    - Returns the numeric string.
+    """
+    if not number:
+        return ""
+    
+    # Remove non-digits
+    cleaned = re.sub(r'\D', '', str(number))
+    
+    # Handle Country Code Normalization (UAE specific based on user context)
+    if cleaned.startswith('0'):
+        cleaned = '971' + cleaned[1:]
+    
+    return cleaned
 
 @login_required
 def contact_home(request):
@@ -40,6 +62,23 @@ def add_contact(request):
         email = request.POST.get('email')
         designation = request.POST.get('designation')
         
+        if waffle.flag_is_active(request, 'strict_contact_validation'):
+            # Normalize the input number
+            normalized_input = normalize_phone(phone_number)
+            
+            # Check against all contacts (inefficient for large DB but safe for strict mode requirement)
+            # Fetch all to normalize and compare in python because DB storage is raw string
+            all_contacts = Contact.objects.all()
+            existing = None
+            for c in all_contacts:
+                if normalize_phone(c.phone_number) == normalized_input:
+                    existing = c
+                    break
+            
+            if existing:
+                messages.error(request, f"This number is used by {existing.name}. Delete or edit that number then only u can add this number")
+                return redirect('contact_home')
+
         Contact.objects.create(
             name=name,
             phone_number=phone_number,
@@ -55,7 +94,23 @@ def edit_contact(request, contact_id):
     if request.method == 'POST':
         contact = get_object_or_404(Contact, id=contact_id)
         contact.name = request.POST.get('name')
-        contact.phone_number = request.POST.get('phone_number')
+        new_phone_number = request.POST.get('phone_number')
+        
+        if waffle.flag_is_active(request, 'strict_contact_validation'):
+            normalized_input = normalize_phone(new_phone_number)
+            
+            all_contacts = Contact.objects.exclude(id=contact_id)
+            existing = None
+            for c in all_contacts:
+                if normalize_phone(c.phone_number) == normalized_input:
+                    existing = c
+                    break
+            
+            if existing:
+                messages.error(request, f"This number is used by {existing.name}. Delete or edit that number then only u can add this number")
+                return redirect('contact_home')
+
+        contact.phone_number = new_phone_number
         contact.email = request.POST.get('email')
         contact.designation = request.POST.get('designation')
         contact.save()
