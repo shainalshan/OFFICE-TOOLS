@@ -34,6 +34,7 @@ urlpatterns = [
     path('tools/converter/', include('file_converter.urls')),
     path('backup/', include('backup_restore.urls')),
     path('backup/', include('backup_restore.urls')),
+    path('pixl_ai/', include('pixl_core.urls')),
 
 
     # APIs

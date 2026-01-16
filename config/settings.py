@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'waffle',
     'file_converter',
     'backup_restore',
+    'pixl_core',
 ]
 
 MIDDLEWARE = [

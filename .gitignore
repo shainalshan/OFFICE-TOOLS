@@ -35,3 +35,10 @@ backups/
 *.dll
 venv/
 .venv/
+
+# AI Models & Data
+PixlAI/
+*.gguf
+*.bin
+pixl_memory.db
+media/knowledge_base/

@@ -100,6 +100,14 @@
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
 
+        {% elif tool.slug == 'pixl_ai' or tool.slug == 'pixl-ai' %}
+        <a href="{% url 'ai_chat' %}" class="tool-card glass-container">
+            <div class="tool-icon">🤖</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+
 
         {% else %}
         <!-- Fallback for generic/future tools -->
