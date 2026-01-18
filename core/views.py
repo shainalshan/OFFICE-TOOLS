@@ -344,6 +344,16 @@ def admin_dashboard(request):
                 
                 messages.success(request, f'User {user.username} has been approved and activated.')
 
+            elif action == 'reject':
+                username = user.username
+                email = user.email
+                
+                # Send Rejection Notification (Optional, keeping silent for now or system log)
+                send_event_notification('USER_REJECTED', {'user': user, 'username': username, 'email': email})
+                
+                user.delete()
+                messages.warning(request, f'User request for {username} rejected and deleted.')
+
             elif action == 'delete_user':
                 username = user.username
                 user.delete()
