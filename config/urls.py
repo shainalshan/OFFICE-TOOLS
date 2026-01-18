@@ -51,6 +51,8 @@ urlpatterns = [
     path('restore/<int:log_id>/', core_views.restore_item, name='restore_item'),
     path('profile/', core_views.profile_view, name='profile_view'),
     path('forgot-password/', core_views.forgot_password, name='forgot_password'),
+    path('dashboard/theme-changer/', core_views.theme_changer_view, name='theme_changer'),
+    path('dashboard/theme-changer/apply/', core_views.apply_theme, name='apply_theme'),
 ]
 
 from django.conf import settings

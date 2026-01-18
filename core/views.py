@@ -15,7 +15,7 @@ import waffle
 from waffle.models import Flag
 from .email_utils import send_dynamic_email
 from .notifications import send_event_notification
-from .models import Tool, UserToolAccess, User, UserProfile, NotificationEventSetting, AuditLog, EmailConfiguration
+from .models import Tool, UserToolAccess, User, UserProfile, NotificationEventSetting, AuditLog, EmailConfiguration, ThemeConfiguration
 
 @login_required
 def test_error(request):
@@ -807,3 +807,51 @@ def forgot_password(request):
         return redirect('login')
         
     return render(request, 'core/forgot_password.html')
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def theme_changer_view(request):
+    users = User.objects.all().order_by('username')
+    config, _ = ThemeConfiguration.objects.get_or_create(id=1)
+    
+    return render(request, 'core/theme_changer.html', {
+        'users': users,
+        'global_theme': config.global_theme
+    })
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def apply_theme(request):
+    if request.method == 'POST':
+        theme_name = request.POST.get('theme_name')
+        scope = request.POST.get('scope') # 'global', 'admin', 'specific'
+        user_id = request.POST.get('user_id')
+        
+        if not theme_name:
+            messages.error(request, "Please select a theme.")
+            return redirect('theme_changer')
+
+        if scope == 'global':
+            config, _ = ThemeConfiguration.objects.get_or_create(id=1)
+            config.global_theme = theme_name
+            config.save()
+            messages.success(request, f"Global theme updated to {theme_name}.")
+            
+        elif scope == 'admin':
+            profile, _ = UserProfile.objects.get_or_create(user=request.user)
+            profile.theme_preference = theme_name
+            profile.save()
+            messages.success(request, f"Theme applied to you ({request.user.username}).")
+            
+        elif scope == 'specific':
+            if not user_id:
+                messages.error(request, "Please select a user for specific application.")
+                return redirect('theme_changer')
+                
+            target_user = get_object_or_404(User, id=user_id)
+            profile, _ = UserProfile.objects.get_or_create(user=target_user)
+            profile.theme_preference = theme_name
+            profile.save()
+            messages.success(request, f"Theme applied to {target_user.username}.")
+            
+    return redirect('theme_changer')

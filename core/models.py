@@ -22,9 +22,20 @@ class UserProfile(models.Model):
     mobile_number = models.CharField(max_length=20, blank=True)
     whatsapp_number = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    theme_preference = models.CharField(max_length=50, blank=True, null=True, help_text="User-specific theme")
 
     def __str__(self):
         return f"Profile for {self.user.username}"
+
+class ThemeConfiguration(models.Model):
+    global_theme = models.CharField(max_length=50, default='theme-default', help_text="Global default theme")
+    
+    def __str__(self):
+        return f"Global Theme: {self.global_theme}"
+
+    class Meta:
+        verbose_name = "Theme Configuration"
+        verbose_name_plural = "Theme Configuration"
 
 class NotificationEventSetting(models.Model):
     EVENT_TYPES = [
