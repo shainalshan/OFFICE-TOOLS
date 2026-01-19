@@ -187,7 +187,13 @@ def ticket_detail(request, ticket_id):
                 send_event_notification('TICKET_COMMENTED', {'ticket': ticket, 'actor': request.user}, functional_recipients=recipients)
         
         elif action == 'status':
-            if is_assignee or is_admin:
+            # --- Safety Mode: Approval Check ---
+            if waffle.flag_is_active(request, 'ticket_approval_workflow') and ticket.approval_status == 'PENDING':
+                messages.error(request, "Cannot change status until ticket is approved.")
+                return redirect('ticket_detail', ticket_id=ticket.ticket_id)
+            # -----------------------------------
+
+            if is_owner or is_assignee or is_admin:
                 new_status = request.POST.get('new_status')
                 if new_status in dict(Ticket.STATUS_CHOICES):
                     if ticket.status != new_status:
@@ -328,9 +334,9 @@ def admin_ticket_panel(request):
             'is_assignee': is_assignee
         })
 
-    all_users = User.objects.filter(
-        Q(groups__name='Ticket Admin') | Q(groups__name='Ticket Support')
-    ).distinct().order_by('username')
+    # SIMPLIFICATION: In Admin Panel, show ALL users as potential assignees.
+    # This avoids issues where a valid assignee is hidden because they aren't in a specific group.
+    all_users = User.objects.all().order_by('username')
 
     return render(request, 'tickets/admin_panel_v6.html', {
         'tickets': tickets,
