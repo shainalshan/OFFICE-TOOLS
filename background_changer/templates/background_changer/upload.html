@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">ID Card Photo Compositor</h3>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <p class="card-text">
+                        Upload a portrait photo (top to chest). The tool will:
+                    <ol>
+                        <li>Remove the background from your photo.</li>
+                        <li>Place you on the official ID card background.</li>
+                        <li>Align and resize automatically.</li>
+                    </ol>
+                    </p>
+
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="user_photo" class="form-label">Upload Portrait Photo</label>
+                            <input type="file" class="form-control" id="user_photo" name="user_photo" accept="image/*"
+                                required>
+                            <div class="form-text">Best results with a clear, solid background behind you, but not
+                                required.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Generate ID Photo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

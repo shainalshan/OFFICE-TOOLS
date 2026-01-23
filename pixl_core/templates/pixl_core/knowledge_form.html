@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{% if item %}Edit{% else %}Add{% endif %} Knowledge</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="{{ item.title|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Text Content</label>
+            <textarea name="content" class="form-control" rows="5">{{ item.content|default:'' }}</textarea>
+            <div class="form-text">Directly paste text here for the AI to learn.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Upload File (Optional)</label>
+            {% if item.file %}
+            <p>Current file: {{ item.file.name }}</p>
+            {% endif %}
+            <input type="file" name="file" class="form-control">
+            <div class="form-text">Upload .txt or .pdf (PDF support depends on ingestion logic, currently text-only
+                extraction).</div>
+        </div>
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'knowledge_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

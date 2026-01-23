@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+
+<div
+    style="position: relative; height: calc(100vh - 100px); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+    <div id="cesiumContainer" style="width: 100%; height: 100%;"></div>
+
+    <!-- Controls Overlay -->
+    <div
+        style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); width: 280px;">
+        <h3 style="margin-top: 0;">🌐 Project Layer</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">Loading models...</p>
+        <div id="project-list" style="max-height: 200px; overflow-y: auto;"></div>
+        <a href="{% url 'three_d_view:project_list' %}" class="btn-primary"
+            style="display: block; text-align: center; margin-top: 10px; background: #6366f1;">Manage / Upload</a>
+    </div>
+</div>
+
+<script>
+    // Access Token
+    const CESIUM_TOKEN = "{{ cesium_token }}";
+    if (CESIUM_TOKEN) {
+        Cesium.Ion.defaultAccessToken = CESIUM_TOKEN;
+    }
+
+    // Initialize Viewer
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(),
+        infoBox: false,
+        selectionIndicator: false,
+        timeline: false,
+        animation: false,
+        baseLayerPicker: false
+    });
+
+    // Fly to Dubai (default)
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(55.2708, 25.2048, 2000),
+        orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-45.0),
+        }
+    });
+
+    // Load Projects
+    fetch("{% url 'three_d_view:api_projects' %}")
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('project-list');
+            listEl.innerHTML = ''; // Clear loading text
+
+            if (data.projects.length === 0) {
+                listEl.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8;">No projects found. Upload one!</div>';
+            }
+
+            data.projects.forEach(proj => {
+                // Add to List
+                const item = document.createElement('div');
+                item.style.padding = '8px';
+                item.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                item.style.cursor = 'pointer';
+                item.innerHTML = `<strong>${proj.name}</strong>`;
+                item.onclick = () => {
+                    viewer.camera.flyTo({
+                        destination: Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt + 500),
+                        orientation: { pitch: Cesium.Math.toRadians(-45.0) }
+                    });
+                };
+                listEl.appendChild(item);
+
+                // Add to Map
+                const position = Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt);
+                const heading = Cesium.Math.toRadians(proj.heading);
+                const pitch = 0;
+                const roll = 0;
+                const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+                const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+
+                const entity = viewer.entities.add({
+                    name: proj.name,
+                    position: position,
+                    orientation: orientation,
+                    model: {
+                        uri: proj.url,
+                        scale: proj.scale,
+                        minimumPixelSize: 128,
+                        maximumScale: 20000
+                    }
+                });
+            });
+        })
+        .catch(err => console.error("Error loading projects:", err));
+</script>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% load waffle_tags %}
+<table cellpadding="0" cellspacing="0" border="0"
+    style="vertical-align: -webkit-baseline-middle; font-size: small; font-family: Arial;">
+    <tbody>
+        <tr>
+            <td style="vertical-align: middle;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td style="vertical-align: middle; padding-right: 20px;">
+                            <span style="display: inline; text-align: left">
+                                {% if photo_base64 %}
+                                <img src="data:image/jpeg;base64,{{ photo_base64 }}" role="presentation" width="130"
+                                    style="display: inline; max-width: 130px; border-radius: 5px; vertical-align: middle;">
+                                {% endif %}
+                            </span>
+                        </td>
+                        {% if calendar_link %}
+                        <td style="vertical-align: middle;">
+                            <a href="{{ calendar_link }}" target="_blank"
+                                style="display: inline-block; background-color: #E30953; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: bold; font-family: Arial, sans-serif; white-space: nowrap;">
+                                Book my calendar
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td height="30"></td>
+        </tr>
+        <tr>
+            <td style="vertical-align: middle;">
+                <table cellpadding="0" cellspacing="0" border="0"
+                    style="vertical-align: -webkit-baseline-middle; font-size: small; font-family: Arial;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <h2 style="margin: 0px; font-size: 16px; color: rgb(0, 0, 0); font-weight: 600;">
+                                    <span>{{ name }}</span>
+                                </h2>
+                                <p style="margin: 0px; color: rgb(0, 0, 0); font-size: 12px; line-height: 20px;">
+                                    <span>{{ designation }}</span>
+                                </p>
+                            </td>
+                            <td width="15">
+                                <div></div>
+                            </td>
+                            <td style="width: 1px; border-bottom: none; border-left: 1px solid rgb(227, 12, 83);"></td>
+                            <td width="15">
+                                <div></div>
+                            </td>
+                            <td>
+                                <table cellpadding="0" cellspacing="0" border="0"
+                                    style="vertical-align: -webkit-baseline-middle; font-size: small; font-family: Arial;">
+                                    <tbody>
+                                        <tr height="25" style="vertical-align: middle;">
+                                            <td width="30" style="vertical-align: middle;">
+                                                <span
+                                                    style="display: inline-block; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/phone-icon-2x.png"
+                                                        alt="mobilePhone" width="13"
+                                                        style="display: block; background-color: rgb(227, 12, 83);">
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0px; color: rgb(0, 0, 0);">
+                                                <a href="tel:{{ phone_mobile }}"
+                                                    style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;">
+                                                    <span>{{ phone_mobile }}</span>
+                                                </a>
+                                                {% if phone_office %}
+                                                |
+                                                <a href="tel:{{ phone_office }}"
+                                                    style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;">
+                                                    <span>{{ phone_office }}</span>
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr height="25" style="vertical-align: middle;">
+                                            <td width="30" style="vertical-align: middle;">
+                                                <span
+                                                    style="display: inline-block; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/email-icon-2x.png"
+                                                        alt="emailAddress" width="13"
+                                                        style="display: block; background-color: rgb(227, 12, 83);">
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0px;">
+                                                <a href="mailto:{{ email }}"
+                                                    style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;">
+                                                    <span>{{ email }}</span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr height="25" style="vertical-align: middle;">
+                                            <td width="30" style="vertical-align: middle;">
+                                                <span
+                                                    style="display: inline-block; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/link-icon-2x.png"
+                                                        alt="website" width="13"
+                                                        style="display: block; background-color: rgb(227, 12, 83);">
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0px;">
+                                                <a href="https://{{ website }}/"
+                                                    style="text-decoration: none; color: #E30953; font-size: 12px;">
+                                                    <strong>{{ website }}</strong>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr height="25" style="vertical-align: middle;">
+                                            <td width="30" style="vertical-align: middle;">
+                                                <span
+                                                    style="display: inline-block; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/address-icon-2x.png"
+                                                        alt="address" width="13"
+                                                        style="display: block; background-color: rgb(227, 12, 83);">
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0px;">
+                                                <span style="font-size: 12px; color: rgb(0, 0, 0);">{{ address }}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td height="30"></td>
+        </tr>
+        <tr>
+            <td style="vertical-align: middle; padding-bottom: 20px;">
+                <span style="display: inline; text-align: left">
+                    <a href="https://{{ website }}/" target="_blank">
+                        <img src="https://storage.googleapis.com/instapage-user-media/849b2632/65143783-0-Review-Us.jpg"
+                            role="presentation" width="210"
+                            style="display: inline; vertical-align: middle; padding-right: 40px">
+                    </a>
+                </span>
+                <span style="display: inline; text-align: right">
+                    <a href="https://{{ website }}/" target="_blank">
+                        <img src="https://storage.googleapis.com/instapage-user-media/849b2632/65288620-0-Logo2.jpg"
+                            role="presentation" width="230" style="display: inline; vertical-align: middle;">
+                    </a>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 100%; border-bottom: 1px solid rgb(227, 12, 83); border-left: none; display: block;"></td>
+        </tr>
+        <tr>
+            <td style="padding-top: 20px;">
+                <table cellpadding="0" cellspacing="0" border="0"
+                    style="width: 100%; vertical-align: -webkit-baseline-middle; font-size: small; font-family: Arial;">
+                    <tbody>
+                        <tr>
+                            <td style="vertical-align: top;">
+                                <a href="https://{{ website }}/" target="_blank">
+                                    <img src="https://storage.googleapis.com/instapage-user-media/849b2632/65143725-0-logo.png"
+                                        role="presentation" width="130" style="display: block; max-width: 130px;">
+                                </a>
+                            </td>
+                            <td style="text-align: right; vertical-align: top;">
+                                <table cellpadding="0" cellspacing="0" border="0"
+                                    style="display: inline-block; vertical-align: -webkit-baseline-middle; font-size: small; font-family: Arial;">
+                                    <tbody>
+                                        <tr style="text-align: right;">
+                                            <td>
+                                                <a href="https://www.facebook.com/pixlgrp"
+                                                    style="display: inline-block; padding: 0px; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/facebook-icon-2x.png"
+                                                        alt="facebook" width="24"
+                                                        style="background-color: rgb(227, 12, 83); max-width: 135px; display: block;">
+                                                </a>
+                                            </td>
+                                            <td width="5">
+                                                <div></div>
+                                            </td>
+                                            <td>
+                                                <a href="https://www.linkedin.com/company/pixlgrp/"
+                                                    style="display: inline-block; padding: 0px; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/linkedin-icon-2x.png"
+                                                        alt="linkedin" width="24"
+                                                        style="background-color: rgb(227, 12, 83); max-width: 135px; display: block;">
+                                                </a>
+                                            </td>
+                                            <td width="5">
+                                                <div></div>
+                                            </td>
+                                            <td>
+                                                <a href="https://www.instagram.com/pixlgrp/"
+                                                    style="display: inline-block; padding: 0px; background-color: rgb(227, 12, 83);">
+                                                    <img src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/instagram-icon-2x.png"
+                                                        alt="instagram" width="24"
+                                                        style="background-color: rgb(227, 12, 83); max-width: 135px; display: block;">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td height="15"></td>
+        </tr>
+    </tbody>
+</table>

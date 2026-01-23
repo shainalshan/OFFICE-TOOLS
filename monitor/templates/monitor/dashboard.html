@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .monitor-card {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #e2e8f0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #94a3b8;
+    }
+
+    .monitor-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .monitor-table th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+    }
+
+    .monitor-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-200 {
+        color: #4ade80;
+    }
+
+    .status-400 {
+        color: #facc15;
+    }
+
+    .status-500 {
+        color: #f87171;
+    }
+</style>
+
+
+<!-- Header -->
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+            Server Log
+        </h1>
+    </div>
+</div>
+
+<!-- Export and Tools Row -->
+<div class="monitor-card" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem;">
+    <div class="stat-label" style="white-space: nowrap;">Export Logs:</div>
+    <form action="{% url 'export_report' %}" method="get"
+        style="display: flex; gap: 1rem; flex: 1; align-items: center;">
+        <input type="date" name="date" required class="form-control"
+            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; padding: 0.5rem; border-radius: 6px;">
+        <button type="submit" class="btn btn-primary"
+            style="padding: 0.5rem 1.5rem; border-radius: 6px; background: #3b82f6; color: white; border: none; cursor: pointer;">
+            Download CSV Report
+        </button>
+    </form>
+</div>
+
+<!-- Live Requests Table -->
+<div class="monitor-card">
+    <div class="stat-label" style="margin-bottom: 1rem;">Live Requests</div>
+    <div style="overflow-x: auto;">
+        <table class="monitor-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>IP</th>
+                    <th>Method</th>
+                    <th>Path</th>
+                    <th>Status</th>
+                    <th>User</th>
+                    <th>Latency (s)</th>
+                </tr>
+            </thead>
+            <tbody id="log-body">
+                {% for log in recent_requests %}
+                <tr>
+                    <td>{{ log.created_at|date:"H:i:s" }}</td>
+                    <td style="font-family: monospace; font-size: 0.85rem; color: #94a3b8;">{{ log.ip_address }}</td>
+                    <td><span
+                            style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">{{
+                            log.method }}</span></td>
+                    <td style="font-family: monospace;">{{ log.path|truncatechars:40 }}</td>
+                    <td
+                        class="{% if log.status_code >= 500 %}status-500{% elif log.status_code >= 400 %}status-400{% else %}status-200{% endif %}">
+                        {{ log.status_code }}
+                    </td>
+                    <td>{{ log.user.username|default:"-" }}</td>
+                    <td>{{ log.response_time|floatformat:3 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Initial last log ID
+    let lastLogId = {% if recent_requests.0 %}{ { recent_requests.0.id } } {% else %} 0{% endif %};
+
+    // Set today's date for export
+    document.querySelector('input[type="date"]').valueAsDate = new Date();
+
+    async function updateDashboard() {
+        try {
+            // Fetch New Logs
+            const resLogs = await fetch(`{% url "api_logs" %}?after_id=${lastLogId}`);
+            if (resLogs.ok) {
+                const logData = await resLogs.json();
+
+                if (logData.logs && logData.logs.length > 0) {
+                    const tbody = document.getElementById('log-body');
+                    if (tbody) {
+                        logData.logs.forEach(log => {
+                            lastLogId = Math.max(lastLogId, log.id);
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${log.created_at}</td>
+                                <td style="font-family: monospace; font-size: 0.85rem; color: #94a3b8;">${log.ip || '-'}</td>
+                                <td><span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">${log.method}</span></td>
+                                <td style="font-family: monospace;">${log.path.substring(0, 40)}</td>
+                                <td class="${log.status >= 500 ? 'status-500' : (log.status >= 400 ? 'status-400' : 'status-200')}">${log.status}</td>
+                                <td>${log.user}</td>
+                                <td>${parseFloat(log.time).toFixed(3)}</td>
+                            `;
+                            tbody.insertBefore(row, tbody.firstChild);
+                            while (tbody.children.length > 50) tbody.removeChild(tbody.lastChild);
+                        });
+                    }
+                }
+            }
+
+        } catch (e) {
+            console.error("Monitor Error:", e);
+        }
+    }
+
+    // Initialize
+    setInterval(updateDashboard, 2000);
+    updateDashboard();
+</script>
+{% endblock %}

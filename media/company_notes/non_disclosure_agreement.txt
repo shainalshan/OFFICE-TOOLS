@@ -1,0 +1,108 @@
+Non-Disclosure Agreement
+Last updated: 14/02/2023
+________________________________________________
+This EMPLOYEE NON-DISCLOSURE AGREEMENT is entered into between ____________________
+(“Employee”) and PIXL Group DMCC (“Company” or “Employer”) (hereinafter referred to as the
+“Agreement”).
+(The Company and the Employee shall hereinafter be collectively referred to as the “Parties” and singularly as a
+“Party”).
+Article I: Scope of Agreement
+This Agreement acknowledges that certain confidential information, trade secrets, and proprietary data
+(hereinafter defined and referred to as “Confidential Information”) of or regarding the Company may be discussed
+and shared between Employee and the Company. The provisions set forth in this Agreement define the
+circumstances in which the Employee can and cannot disclose Confidential Information, and include the remedies,
+penalties and lawful action the Company may take should such information be used or disclosed by the Employee.
+The Parties agree that it is in their best interests to protect the Company’s Confidential Information, and that the
+terms of this Agreement create a bond of trust and confidentiality between them. In consideration of Employee’s
+commencement of employment, or continued employment with the Company, the Parties agree as follows:
+Article II: Confidential Information
+A. Definitions. Confidential Information shall include without limitation, any of the following relating to the
+Company, whether original, duplicated, computerized, memorized, hand-written or in any other form which
+contains information which is of a confidential nature:
+(a) inventions, discoveries, plans, concepts, designs, models, devices, equipment, apparatus, products,
+prototypes, formulae, algorithms, techniques, research projects, computer programs, software,
+firmware, hardware, business, development and marketing plans, merchandising systems, financial and
+pricing data, information concerning investors, customers, suppliers, consultants and employees, and
+any other concepts, ideas or information involving or related to the business which, if misused or
+disclosed, could adversely affect the Company’s business
+(b) trade secrets, methods of operation, know-how, patents, copyrights, trademarks and technical
+specifications;
+(c) advice to clients and any other documents provided to clients, documents/information about marketing,
+sales products and investment research;
+(d) documents/information about partners and persons associated or employed by the Company, including
+organisation charts, personnel files, performance evaluations and compensation information (including
+such person's earnings, salaries, bonuses, the Company's costs, assets, debts, profit projections, the
+Employee’s remuneration or bonus payments made to the Employee in connection with the Employee’s
+employment with the Company);
+(e) internal control mechanisms, operations and other internal logistics information;
+(f) legal documents, legal matters and other related information;
+(g) non-public information regarding the business of the Company which are commercially valuable and
+strategic information, including but not limited to trading activity information, trading technology
+information, trading records, trading positions, trading venues (exchanges and others), assets traded or
+held, connectivity to trading venues, details over connectivity, places of any type of trading activity,
+trading strategies and techniques, leverage positions, internal non-public company financial
+information, business activities and practices, quantitative models and techniques, speed of hardware
+and/or models, latency of any part of the trading infrastructure including hardware and software,
+hardware utilized for all parts of business, including but not limited to trading and quantitative
+modelling, proprietary software and programs of any kind, proprietary system architecture, broker
+records, brokers utilized by the Company, vendors utilized by the Company, deal set; and
+(h) any information which the Employee has been told is confidential or which the Employee might
+reasonably expect the Company would regard as confidential, or any information which has been given
+to the Company in confidence by customers, suppliers and other persons; and
+(i) Information that is reasonably understood to be confidential given the nature of the information and the
+circumstances surrounding the disclosure.
+shainal Shainal Badusha
+Non-Disclosure Agreement
+Last updated: 14/02/2023
+________________________________________________
+B. Exclusions. For the purposes of this Agreement, information shall not be deemed Confidential Information
+and the Employee shall have no obligation to keep it confidential if:
+ (i) the information was publicly known;
+ (ii) the information was received from a third party not subject to the restrictions of this Agreement and
+becomes available to Employee through no wrongful act or breach of Agreement on their part; or
+ (iii) the information was approved for release by Employer through written authorization.
+C. Period of Confidentiality.
+Employee agrees not to use or disclose Confidential Information for their own personal benefit or the benefit of
+any other person, corporation or entity other than the Company during the Employee’s employment with the
+company or any time thereafter.
+D. Limitations. Employee shall limit access to Confidential Information to individuals on a strictly need-to-know
+basis, involving only those who are carrying out duties related to the Company and its business. Employee shall
+ensure that such individuals, especially those under the Employee’s command (affiliates, agents, consultants,
+representatives and other employees) are bound by and shall comply with the terms of this Agreement.
+E. Ownership. All repositories of information containing or in any way relating to Confidential Information is
+considered property of the Employer. The removal of Confidential Information from the Company’s premises is
+prohibited unless prior written consent is provided by the Company. All such items made, compiled or used by
+the Employee shall be delivered to the Employer by Employee upon termination of employment or at any other
+time as per the Employer’s request.
+Article III: Governing Law and Jurisdiction
+This Agreement shall be governed in accordance with the UAE laws. The Parties hereto irrevocably agree that
+the Dubai courts shall have non-exclusive jurisdiction to hear and determine any suit, action or proceeding, and
+to settle any disputes which may arise out of or in connection with this Agreement and for that purpose, irrevocably
+submit to the jurisdiction of such courts.
+Article IV: Immunity
+Disclosing Confidential Information to an attorney, government representative or court official in confidence
+while assisting or taking part in a case involving a suspected violation of law is not considered a breach of this
+Agreement. Should the Employee be required to disclose Confidential Information by law, the Employee shall
+provide Employer with prompt notice of such request in order to obtain a protective order or otherwise prevent
+disclosure of such information.
+Article V: Breach of agreement
+A. Cause for Action. Employee understands that the use or disclosure of any Confidential Information may be
+cause for an action at law in an appropriate court.
+B. Indemnification. Employee understands and agrees that if the use or disclosure of Confidential Information
+by them or any affiliate, employee or representative of the Employee causes damage, loss, cost or expense to the
+Company, the Employee shall be held responsible and shall indemnify the Company.
+C. Notice of Unauthorized Use or Disclosure. Employee is bound by this Agreement to notify the Company in
+the event of a breach of agreement involving the dissemination of Confidential Information, either by the
+Employee or a third party, and will do everything possible to help the Company regain possession of the
+Confidential Information.
+Non-Disclosure Agreement
+Last updated: 14/02/2023
+________________________________________________
+Article VI: Prevailing party
+In a dispute arising out of or in relation to this Agreement, the prevailing party shall have the right to collect from
+the other party its reasonable attorney fees, costs and necessary expenditures.
+Article VII: Survival
+The obligations of the Employee under this Agreement shall survive termination of his or her employment with
+the Company.
+IN WITNESS WHEREOF, the Parties hereto agree to the terms of this Agreement and signed on the dates written
+below.

@@ -1,0 +1,270 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="glass-container animate-fade-in" style="max-width: 900px; margin: 2rem auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="margin:0;">Background Changer <small style="font-size:0.5em; opacity:0.5;">v2.2</small></h2>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Upload a photo to automatically replace its
+            background.</p>
+    </div>
+
+    <div class="processing-container" style="display: flex; flex-direction: column; align-items: center; gap: 2rem;">
+
+        <!-- System Status Check -->
+        <div id="system-status"
+            style="width: 100%; max-width: 500px; font-size: 0.8em; text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <span id="header-status">⏳ Checking Browser Features...</span> |
+            <span id="lib-status">⏳ Loading AI Engine...</span>
+        </div>
+
+        <!-- Input Area -->
+        <div style="width: 100%; max-width: 500px; padding: 2rem; border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; text-align: center;"
+            id="drop-zone">
+            <input type="file" id="image-input" accept="image/*" style="display: none;">
+            <label for="image-input" class="btn-primary"
+                style="cursor: pointer; display: inline-block; margin-bottom: 1rem; padding: 12px 24px; font-size: 1.1em;">
+                📷 Upload Photo
+            </label>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">or drag and drop here</p>
+        </div>
+
+        <!-- Status / Processing -->
+        <div id="status-area" style="display: none; text-align: center;">
+            <div class="loader" style="margin: 0 auto 1rem;"></div>
+            <p id="status-text" style="color: var(--text-accent);">Initializing AI model...</p>
+            <p style="color: var(--text-secondary); font-size: 0.8rem;">First run may take a moment to download
+                resources.</p>
+            <p style="color: var(--text-secondary); font-size: 0.7rem; margin-top:5px;">(Approx 100MB download)</p>
+        </div>
+
+        <!-- Result Area -->
+        <div id="result-area" style="display: none; width: 100%; text-align: center;">
+            <h3 style="margin-bottom: 1rem; color: #10b981;">Result</h3>
+            <div
+                style="position: relative; display: inline-block; max-width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden;">
+                <canvas id="output-canvas" style="max-width: 100%; height: auto; display: block;"></canvas>
+            </div>
+            <div style="margin-top: 1.5rem;">
+                <a id="download-btn" href="#" download="new_profile.png" class="btn-primary"
+                    style="text-decoration: none;">⬇️ Download Image</a>
+                <button onclick="resetTool()" class="btn-secondary"
+                    style="margin-left: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 4px; color: white; cursor: pointer;">🔄
+                    Start Over</button>
+            </div>
+        </div>
+
+        <!-- Error Area -->
+        <div id="error-area"
+            style="display: none; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2); max-width: 600px; text-align:left;">
+            <strong>⚠️ An error occurred:</strong><br>
+            <span id="error-text" style="font-family: monospace; font-size:0.9em;"></span>
+            <br><br>
+            <small style="color: #ccc;">Troubleshooting: Ensure you are using a modern browser (Chrome/Edge/Firefox). If
+                "SharedArrayBuffer" error, the server headers are missing.</small>
+        </div>
+
+    </div>
+</div>
+
+<!-- Load imgly/background-removal (ESM) -->
+<script type="module">
+    import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.0.3/+esm";
+
+    // System Check Checks
+    const headerStatus = document.getElementById('header-status');
+    const libStatus = document.getElementById('lib-status');
+
+    // 1. Check Browser Features
+    if (crossOriginIsolated) {
+        headerStatus.innerHTML = "✅ Browser Features Active";
+        headerStatus.style.color = "#10b981";
+    } else {
+        headerStatus.innerHTML = "❌ Missing Security Headers";
+        headerStatus.style.color = "#ef4444";
+        showError("Your browser is blocking the AI engine. 'Cross-Origin Isolation' is incorrectly configured.");
+    }
+
+    // 2. Check Library Load
+    if (typeof removeBackground === 'function') {
+        libStatus.innerHTML = "✅ AI Engine Loaded";
+        libStatus.style.color = "#10b981";
+    } else {
+        libStatus.innerHTML = "❌ AI Engine Failed";
+        libStatus.style.color = "#ef4444";
+    }
+
+    const bgTemplateUrl = "{{ bg_template_url }}";
+    const imageInput = document.getElementById('image-input');
+    const statusArea = document.getElementById('status-area');
+    const statusText = document.getElementById('status-text');
+    const resultArea = document.getElementById('result-area');
+    const outputCanvas = document.getElementById('output-canvas');
+    const downloadBtn = document.getElementById('download-btn');
+    const dropZone = document.getElementById('drop-zone');
+    const errorArea = document.getElementById('error-area');
+    const errorText = document.getElementById('error-text');
+
+    // Make resetTool available globally since it's called by onclick
+    window.resetTool = function () {
+        resultArea.style.display = 'none';
+        dropZone.style.display = 'block';
+        imageInput.value = '';
+    };
+
+    let bgImage = null;
+
+    // Load background template immediately
+    const bgImgObj = new Image();
+    // Removed crossOrigin = anonymous to prevent COEP blocks on local/same-origin media
+    bgImgObj.src = bgTemplateUrl;
+    bgImgObj.onload = () => {
+        bgImage = bgImgObj;
+        console.log("Template loaded");
+    };
+    bgImgObj.onerror = (e) => {
+        console.error("Template load error", e);
+        showError("Failed to load background template. Please check configuration. " + bgTemplateUrl);
+    };
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            processImage(e.target.files[0]);
+        }
+    });
+
+    async function processImage(file) {
+        if (!bgImage) {
+            showError("Background template is not ready yet.");
+            return;
+        }
+
+        // UI Updates
+        dropZone.style.display = 'none';
+        resultArea.style.display = 'none';
+        errorArea.style.display = 'none';
+        statusArea.style.display = 'block';
+        statusText.innerText = "Removing background...";
+
+        try {
+            // 1. Remove Background (using imported function)
+            const blob = await removeBackground(file, {
+                progress: (key, current, total) => {
+                    const percent = Math.round((current / total) * 100);
+                    statusText.innerText = `Processing: ${percent}%`;
+                }
+            });
+
+            statusText.innerText = "Compositing...";
+
+            // 2. Load Processed Subject
+            const subjectImg = await loadImage(URL.createObjectURL(blob));
+
+            // 3. Composite on Canvas
+            const ctx = outputCanvas.getContext('2d');
+
+            // Set canvas size to template size
+            outputCanvas.width = bgImage.width;
+            outputCanvas.height = bgImage.height;
+
+            // Draw Background
+            ctx.drawImage(bgImage, 0, 0);
+
+            // Calculate Subject Position (Center Bottom)
+            // Goal: subject should take up significant height, e.g., 85%
+            const targetHeight = bgImage.height * 0.85;
+            const scale = targetHeight / subjectImg.height;
+            const targetWidth = subjectImg.width * scale;
+
+            const x = (bgImage.width - targetWidth) / 2;
+            const y = bgImage.height - targetHeight; // Bottom aligned
+
+            // Draw Subject
+            ctx.drawImage(subjectImg, x, y, targetWidth, targetHeight);
+
+            // 4. Finalize
+            statusArea.style.display = 'none';
+            resultArea.style.display = 'block';
+
+            // Setup Download
+            downloadBtn.href = outputCanvas.toDataURL("image/png");
+
+        } catch (err) {
+            console.error(err);
+            showError(`Processing failed: ${err.message || err}`);
+        }
+    }
+
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    function showError(msg) {
+        statusArea.style.display = 'none';
+        errorArea.style.display = 'block';
+        errorText.innerText = msg;
+        dropZone.style.display = 'block'; // Allow retry
+    }
+
+    // Drag and Drop support
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#10b981';
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'rgba(255,255,255,0.2)';
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            processImage(e.dataTransfer.files[0]);
+        }
+    });
+
+</script>
+
+<!-- Fallback Script Detection -->
+<script>
+    setTimeout(() => {
+        const libStatus = document.getElementById('lib-status');
+        if (!libStatus.innerHTML.includes("Loaded")) {
+            libStatus.innerHTML = "❌ AI Engine Timeout";
+            libStatus.style.color = "#ef4444";
+
+            const errorArea = document.getElementById('error-area');
+            const errorText = document.getElementById('error-text');
+            errorArea.style.display = 'block';
+            errorText.innerHTML = "<strong>CRITICAL ERROR:</strong> The AI Engine script failed to load.<br>1. Check your internet connection.<br>2. Disable AdBlockers.<br>3. <a href='https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.0.3/dist/imgly-background-removal.min.js' target='_blank' style='color:white;'>Click here</a> to verify you can access the library.";
+        }
+    }, 5000); // 5 second timeout
+</script>
+
+<style>
+    .loader {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid #10b981;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}

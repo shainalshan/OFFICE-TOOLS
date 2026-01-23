@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Pixl AI Brain</h2>
+        <div>
+            <a href="{% url 'ai_chat' %}" class="btn btn-success me-2">💬 Chat / Test AI</a>
+            <a href="{% url 'knowledge_add' %}" class="btn btn-primary">Add New Knowledge</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Knowledge Base ("The Memory")
+        </div>
+        <div class="card-body">
+            <p class="text-muted">This data is ingested into the Vector Database when you run
+                <code>python manage.py train_ai</code>.</p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Snippet</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.content|truncatechars:50 }}</td>
+                        <td>{{ item.updated_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'knowledge_edit' item.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{% url 'knowledge_delete' item.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No knowledge items found. Add some to make the AI smarter!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

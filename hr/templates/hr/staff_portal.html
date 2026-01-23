@@ -1,0 +1,693 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto; padding-bottom: 4rem;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8rem;">👋 Hello, {{ user.first_name|default:user.username }}</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">{{ current_time|date:"l, F j, Y" }}</p>
+        </div>
+        <div style="text-align: right;">
+            <span id="current-clock" style="font-size: 1.5rem; font-family: monospace; color: #818cf8;"></span>
+        </div>
+    </div>
+
+    <!-- Alert for disabled -->
+    {% if not settings.timesheet_enabled %}
+    <div
+        style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+        ⚠️ Timesheet access is currently disabled for your account. Please contact HR.
+    </div>
+    {% endif %}
+
+    <!-- PUNCH SECTION -->
+    <div class="glass-container"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; margin-bottom: 2rem;">
+
+        <!-- Status Indicator -->
+        <div id="status-text"
+            style="font-size: 1.2rem; margin-bottom: 2rem; color: {% if is_punched_in %}#4ade80{% else %}var(--text-secondary){% endif %};">
+            {% if is_punched_in %}
+            🟢 You are currently <b>Punched IN</b>
+            {% else %}
+            ⚪ You are currently <b>Punched OUT</b>
+            {% endif %}
+        </div>
+
+        {% load waffle_tags %}
+
+        <!-- MANUAL PUNCH BUTTON -->
+        <!-- Logic: Show Manual Button IF 'restrict_touch_punch' is OFF -->
+        {% flag "restrict_touch_punch" %}
+        <!-- Restricted Mode: Manual Button Hidden -->
+        <div style="color: var(--text-secondary); margin-bottom: 2rem; font-style: italic;">
+            Touch punch is disabled. Please use biometric authentication.
+        </div>
+        {% else %}
+        <!-- Normal Mode: Show Manual Button -->
+        {% flag "timesheet_strict_mode" %}
+        <!-- Strict Mode ON: Check granular permission -->
+        {% if settings.allow_punch %}
+        <button id="punch-btn" onclick="togglePunch()" {% if not settings.timesheet_enabled %}disabled{% endif %}
+            class="punch-button {% if is_punched_in %}punched-in{% endif %}">
+            <div class="punch-inner">
+                <span class="punch-label">{% if is_punched_in %}PUNCH<br>OUT{% else %}PUNCH<br>IN{% endif %}</span>
+            </div>
+            <div class="punch-ripple"></div>
+        </button>
+        {% else %}
+        <div
+            style="text-align:center; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🔒</span>
+            <h3 style="margin:0; color: var(--text-secondary);">Punch Access Disabled</h3>
+            <p style="margin: 0.5rem 0 0 0; color: #94a3b8; font-size: 0.9rem;">Administrator has restricted punch
+                access.</p>
+        </div>
+        {% endif %}
+        {% else %}
+        <!-- Strict Mode OFF: Default Behavior -->
+        <button id="punch-btn" onclick="togglePunch()" {% if not settings.timesheet_enabled %}disabled{% endif %}
+            class="punch-button {% if is_punched_in %}punched-in{% endif %}">
+            <div class="punch-inner">
+                <span class="punch-label">{% if is_punched_in %}PUNCH<br>OUT{% else %}PUNCH<br>IN{% endif %}</span>
+            </div>
+            <div class="punch-ripple"></div>
+        </button>
+        {% endflag %}
+        {% endflag %}
+
+
+        <!-- FACE BIOMETRIC PUNCH SECTION -->
+        {% flag "face_biometric_punch" %}
+        <div style="margin-top: 2rem; text-align: center;">
+            <div style="height: 1px; background: rgba(255,255,255,0.1); width: 100%; margin-bottom: 2rem;"></div>
+
+            {% if is_face_enrolled %}
+            <!-- Check Permission -->
+            {% flag "timesheet_strict_mode" %}
+            {% if settings.allow_punch %}
+            <button onclick="startFacePunch()" class="btn-face-punch">
+                <span style="font-size: 1.5rem;">👁️</span> FACE PUNCH
+            </button>
+            {% else %}
+            <button disabled class="btn-face-punch"
+                style="border-color: #475569; color: #475569; cursor: not-allowed; opacity: 0.5;">
+                <span style="font-size: 1.5rem;">🔒</span> PERMISSION DENIED
+            </button>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #f87171;">Contact Admin to enable Punch Access
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- Strict Mode OFF: Always Allow -->
+            <button onclick="startFacePunch()" class="btn-face-punch">
+                <span style="font-size: 1.5rem;">👁️</span> FACE PUNCH
+            </button>
+            {% endflag %}
+
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">Biometric Authentication
+                Active</div>
+            <div style="margin-top: 1rem;">
+                <a href="javascript:resetFaceData()"
+                    style="color: #64748b; font-size: 0.8rem; text-decoration: underline;">Reset Face ID</a>
+            </div>
+
+            {% else %}
+            <button onclick="startFaceEnrollment()" class="btn-face-enroll">
+                <span style="font-size: 1.2rem;">👤</span> Setup Face ID
+            </button>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #fbbf24;">⚠️ Face ID required for strict mode
+            </div>
+            {% endif %}
+
+            <!-- Placeholder for future biometric devices -->
+            <!-- <div id="future-devices-container"></div> -->
+        </div>
+        {% endflag %}
+
+        Click to record your attendance.
+        </p>
+
+        <!-- COUNTDOWN TIMER -->
+        {% if first_punch_in %}
+        <div id="countdown-container"
+            style="margin-top: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; width: 100%;">
+            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Time Remaining (9h
+                Shift)</div>
+            <div id="shift-timer" style="font-size: 1.5rem; font-family: monospace; font-weight: bold; color: #fbbf24;">
+                Calculating...</div>
+        </div>
+        <script>
+            const firstPunchIso = "{{ first_punch_in|date:'c' }}";
+
+            function updateShiftTimer() {
+                const startTime = new Date(firstPunchIso);
+                const now = new Date();
+                const diffMs = now - startTime;
+
+                // 9 hours in ms
+                const targetMs = 9 * 60 * 60 * 1000;
+                const remainingMs = targetMs - diffMs;
+
+                const timerEl = document.getElementById('shift-timer');
+
+                if (remainingMs <= 0) {
+                    timerEl.innerText = "🎉 Shift Completed!";
+                    timerEl.style.color = "#4ade80"; // Green
+                } else {
+                    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+
+                    timerEl.innerText = `${hours}h ${minutes}m ${seconds}s`;
+
+                    if (hours === 0 && minutes < 60) {
+                        timerEl.style.color = "#f87171"; // Red urgency
+                    }
+                }
+            }
+
+            setInterval(updateShiftTimer, 1000);
+            updateShiftTimer(); // Initial call
+        </script>
+        {% endif %}
+
+        <div style="margin-top: 3rem;">
+            <a href="{% url 'hr_current_timesheet' %}" style="
+               background: linear-gradient(135deg, #6366f1, #4f46e5);
+               color: white;
+               padding: 1rem 2.5rem;
+               border-radius: 50px;
+               text-decoration: none;
+               font-weight: 600;
+               font-size: 1.1rem;
+               box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4), 0 8px 10px -6px rgba(99, 102, 241, 0.1);
+               transition: all 0.3s ease;
+               display: inline-flex;
+               align-items: center;
+               gap: 0.8rem;
+               border: 1px solid rgba(255,255,255,0.1);
+               "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 20px 25px -5px rgba(99, 102, 241, 0.5), 0 8px 10px -6px rgba(99, 102, 241, 0.1)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(99, 102, 241, 0.4), 0 8px 10px -6px rgba(99, 102, 241, 0.1)';">
+                <span style="font-size: 1.4rem;">📅</span> View Full Timesheet
+            </a>
+        </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="glass-container">
+        <h3
+            style="margin-top: 0; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+            🕒 Today's Activity</h3>
+        <div id="punch-log">
+            {% for punch in todays_punches %}
+            <div
+                style="display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span style="color: {% if punch.type == 'IN' %}#4ade80{% else %}#f87171{% endif %}; font-weight: bold;">
+                    {{ punch.get_type_display }}
+                </span>
+                <span style="font-family: monospace;">{{ punch.timestamp|time:"H:i:s" }}</span>
+            </div>
+            {% empty %}
+            <div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No activity today.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- FACE BIOMETRIC MODAL -->
+<div id="faceModal"
+    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+
+    <!-- Video Wrapper (Centered Window) -->
+    <div
+        style="position: relative; width: 640px; height: 480px; max-width: 95vw; max-height: 80vh; border-radius: 12px; overflow: hidden; box-shadow: 0 0 50px rgba(99, 102, 241, 0.3); border: 2px solid rgba(255,255,255,0.1); background: black;">
+
+        <video id="inputVideo" autoplay muted playsinline
+            style="width: 100%; height: 100%; object-fit: cover; opacity: 0.6; filter: grayscale(50%) contrast(1.1);"></video>
+        <canvas id="overlayCanvas" style="position: absolute; top:0; left:0; width: 100%; height: 100%;"></canvas>
+
+        <!-- FBI Overlay Elements -->
+        <div class="fbi-overlay-grid"></div>
+        <div class="fbi-scan-line"></div>
+        <div class="fbi-target-box" style="left: 50%; top: 50%; transform: translate(-50%, -50%);">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+        </div>
+
+        <div id="scanStatus"
+            style="position: absolute; bottom: 1rem; left: 1rem; font-family: monospace; color: #00ff00; font-size: 1rem; background: rgba(0,0,0,0.8); padding: 0.3rem 0.6rem; border: 1px solid #00ff00;">
+            INITIALIZING SYSTEM...
+        </div>
+
+        <button onclick="closeFaceModal()"
+            style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); border: 1px solid red; color: red; padding: 0.3rem 0.8rem; cursor: pointer; font-family: monospace; border-radius: 4px;">ABORT</button>
+    </div>
+</div>
+
+<style>
+    /* Face Button Styles */
+    .btn-face-punch {
+        background: transparent;
+        border: 2px solid #6366f1;
+        color: #6366f1;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-face-punch:hover {
+        background: #6366f1;
+        color: white;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-face-enroll {
+        background: transparent;
+        border: 2px solid #fbbf24;
+        color: #fbbf24;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-face-enroll:hover {
+        background: #fbbf24;
+        color: black;
+    }
+
+    /* FBI Animation Styles */
+    .fbi-overlay-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+    }
+
+    .fbi-target-box {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border: 1px solid rgba(0, 255, 0, 0.3);
+    }
+
+    .fbi-target-box .corner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: #00ff00;
+        border-style: solid;
+        box-shadow: 0 0 10px #00ff00;
+    }
+
+    .tl {
+        top: -2px;
+        left: -2px;
+        border-width: 3px 0 0 3px;
+    }
+
+    .tr {
+        top: -2px;
+        right: -2px;
+        border-width: 3px 3px 0 0;
+    }
+
+    .bl {
+        bottom: -2px;
+        left: -2px;
+        border-width: 0 0 3px 3px;
+    }
+
+    .br {
+        bottom: -2px;
+        right: -2px;
+        border-width: 0 3px 3px 0;
+    }
+
+    .fbi-scan-line {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: #00ff00;
+        box-shadow: 0 0 15px #00ff00;
+        opacity: 0.5;
+        animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% {
+            top: 0%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 100%;
+            opacity: 0;
+        }
+    }
+
+    /* PUNCH BUTTON STYLES */
+    .punch-button {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(145deg, #10b981, #059669);
+        /* Green for Punch In */
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .punch-button.punched-in {
+        background: linear-gradient(145deg, #ef4444, #b91c1c);
+        /* Red for Punch Out */
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    }
+
+    .punch-button:active {
+        transform: scale(0.95);
+    }
+
+    .punch-button:disabled {
+        background: #475569;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .punch-inner {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .punch-label {
+        color: white;
+        font-weight: 800;
+        font-size: 1.5rem;
+        line-height: 1.2;
+        text-align: center;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+    }
+
+    /* Ripple Animation */
+    .punch-ripple {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+    }
+
+    .punch-button:active .punch-ripple {
+        animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+</style>
+
+<!-- Load Face API -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+    // Live Clock
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('current-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }, 1000);
+
+    // Punch Logic (Standard)
+    function togglePunch() {
+        if (confirm("Are you sure you want to punch?")) {
+            const btn = document.getElementById('punch-btn');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.style.opacity = '0.8';
+
+            fetch("{% url 'hr_punch_api' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        btn.innerHTML = originalContent;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Network Error');
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+        }
+    }
+
+    // --- FACE BIOMETRIC LOGIC ---
+    let faceStream = null;
+    let isFaceModelsLoaded = false;
+    let scanMode = 'none'; // 'enroll' or 'punch'
+    let isScanning = false;
+
+    // Use Github Raw for models
+    const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
+
+    async function loadFaceModels() {
+        if (isFaceModelsLoaded) return;
+        setStatus("LOADING NEURAL NETWORKS...");
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        isFaceModelsLoaded = true;
+        setStatus("SYSTEM READY");
+    }
+
+    function setStatus(text, isError = false) {
+        const el = document.getElementById('scanStatus');
+        el.innerText = text;
+        el.style.color = isError ? 'red' : '#00ff00';
+        el.style.borderColor = isError ? 'red' : '#00ff00';
+        el.style.textShadow = isError ? '0 0 10px red' : '0 0 10px #00ff00';
+    }
+
+    async function startFaceEnrollment() {
+        scanMode = 'enroll';
+        openFaceModal();
+    }
+
+    async function startFacePunch() {
+        scanMode = 'punch';
+        openFaceModal();
+    }
+
+    async function openFaceModal() {
+        document.getElementById('faceModal').style.display = 'flex';
+        await loadFaceModels();
+        const video = document.getElementById('inputVideo');
+
+        try {
+            faceStream = await navigator.mediaDevices.getUserMedia({ video: {} });
+            video.srcObject = faceStream;
+
+            setStatus("ACQUIRING TARGET...");
+            isScanning = true;
+            detectFaceLoop();
+        } catch (err) {
+            console.error(err);
+            setStatus("CAMERA ACCESS DENIED", true);
+        }
+    }
+
+    function closeFaceModal() {
+        document.getElementById('faceModal').style.display = 'none';
+        isScanning = false;
+        if (faceStream) {
+            faceStream.getTracks().forEach(track => track.stop());
+            faceStream = null;
+        }
+    }
+
+    async function detectFaceLoop() {
+        if (!isScanning) return;
+
+        const video = document.getElementById('inputVideo');
+        const canvas = document.getElementById('overlayCanvas');
+
+        // Wait for video to play
+        if (video.paused || video.ended || !faceapi.nets.ssdMobilenetv1.params) {
+            return setTimeout(() => detectFaceLoop(), 100);
+        }
+
+        const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 });
+
+        // Detection
+        const result = await faceapi.detectSingleFace(video, options)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+        if (result) {
+            const dims = faceapi.matchDimensions(canvas, video, true);
+            const resizedResult = faceapi.resizeResults(result, dims);
+            faceapi.draw.drawDetections(canvas, resizedResult);
+            // faceapi.draw.drawFaceLandmarks(canvas, resizedResult);
+
+            // Draw FBI box
+            const box = resizedResult.detection.box;
+            // setStatus(`TARGET ACQUIRED: ${(result.detection.score * 100).toFixed(0)}%`);
+
+            // Action
+            if (result.detection.score > 0.5) {
+                if (scanMode === 'enroll') {
+                    if (confirm("Face Detected. Save as your ID?")) {
+                        submitEnrollment(result.descriptor);
+                        isScanning = false;
+                    }
+                } else if (scanMode === 'punch') {
+                    // Auto punch
+                    setStatus("IDENTIFYING...", false);
+                    submitPunch(result.descriptor);
+                    isScanning = false; // Stop loop to prevent double punch while waiting
+                }
+            }
+        } else {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            setStatus("SEARCHING...", false);
+        }
+
+        if (isScanning) setTimeout(() => detectFaceLoop(), 100);
+    }
+
+    function submitEnrollment(descriptor) {
+        setStatus("ENCRYPTING DATA...");
+        fetch("{% url 'hr_enroll_face' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ descriptor: Array.from(descriptor) })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert("Face ID Saved!");
+                    window.location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                    isScanning = true; detectFaceLoop();
+                }
+            })
+            .catch(err => {
+                alert("Network Error");
+                isScanning = true; detectFaceLoop();
+            });
+    }
+
+    function resetFaceData() {
+        if (confirm("Are you sure you want to delete your Face ID? You will need to enroll again.")) {
+            fetch("{% url 'hr_reset_face' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    window.location.reload();
+                });
+        }
+    }
+
+    function submitPunch(descriptor) {
+        fetch("{% url 'hr_face_punch' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ descriptor: Array.from(descriptor) })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Success UI
+                    setStatus("ACCESS GRANTED (Score: " + data.distance.toFixed(3) + ")", false);
+                    document.getElementById('scanStatus').style.background = "rgba(0,255,0,0.8)";
+                    document.getElementById('scanStatus').style.color = "black";
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    // Error UI
+                    setStatus(data.message.toUpperCase(), true);
+                    setTimeout(() => {
+                        isScanning = true; detectFaceLoop();
+                    }, 2000);
+                }
+            })
+            .catch(err => {
+                setStatus("SYSTEM FAILURE", true);
+                setTimeout(() => {
+                    isScanning = true; detectFaceLoop();
+                }, 2000);
+            });
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container glass-container animate-fade-in">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="margin:0;">Create Your Signature</h2>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Enter your details below to generate a professional
+            HTML signature.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'create_signature' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="signature_model">Signature Model</label>
+            <select id="signature_model" name="signature_model" required>
+                <option value="pixl">Pixl Email Signature</option>
+                <option value="pixl_calendar">Pixl Email Signature - with Calendar</option>
+                <option value="invespy">Invespy Email Signature</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g. John Doe">
+        </div>
+
+        <div class="form-group">
+            <label for="designation">Designation</label>
+            <input type="text" id="designation" name="designation" required placeholder="e.g. Software Engineer">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="john@company.com">
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <label for="phone_mobile">Mobile Number</label>
+                <input type="tel" id="phone_mobile" name="phone_mobile" required placeholder="+971 50...">
+            </div>
+            <div>
+                <label for="phone_office">Office Number</label>
+                <input type="tel" id="phone_office" name="phone_office" placeholder="+971 4..." value="+971 45572884">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" placeholder="www.pixl.ae" value="www.pixl.ae">
+        </div>
+
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address"
+                placeholder="38th Floor, Al Habtoor Business Tower, King Salman Bin Abdulaziz Al Saud St, Dubai Marina, Dubai, UAE"
+                value="38th Floor, Al Habtoor Business Tower, King Salman Bin Abdulaziz Al Saud St, Dubai Marina, Dubai, UAE">
+        </div>
+
+        <div class="form-group" id="calendar-link-group" style="display: none;">
+            <label for="calendar_link">Calendar Link</label>
+            <input type="url" id="calendar_link" name="calendar_link" placeholder="https://calendly.com/your-name">
+        </div>
+
+        <div class="form-group">
+            <label for="photo">Profile Photo (Max 50KB)</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <div class="file-hint">Supported formats: JPG, PNG. Image will be automatically resized/circular crop is
+                handled by CSS.</div>
+
+            {% if error %}
+            <div style="color: #ff6b6b; margin-top: 0.5rem; font-size: 0.9rem;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn-primary">Generate Signature</button>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modelSelect = document.getElementById('signature_model');
+        const websiteInput = document.getElementById('website');
+        const addressInput = document.getElementById('address');
+
+        const defaults = {
+            'pixl': {
+                'website': 'www.pixl.ae',
+                'address': '38th Floor, Al Habtoor Business Tower, King Salman Bin Abdulaziz Al Saud St, Dubai Marina, Dubai, UAE'
+            },
+            'invespy': {
+                'website': 'www.invespy.com',
+                'address': '1903, Swiss Tower, JLT, Dubai'
+            }
+        };
+
+        modelSelect.addEventListener('change', function () {
+            const selected = this.value;
+            if (defaults[selected]) {
+                websiteInput.value = defaults[selected].website;
+                addressInput.value = defaults[selected].address;
+            }
+        });
+
+        // Toggle Calendar Link visibility
+        function toggleCalendarInput() {
+            const calendarGroup = document.getElementById('calendar-link-group');
+            const calendarInput = document.getElementById('calendar_link');
+            if (modelSelect.value === 'pixl_calendar') {
+                calendarGroup.style.display = 'block';
+                calendarInput.required = true;
+            } else {
+                calendarGroup.style.display = 'none';
+                calendarInput.required = false;
+            }
+        }
+
+        modelSelect.addEventListener('change', toggleCalendarInput);
+        toggleCalendarInput(); // Run on load
+    });
+</script>
+{% endblock %}

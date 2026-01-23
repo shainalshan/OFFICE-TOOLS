@@ -1,0 +1,199 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+
+<div
+    style="position: relative; height: 800px; width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000;">
+    <div id="cesiumContainer" style="width: 100%; height: 100%;"></div>
+
+    <!-- Controls Overlay -->
+    <div
+        style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); width: 280px; z-index: 1000;">
+        <h3 style="margin-top: 0;">🌐 Project Layer</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">Loading models...</p>
+        <div id="project-list" style="max-height: 200px; overflow-y: auto;"></div>
+        <a href="{% url 'three_d_view:project_list' %}" class="btn-primary"
+            style="display: block; text-align: center; margin-top: 10px; background: #6366f1;">Manage / Upload</a>
+    </div>
+</div>
+
+<script>
+    // Force No Token
+    Cesium.Ion.defaultAccessToken = "";
+
+    // Initialize Viewer
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
+            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+        }),
+        terrainProvider: new Cesium.ArcGISTiledElevationTerrainProvider({
+            url: 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer'
+        }),
+        scene3DOnly: true,
+        baseLayerPicker: false,
+        geocoder: false,
+        homeButton: false,
+        infoBox: false,
+        sceneModePicker: false,
+        selectionIndicator: false,
+        timeline: false,
+        navigationHelpButton: false,
+        animation: false,
+        shadows: false,
+        terrainShadows: Cesium.ShadowMode.DISABLED,
+        creditContainer: document.createElement("div")
+    });
+
+    // Performance Settings
+    viewer.resolutionScale = 1.0;
+    viewer.scene.postProcessStages.fxaa.enabled = true;
+    viewer.scene.highDynamicRange = false;
+    viewer.scene.globe.enableLighting = true;
+    viewer.scene.globe.depthTestAgainstTerrain = true;
+    viewer.scene.screenSpaceCameraController.minimumZoomDistance = 1;
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+    viewer.scene.globe.maximumScreenSpaceError = 2;
+
+    // Load Buildings
+    try {
+        const buildings = viewer.scene.primitives.add(Cesium.createOsmBuildings());
+        buildings.style = new Cesium.Cesium3DTileStyle({
+            color: { conditions: [['true', 'color("white", 0.9)']] }
+        });
+    } catch (e) { }
+
+    // Debug UI Helper
+    function addDebugUI(name, entity) {
+        const container = document.getElementById('project-list');
+        const debugBox = document.createElement('div');
+        debugBox.style.marginTop = '10px';
+        debugBox.style.padding = '10px';
+        debugBox.style.background = 'rgba(255, 255, 255, 0.1)';
+        debugBox.style.borderRadius = '8px';
+        debugBox.innerHTML = `
+            <div style="font-size:0.8rem; font-weight:bold; color:white; margin-bottom:5px;">${name} Controls</div>
+            
+            <!-- Scale Control -->
+            <div style="display:flex; justify-content:space-between; color:#cbd5e1; font-size:0.75rem;">
+                <label>SIZE:</label>
+                <span id="scale-val-${entity.id}">1.0x</span>
+            </div>
+            <input type="range" min="1" max="1000" value="1" style="width:100%" 
+                oninput="updateScale('${entity.id}', this.value)">
+
+            <!-- Rotation Control -->
+            <div style="display:flex; justify-content:space-between; color:#cbd5e1; font-size:0.75rem; margin-top:5px;">
+                <label>ROTATION:</label>
+                <span id="rot-val-${entity.id}">0°</span>
+            </div>
+            <input type="range" min="0" max="360" value="0" style="width:100%" 
+                oninput="updateRotation('${entity.id}', this.value)">
+
+            <div id="status-${entity.id}" style="font-size:0.7rem; margin-top:5px; color:#fbbf24;">Loading...</div>
+        `;
+        container.appendChild(debugBox);
+
+        // Track ID mapping
+        window.entities = window.entities || {};
+        window.entities[entity.id] = entity;
+    }
+
+    // Global scaler function
+    window.updateScale = function (id, value) {
+        const entity = window.entities[id];
+        if (entity && entity.model) {
+            entity.model.scale = parseFloat(value);
+            document.getElementById(`scale-val-${id}`).innerText = value + 'x';
+        }
+    };
+
+    // Global rotation function
+    window.updateRotation = function (id, value) {
+        const entity = window.entities[id];
+        if (entity) {
+            const heading = Cesium.Math.toRadians(parseFloat(value));
+            const pitch = 0;
+            const roll = 0;
+            const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+            const orientation = Cesium.Transforms.headingPitchRollQuaternion(entity.position.getValue(Cesium.JulianDate.now()), hpr);
+            entity.orientation = orientation;
+            document.getElementById(`rot-val-${id}`).innerText = value + '°';
+        }
+    };
+
+    // Load Projects
+    fetch("{% url 'three_d_view:api_projects' %}")
+        .then(res => res.json())
+        .then(data => {
+            const listEl = document.getElementById('project-list');
+            listEl.innerHTML = '';
+
+            if (data.projects.length === 0) {
+                listEl.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8;">No projects found. Upload one!</div>';
+            }
+
+            data.projects.forEach(proj => {
+                // List Item (Fly To)
+                const item = document.createElement('div');
+                item.style.padding = '8px';
+                item.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                item.style.cursor = 'pointer';
+                item.innerHTML = `<strong>🏳️ ${proj.name} (Fly To)</strong>`;
+                item.onclick = () => {
+                    viewer.camera.flyTo({
+                        destination: Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt + 200),
+                        orientation: { pitch: Cesium.Math.toRadians(-45.0) }
+                    });
+                };
+                listEl.appendChild(item);
+
+                // Map Entity
+                const position = Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt);
+                const heading = Cesium.Math.toRadians(proj.heading);
+                const hpr = new Cesium.HeadingPitchRoll(heading, 0, 0);
+                const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr);
+
+                const entity = viewer.entities.add({
+                    name: proj.name,
+                    position: position,
+                    orientation: orientation,
+                    model: {
+                        uri: proj.url,
+                        scale: proj.scale || 1.0,
+                        minimumPixelSize: 64,
+                        maximumScale: 20000,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                    },
+                    point: {
+                        pixelSize: 10,
+                        color: Cesium.Color.RED,
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 2,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                    },
+                    // White Surround Mark (Target Circle)
+                    ellipse: {
+                        semiMinorAxis: 50.0, // 50 meters radius
+                        semiMajorAxis: 50.0,
+                        material: Cesium.Color.WHITE.withAlpha(0.3),
+                        outline: true,
+                        outlineColor: Cesium.Color.WHITE,
+                        outlineWidth: 1, // Very thin line
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                    }
+                });
+
+                // Add Debug UI
+                addDebugUI(proj.name, entity);
+            });
+            console.log("Projects loaded successfully.");
+        })
+        .catch(err => {
+            console.error("Error loading projects:", err);
+            document.getElementById('project-list').innerHTML = '<div style="color:red;">Error loading data.</div>';
+        });
+</script>
+{% endblock %}

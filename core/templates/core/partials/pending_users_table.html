@@ -1,0 +1,44 @@
+{% if pending_users %}
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+            <th style="padding: 1rem;">Username</th>
+            <th style="padding: 1rem;">Email</th>
+            <th style="padding: 1rem;">Date Joined</th>
+            <th style="padding: 1rem;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in pending_users %}
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 1rem;">{{ user.username }}</td>
+            <td style="padding: 1rem;">{{ user.email }}</td>
+            <td style="padding: 1rem;">{{ user.date_joined|date:"M d, Y" }}</td>
+            <td style="padding: 1rem;">
+                <form method="post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button type="submit" name="action" value="approve"
+                        style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                        Approve
+                    </button>
+                </form>
+                <form method="post" style="display: inline-block;"
+                    onsubmit="return confirm('Reject and delete this request?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button type="submit" name="action" value="reject"
+                        style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                        Reject
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="padding: 2rem; color: var(--text-secondary); text-align: center;">
+    No pending users.
+</div>
+{% endif %}

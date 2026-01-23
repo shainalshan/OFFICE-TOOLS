@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in" style="text-align: center; padding: 4rem;">
+    <div class="glass-container" style="max-width: 600px; margin: 0 auto; padding: 3rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🚧</div>
+        <h1 style="margin-bottom: 1rem;">{{ tool_name }}</h1>
+        <p style="color: var(--text-secondary); font-size: 1.2rem;">This tool is coming soon.</p>
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'home' %}" class="btn-primary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

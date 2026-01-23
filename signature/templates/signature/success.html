@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="glass-container animate-fade-in"
+    style="text-align: center; padding: 3rem; max-width: 500px; margin: 0 auto;">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+    <h2 style="margin-bottom: 1rem;">Signature Ready!</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        Your professional HTML signature has been generated successfully.
+    </p>
+
+    <a href="{% url 'download_signature' %}" class="btn-primary"
+        style="text-decoration: none; display: inline-block; width: auto; padding: 1rem 3rem;">
+        Download .html File
+    </a>
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'create_signature' %}" style="color: #667eea; font-size: 0.9rem;">Create Another</a>
+    </div>
+</div>
+{% endblock %}

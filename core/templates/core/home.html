@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <h1 style="text-align: center; margin-bottom: 2rem;">Select a Tool</h1>
+
+    <div class="tools-grid">
+        {% for tool in tools %}
+        {% if tool.slug == 'signature' %}
+        <a href="{% url 'create_signature' %}" class="tool-card glass-container">
+            <div class="tool-icon">✍️</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'ticketing' %}
+        <a href="{% url 'my_tickets' %}" class="tool-card glass-container">
+            <div class="tool-icon">🎫</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'assets' %}
+        <a href="{% url 'asset_dashboard' %}" class="tool-card glass-container">
+            <div class="tool-icon">📦</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'news' %}
+        <a href="{% url 'news_list' %}" class="tool-card glass-container">
+            <div class="tool-icon">📢</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'monitor' %}
+        <a href="{% url 'monitor_dashboard' %}" class="tool-card glass-container">
+            <div class="tool-icon">📊</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+        {% elif tool.slug == 'manage-contacts' or tool.slug == 'contacts' %}
+        <a href="{% url 'contact_home' %}" class="tool-card glass-container">
+            <div class="tool-icon">👥</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        <!-- Hidden: Accessed via Contact Numbers tool if permissions allow -->
+        {% elif tool.slug == 'hr-portal' or tool.slug == 'hr' or tool.slug == 'hr-manager' %}
+        <a href="{% url 'hr_admin_dashboard' %}" class="tool-card glass-container">
+            <div class="tool-icon">👔</div>
+            <div class="tool-title">{{ tool.name }}</div>
+        </a>
+
+        {% elif tool.slug == 'timesheet' or tool.slug == 'timesheets' %}
+        <a href="{% url 'hr_staff_portal' %}" class="tool-card glass-container">
+            <div class="tool-icon">⏱️</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'image-compressor' %}
+        <a href="{% url 'compress_image' %}" class="tool-card glass-container">
+            <div class="tool-icon">🖼️</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'chat' %}
+        <a href="{% url 'group_chat' %}" class="tool-card glass-container">
+            <div class="tool-icon">💬</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'converter' %}
+        <a href="{% url 'converter_home' %}" class="tool-card glass-container">
+            <div class="tool-icon">🔄</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'pdf-to-word' %}
+        <a href="{% url 'pdf_to_word' %}" class="tool-card glass-container">
+            <div class="tool-icon">📄</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == '3d-view' %}
+        <a href="{% url 'three_d_view:project_list' %}" class="tool-card glass-container">
+            <div class="tool-icon">🌍</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+        {% elif tool.slug == 'device-tracker' %}
+        <a href="{% url 'tracker_dashboard' %}" class="tool-card glass-container">
+            <div class="tool-icon">📡</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+        {% elif tool.slug == 'background-changer' %}
+        <a href="{% url 'upload_photo' %}" class="tool-card glass-container">
+            <div class="tool-icon">📸</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+        {% elif tool.slug == 'pixl_ai' or tool.slug == 'pixl-ai' %}
+        <a href="{% url 'ai_chat' %}" class="tool-card glass-container">
+            <div class="tool-icon">🤖</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+
+
+        {% else %}
+        <!-- Fallback for generic/future tools -->
+        <div class="tool-card glass-container" style="opacity: 0.7; cursor: not-allowed;">
+            <div class="tool-icon">🔧</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }} (Not Configured)</div>
+        </div>
+        {% endif %}
+        {% empty %}
+        {% if user.is_superuser %}
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">
+            <p>No tools are active. Go to Admin to create tools.</p>
+        </div>
+        {% else %}
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">
+            <p>You don't have access to any tools yet.</p>
+            <!-- Device Tracker -->
+            <a href="{% url 'tracker_dashboard' %}" class="tool-card hover-lift" style="text-decoration: none;">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    📡
+                </div>
+                <h3 class="tool-title">Device Monitor</h3>
+                <p class="tool-desc">Real-time CPU, RAM & Location tracking.</p>
+            </a>
+
+            <!-- Server Monitor -->
+            <p>Please contact the administrator.</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

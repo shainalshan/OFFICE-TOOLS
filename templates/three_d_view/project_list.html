@@ -1,0 +1,138 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Leaflet CSS & JS for Coordinate Picker -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+            🏗️ 3D Projects
+        </h1>
+        <a href="{% url 'three_d_view:map_view' %}" class="btn-primary" style="background: #10b981;">Open 3D Map 🌍</a>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="glass-container" style="padding: 2rem; margin-bottom: 2rem;">
+        <h3>Upload New Model (.glb / .gltf)</h3>
+        <form method="post" enctype="multipart/form-data" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- Name -->
+                <div>
+                    <label class="block mb-2 text-sm text-gray-400">Project Name</label>
+                    <input type="text" name="name" required
+                        class="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white outline-none focus:border-indigo-500">
+                </div>
+
+                <!-- File -->
+                <div>
+                    <label class="block mb-2 text-sm text-gray-400">3D Model File</label>
+                    <input type="file" name="model_file" accept=".glb,.gltf" required
+                        class="w-full text-slate-400 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
+                </div>
+
+                <!-- Map Picker (Full Width) -->
+                <div style="grid-column: 1 / span 2;">
+                    <label class="block mb-2 text-sm text-gray-400">Pick Location on Map (Click to set)</label>
+                    <div id="pickerMap" style="height: 300px; border-radius: 8px; border: 1px solid #475569;"></div>
+                </div>
+
+                <!-- Coords -->
+                <div>
+                    <label class="block mb-2 text-sm text-gray-400">Latitude</label>
+                    <input type="number" step="any" name="latitude" id="id_latitude" value="25.2048"
+                        class="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block mb-2 text-sm text-gray-400">Longitude</label>
+                    <input type="number" step="any" name="longitude" id="id_longitude" value="55.2708"
+                        class="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary"
+                style="margin-top: 1.5rem; width: 100%; justify-content: center;">Upload Project</button>
+        </form>
+    </div>
+
+    <!-- List -->
+    <div class="grid grid-cols-1 gap-4">
+        {% for project in projects %}
+        <div class="glass-container"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+            <div>
+                <div style="font-weight: bold; font-size: 1.1rem;">{{ project.name }}</div>
+                <div style="font-size: 0.8rem; color: #94a3b8;">
+                    {{ project.latitude }}, {{ project.longitude }} | {{ project.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+            <div>
+                <a href="{{ project.model_file.url }}" target="_blank"
+                    style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; margin-right: 1rem;">Download</a>
+
+                <a href="{% url 'three_d_view:delete_project' project.id %}"
+                    onclick="return confirm('Are you sure you want to delete {{ project.name }}?');"
+                    style="color: #ef4444; text-decoration: none; font-size: 0.9rem;">Delete</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #64748b; padding: 2rem;">No projects uploaded yet.</div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    // Initialize Leaflet Map
+    document.addEventListener('DOMContentLoaded', function () {
+        const defaultLat = 25.2048;
+        const defaultLon = 55.2708;
+
+        const map = L.map('pickerMap').setView([defaultLat, defaultLon], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker = L.marker([defaultLat, defaultLon], { draggable: true }).addTo(map);
+
+        function updateInputs(lat, lng) {
+            document.getElementById('id_latitude').value = lat.toFixed(6);
+            document.getElementById('id_longitude').value = lng.toFixed(6);
+        }
+
+        // Update on Drag
+        marker.on('dragend', function (e) {
+            const pos = marker.getLatLng();
+            updateInputs(pos.lat, pos.lng);
+        });
+
+        // Update on Map Click
+        map.on('click', function (e) {
+            marker.setLatLng(e.latlng);
+            updateInputs(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Sync inputs if user types manually
+        const latInput = document.getElementById('id_latitude');
+        const lonInput = document.getElementById('id_longitude');
+
+        function updateMarkerFromInput() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lonInput.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                marker.setLatLng([lat, lng]);
+                map.panTo([lat, lng]);
+            }
+        }
+
+        latInput.addEventListener('change', updateMarkerFromInput);
+        lonInput.addEventListener('change', updateMarkerFromInput);
+    });
+</script>
+{% endblock %}
