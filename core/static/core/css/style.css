@@ -2,84 +2,299 @@
     --primary-color: #6c5ce7;
     --secondary-color: #a29bfe;
     --bg-color: #0f0c29;
-    --card-bg: rgba(255, 255, 255, 0.1);
+    --sidebar-bg: #141036;
+    --header-bg: #141036;
+    --card-bg: rgba(255, 255, 255, 0.05); /* Slightly more transparent */
     --text-color: #ffffff;
     --text-muted: #b2bec3;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0;
     font-family: 'Outfit', sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background: #0f0c29; /* Fallback */
     color: var(--text-color);
-    min-height: 100vh;
-    overflow-x: hidden;
+    height: 100vh;
+    overflow: hidden; /* Prevent body scroll, use content scroll */
+}
+
+/* Layout */
+.layout-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    flex-shrink: 0;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    padding-left: 0.5rem;
+}
+
+.sidebar-brand i {
+    font-size: 1.5rem;
+    color: #ff7675; /* Rocket color */
+}
+
+.sidebar-brand h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: var(--hover-bg);
+    color: var(--text-color);
+}
+
+.nav-item.active {
+    /* Optional: varying active state style */
+    color: #74b9ff;
+}
+
+.nav-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #0f0c29, #302b63 50%, #24243e);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Top Header */
+.top-header {
+    height: 70px;
+    background-color: transparent; /* Or semi-transparent if preferred */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    border-bottom: 1px solid transparent; /* Keep it clean */
+}
+
+.search-bar {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 350px;
+}
+
+.search-bar input {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    outline: none;
+    width: 100%;
+    padding: 0; /* Override default input padding */
+}
+
+.search-bar i {
+    color: var(--text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: #feca57; /* Warning/Bell color usually, but used gold here */
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.icon-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #a29bfe;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.username {
+    font-weight: 500;
+}
+
+/* Content Scrollable */
+.content-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.background-animation {
+    /* Keep existing background animation but make sure it stays behind content */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px; /* Increased for dashboard view */
     margin: 0 auto;
     padding: 2rem;
     position: relative;
     z-index: 1;
 }
 
+/* Dashboard Header adjustments */
 .dashboard-header {
     text-align: center;
-    margin-bottom: 4rem;
-    animation: fadeInDown 1s ease-out;
+    margin-bottom: 3rem;
+    background: linear-gradient(90deg, rgba(85, 239, 196, 0.1), rgba(162, 155, 254, 0.1)); /* Optional banner bg */
+    padding: 2rem;
+    border-radius: 0 0 20px 20px;
+    margin-top: -2rem; /* Pull up to top */
+    margin-left: -2rem;
+    margin-right: -2rem;
+    /* Reset text align if needed, design shows Welcome msg */
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .dashboard-header h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
+    margin: 0;
     margin-bottom: 0.5rem;
-    background: linear-gradient(to right, #a29bfe, #ffeaa7);
+    background: white; /* Simpler for now */
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: white;
 }
 
+.dashboard-desc {
+    color: var(--text-muted);
+}
+
+/* Tools Grid */
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    padding: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 0;
 }
 
 .tool-card {
     background: var(--card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem 1.5rem;
     text-align: center;
     text-decoration: none;
     color: var(--text-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
 }
 
 .tool-card:hover:not(.disabled) {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
     border-color: var(--primary-color);
 }
 
 .tool-card .icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.tool-card h3 {
+    margin: 0.5rem 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .tool-card p {
     color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
 }
 
-.tool-card.disabled {
-    opacity: 0.6;
-    cursor: default;
-    filter: grayscale(0.8);
-}
-
-/* Form Styles */
+/* Form Styles Override if needed */
 .form-container {
     max-width: 600px;
     margin: 0 auto;
@@ -87,17 +302,7 @@ body {
     backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    border: 1px solid var(--border-color);
 }
 
 input[type="text"],
@@ -106,12 +311,12 @@ input[type="number"],
 input[type="file"] {
     width: 100%;
     padding: 0.8rem;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
     background: rgba(0, 0, 0, 0.2);
     color: white;
     font-family: inherit;
-    box-sizing: border-box; /* Fix padding issue */
+    /* Note: .search-bar input overrides some of this */
 }
 
 input:focus {
@@ -122,27 +327,16 @@ input:focus {
 button[type="submit"] {
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     border: none;
-    padding: 1rem 2rem;
+    padding: 0.8rem 2rem;
     color: white;
-    border-radius: 50px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1rem;
     width: 100%;
     font-weight: 600;
     transition: transform 0.2s;
 }
 
 button[type="submit"]:hover {
-    transform: scale(1.05);
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    transform: translateY(-2px);
 }

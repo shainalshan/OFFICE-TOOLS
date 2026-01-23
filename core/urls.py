@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/notifications/mark-all-unread/', views.mark_all_unread, name='mark_all_unread'),
     path('api/notifications/delete/<int:notification_id>/', views.delete_notification, name='delete_notification'),
     path('api/notifications/clear-all/', views.clear_all_notifications, name='clear_all_notifications'),
+    path('portal/', views.react_dashboard, name='react_dashboard'),
     path('test-error/', views.test_error, name='test_error'),
     path('profile/', views.profile_view, name='profile_view'),
 ]

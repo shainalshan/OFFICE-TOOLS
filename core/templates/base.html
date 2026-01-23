@@ -7,13 +7,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Office Portal{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="background-animation"></div>
-    <div class="container">
-        {% block content %}{% endblock %}
+    <div class="layout-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-rocket"></i>
+                <h2>Office Portal</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-anchor"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-folder"></i>
+                    <span>Projects</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Documents</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendar</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Team</span>
+                </a>
+                <a href="#" class="nav-item mt-auto">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn"><i class="fas fa-calendar"></i></button>
+                    <button class="icon-btn"><i class="fas fa-bell"></i></button>
+                    <div class="user-profile">
+                        <div class="avatar">A</div>
+                        <span class="username">admin</span>
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-scrollable">
+                <div class="background-animation"></div>
+                <div class="container">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 

@@ -28,6 +28,10 @@ def test_error(request):
     return redirect('home')
 
 
+def react_dashboard(request):
+    return render(request, 'core/react_dashboard.html')
+
+
 def home(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -41,7 +45,7 @@ def home(request):
         except UserToolAccess.DoesNotExist:
             tools = []
 
-    return render(request, 'core/home.html', {'tools': tools})
+    return render(request, 'core/react_dashboard.html')
 
 @login_required
 def set_user_tools(request):
