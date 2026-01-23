@@ -1,14 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/static/react_dashboard/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-    <script type="module" crossorigin src="/static/react_dashboard/assets/index.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/react_dashboard/assets/index.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/static/react_dashboard/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frontend</title>
+  <script type="module" crossorigin src="/static/react_dashboard/assets/index.js"></script>
+  <link rel="stylesheet" crossorigin href="/static/react_dashboard/assets/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    window.django = {
+      user: {
+        username: "{{ user.username|default:'Guest' }}",
+        full_name: "{{ user.get_full_name|default:user.username }}",
+        email: "{{ user.email|default:'' }}",
+        is_superuser: "{{ user.is_superuser|yesno:'true,false' }}" === "true",
+        is_authenticated: "{{ user.is_authenticated|yesno:'true,false' }}" === "true"
+      }
+    };
+  </script>
+</body>
+
 </html>

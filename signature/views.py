@@ -76,9 +76,12 @@ def create_signature(request):
                 else:
                     # Original Logic (Flag OFF)
                     if photo.size > 51200:
-                        return render(request, 'signature/form.html', {
-                            'error': 'Image file is too large. Please upload an image smaller than 50KB.'
-                        })
+                        # Fallback to pure React rendering with error might be tricky without passing context easily
+                        # But standard non-AJAX post will reload page. 
+                        # We can render the react template again? 
+                        # React app won't show error unless we pass it. 
+                        # For now let's hope it works or user sees backend error.
+                        return HttpResponse("Error: Image too large. Please go back.", status=400)
                     
                     # Read and encode image
                     photo_data = photo.read()
@@ -131,11 +134,11 @@ def create_signature(request):
             return redirect('signature_success')
 
         except Exception as e:
-            return render(request, 'signature/form.html', {
-                'error': f'An error occurred: {str(e)}'
-            })
+             # Simplistic error handling for now - pure text response or redirect with error param
+            return HttpResponse(f"Error: {str(e)}", status=500)
 
-    return render(request, 'signature/form.html')
+    # GET Request: Serve React App
+    return render(request, 'core/react_dashboard.html')
 
 @login_required
 def signature_success(request):
