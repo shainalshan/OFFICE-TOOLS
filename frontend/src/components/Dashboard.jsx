@@ -118,13 +118,13 @@ const Dashboard = () => {
                 <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-3xl opacity-50"></div>
             </div>
 
-            <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-10 shadow-2xl overflow-hidden">
+            <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-5 shadow-2xl overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                <div className="relative flex flex-col gap-2">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                        Welcome, shainal badusha!
+                <div className="relative flex flex-col gap-1">
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                        Welcome, {window.django?.user?.full_name || 'User'}!
                     </h1>
-                    <p className="text-blue-100 text-lg font-medium opacity-90">
+                    <p className="text-blue-100 text-sm font-medium opacity-90">
                         Here are your essential tools.
                     </p>
                 </div>
