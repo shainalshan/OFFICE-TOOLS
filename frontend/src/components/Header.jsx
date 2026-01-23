@@ -24,10 +24,12 @@ const Header = () => {
 
                 <div className="flex items-center gap-3 pl-6 border-l border-slate-800">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center text-sm font-bold text-white shadow-lg ring-2 ring-slate-800">
-                        SB
+                        {(window.django?.user?.username || 'U').substring(0, 2).toUpperCase()}
                     </div>
                     <div className="flex items-center gap-2 cursor-pointer group">
-                        <span className="text-sm font-medium text-slate-200 group-hover:text-white">admin</span>
+                        <span className="text-sm font-medium text-slate-200 group-hover:text-white">
+                            {window.django?.user?.username || 'User'}
+                        </span>
                         <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-white transition-transform group-hover:rotate-180" />
                     </div>
                 </div>
