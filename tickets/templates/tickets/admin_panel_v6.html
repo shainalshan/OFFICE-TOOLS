@@ -2,165 +2,226 @@
 {% load core_tags %}
 
 {% block content %}
-<div class="animate-fade-in">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style="margin:0;">Ticket Admin Panel</h1>
-        <div style="display: flex; gap: 1rem;">
+<div class="animate-fade-in space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Ticket Admin Panel</h1>
+            <p class="mt-1 text-slate-400">Manage and track support requests</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
             {% if user.is_superuser %}
-            <button onclick="toggleAssigneeModal()" class="btn-primary"
-                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">🕵️ Manage
-                Assignees</button>
-            <button onclick="toggleAccessModal()" class="btn-primary"
-                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">👥 Manage
-                Access</button>
-            <button onclick="toggleResetSequenceModal()" class="btn-primary"
-                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #ef4444; border: 1px solid #dc2626;">⚠️
-                Reset
-                Sequence</button>
+            <button onclick="toggleAssigneeModal()"
+                class="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white">
+                <span>🕵️</span> Manage Assignees
+            </button>
+            <button onclick="toggleAccessModal()"
+                class="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white">
+                <span>👥</span> Manage Access
+            </button>
+            <button onclick="toggleResetSequenceModal()"
+                class="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20 hover:text-red-300">
+                <span>⚠️</span> Reset Sequence
+            </button>
             {% endif %}
-            <a href="{% url 'ticket_reports' %}" class="btn-primary"
-                style="width: auto; margin-top: 0; padding: 0.75rem 1.5rem; background: #64748b;">📊 View Reports</a>
+            <a href="{% url 'ticket_reports' %}"
+                class="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500">
+                <span>📊</span> View Reports
+            </a>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="glass-container"
-        style="padding: 1rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center;">
-        <span style="font-weight: bold; color: var(--text-secondary);">Filter:</span>
-        <a href="?"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_active %}1{% else %}0.6{% endif %};">All</a>
-        <a href="?status=PENDING"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_pending %}1{% else %}0.6{% endif %};">Pending</a>
-        <a href="?status=IN_PROGRESS"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_in_progress %}1{% else %}0.6{% endif %};">In
-            Progress</a>
-        <a href="?status=COMPLETED"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_completed %}1{% else %}0.6{% endif %};">Completed</a>
-        <a href="?status=CANCELLED"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_cancelled %}1{% else %}0.6{% endif %};">Cancelled</a>
-        <a href="?priority=DEADLINE"
-            style="color: #fbbf24; text-decoration: none; opacity: {% if is_filter_deadline %}1{% else %}0.6{% endif %}; font-weight: bold;">
-            ⏳ Deadline Tickets
-        </a>
-        <span style="color: rgba(255,255,255,0.2);">|</span>
-        <a href="?assignee=none"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_unassigned %}1{% else %}0.6{% endif %};">Unassigned</a>
-        <a href="?assignee=me"
-            style="color: white; text-decoration: none; opacity: {% if is_filter_me %}1{% else %}0.6{% endif %};">My
-            Tickets</a>
+    <!-- Filters & Search -->
+    <div class="glass-container flex flex-col gap-6 p-6 md:flex-row md:items-center">
+        <div class="flex flex-wrap items-center gap-4 text-sm">
+            <span class="font-medium text-slate-400">Filter:</span>
+
+            <a href="?"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_active %}bg-blue-500/20 text-blue-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                All
+            </a>
+
+            <a href="?status=PENDING"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_pending %}bg-amber-500/20 text-amber-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                Pending
+            </a>
+
+            <a href="?status=IN_PROGRESS"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_in_progress %}bg-blue-500/20 text-blue-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                In Progress
+            </a>
+
+            <a href="?status=COMPLETED"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_completed %}bg-emerald-500/20 text-emerald-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                Completed
+            </a>
+
+            <a href="?status=CANCELLED"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_cancelled %}bg-red-500/20 text-red-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                Cancelled
+            </a>
+
+            <div class="h-6 w-px bg-slate-700 mx-2"></div>
+
+            <a href="?priority=DEADLINE"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition-colors {% if is_filter_deadline %}bg-amber-500/20 text-amber-400{% else %}text-amber-500/80 hover:text-amber-400 hover:bg-slate-800{% endif %}">
+                <span>⏳</span> Deadline
+            </a>
+
+            <a href="?assignee=none"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_unassigned %}bg-purple-500/20 text-purple-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                Unassigned
+            </a>
+
+            <a href="?assignee=me"
+                class="px-3 py-1.5 rounded-lg transition-colors {% if is_filter_me %}bg-blue-500/20 text-blue-400{% else %}text-slate-400 hover:text-white hover:bg-slate-800{% endif %}">
+                My Tickets
+            </a>
+        </div>
 
         <!-- Search -->
-        <form method="get" style="margin-left: auto; display: flex; gap: 0.5rem;">
-            <input type="text" name="ticket_search" placeholder="Search Ticket ID or User..."
-                value="{{ request.GET.ticket_search|default:'' }}"
-                style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
-            <button type="submit" class="btn-primary"
-                style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem;">Search</button>
+        <form method="get" class="ml-auto flex w-full gap-2 md:w-auto">
+            <div class="relative flex-1 md:w-64">
+                <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"></i>
+                <input type="text" name="ticket_search" placeholder="Search ID or User..."
+                    value="{{ request.GET.ticket_search|default:'' }}"
+                    class="w-full rounded-xl border border-slate-700 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            </div>
+            <button type="submit"
+                class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700 hover:text-white">
+                Search
+            </button>
         </form>
     </div>
 
     <!-- Ticket List -->
-    <div class="glass-container" style="padding: 0; overflow-x: auto;">
-        <table style="width: 100%; min-width: 1200px; border-collapse: collapse; table-layout: fixed;">
-            <thead>
-                <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                    <th style="padding: 1rem; width: 100px;">ID</th>
-                    <th style="padding: 1rem; width: 100px;">User</th>
-                    <th style="padding: 1rem; width: 100px;">Priority</th>
-                    <th style="padding: 1rem; width: 120px;">Status</th>
-                    <th style="padding: 1rem; width: 140px;">Assign To</th>
-                    <th style="padding: 1rem; width: 25%;">Resolution</th>
-                    <th style="padding: 1rem; width: 110px;">Deadline</th>
-                    <th style="padding: 1rem; width: 100px;">Created</th>
-                    <th style="padding: 1rem; width: 90px;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ticket in tickets %}
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td
-                        style="padding: 1rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <a href="{% url 'ticket_detail' ticket.ticket_id %}"
-                            style="color: #60a5fa; text-decoration: none;">
-                            {{ ticket.ticket_id }}
-                        </a>
-                    </td>
-                    <td style="padding: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                        title="{{ ticket.user.username }}">{{ ticket.user.username }}</td>
-                    <td style="padding: 1rem;">
-                        <span class="dot-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
-                    </td>
-
-                    <!-- Form spans multiple columns -->
-                    <form method="post" style="display: contents;">
-                        {% csrf_token %}
-                        <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-
-                        <td style="padding: 1rem;">
-                            <select name="new_status"
-                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="PENDING" {{ ticket.is_pending|yesno:"selected," }}>Pending</option>
-                                <option value="IN_PROGRESS" {{ ticket.is_in_progress|yesno:"selected," }}>In
-                                    Progress</option>
-                                <option value="COMPLETED" {{ ticket.is_completed|yesno:"selected," }}>Completed
-                                </option>
-                                <option value="CANCELLED" {{ ticket.is_cancelled|yesno:"selected," }}>Cancelled
-                                </option>
-                            </select>
+    <div class="glass-container overflow-hidden p-0">
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400">
+                        <th class="px-6 py-4 font-semibold">ID</th>
+                        <th class="px-6 py-4 font-semibold">User</th>
+                        <th class="px-6 py-4 font-semibold">Priority</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Assign To</th>
+                        <th class="px-6 py-4 font-semibold w-1/4">Resolution</th>
+                        <th class="px-6 py-4 font-semibold">Deadline</th>
+                        <th class="px-6 py-4 font-semibold">Created</th>
+                        <th class="px-6 py-4 font-semibold">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for ticket in tickets %}
+                    <tr class="group transition-colors hover:bg-slate-800/30">
+                        <td class="px-6 py-4">
+                            <a href="{% url 'ticket_detail' ticket.ticket_id %}"
+                                class="font-mono font-medium text-blue-400 hover:text-blue-300 hover:underline">
+                                {{ ticket.ticket_id }}
+                            </a>
                         </td>
-
-                        <td style="padding: 1rem;">
-                            <select name="assigned_to"
-                                style="padding: 0.25rem; font-size: 0.8rem; width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                                <option value="none">Unassigned</option>
-                                {% for user in users %}
-                                <option value="{{ user.id }}" {% if ticket.assigned_to and
-                                    ticket.assigned_to.id==user.id %}selected{% endif %}>{{ user.username }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-
-                        <td style="padding: 1rem;">
-                            <textarea name="resolution" rows="1" placeholder="Add comment..."
-                                style="width: 100%; padding: 0.25rem; font-size: 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; resize: vertical;">{{ ticket.resolution|default:'' }}</textarea>
-                        </td>
-
-                        <td style="padding: 1rem; font-size: 0.9rem;">
-                            {% if ticket.deadline %}
-                            <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
-                                style="color: #fbbf24; font-weight: bold;">
-                                {{ ticket.deadline|date:"M d, H:i" }}
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div
+                                    class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-400">
+                                    {{ ticket.user.username|slice:":1"|upper }}
+                                </div>
+                                <span class="text-slate-300" title="{{ ticket.user.username }}">{{ ticket.user.username
+                                    }}</span>
                             </div>
-                            {% else %}
-                            <span style="color: var(--text-secondary);">-</span>
-                            {% endif %}
                         </td>
-                        <td style="padding: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
-                            {{ ticket.created_at|date:"M d H:i" }}
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
+                                {% if ticket.priority == 'HIGH' or ticket.priority == 'CRITICAL' %}bg-red-500/10 text-red-400 ring-red-500/20
+                                {% elif ticket.priority == 'MEDIUM' %}bg-amber-500/10 text-amber-400 ring-amber-500/20
+                                {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">
+                                {{ ticket.get_priority_display }}
+                            </span>
                         </td>
 
-                        <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
-                            <button type="submit" class="btn-primary"
-                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto;"
-                                title="Save Changes">💾</button>
+                        <!-- Form spans multiple columns -->
+                        <form method="post" class="contents">
+                            {% csrf_token %}
+                            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
 
-                            <button type="submit" formaction="{% url 'delete_ticket' ticket.ticket_id %}"
-                                onclick="return confirm('Are you sure you want to delete ticket {{ ticket.ticket_id }}?');"
-                                style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; border-radius: 4px; cursor: pointer;"
-                                title="Delete Ticket">
-                                🗑️
-                            </button>
+                            <td class="px-6 py-4">
+                                <select name="new_status"
+                                    class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="PENDING" {{ ticket.is_pending|yesno:"selected," }}>Pending</option>
+                                    <option value="IN_PROGRESS" {{ ticket.is_in_progress|yesno:"selected," }}>In
+                                        Progress</option>
+                                    <option value="COMPLETED" {{ ticket.is_completed|yesno:"selected," }}>Completed
+                                    </option>
+                                    <option value="CANCELLED" {{ ticket.is_cancelled|yesno:"selected," }}>Cancelled
+                                    </option>
+                                </select>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <select name="assigned_to"
+                                    class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="none">Unassigned</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.id }}" {% if ticket.assigned_to and
+                                        ticket.assigned_to.id==user.id %}selected{% endif %}>
+                                        {{ user.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <textarea name="resolution" rows="1" placeholder="Add resolution..."
+                                    class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">{{ ticket.resolution|default:'' }}</textarea>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {% if ticket.deadline %}
+                                <div class="deadline-timer text-xs font-medium"
+                                    data-deadline="{{ ticket.deadline|date:'c' }}">
+                                    {{ ticket.deadline|date:"M d, H:i" }}
+                                </div>
+                                {% else %}
+                                <span class="text-slate-500">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <span class="text-slate-500 text-xs">{{ ticket.created_at|date:"M d" }}</span>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <button type="submit"
+                                        class="rounded-lg bg-blue-600/20 p-1.5 text-blue-400 transition-colors hover:bg-blue-600/30 hover:text-blue-300"
+                                        title="Save Changes">
+                                        <i data-lucide="save" class="h-4 w-4"></i>
+                                    </button>
+
+                                    <button type="submit" formaction="{% url 'delete_ticket' ticket.ticket_id %}"
+                                        onclick="return confirm('Are you sure you want to delete ticket {{ ticket.ticket_id }}?');"
+                                        class="rounded-lg bg-red-500/10 p-1.5 text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
+                                        title="Delete Ticket">
+                                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </form>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center gap-2">
+                                <i data-lucide="inbox" class="h-8 w-8 text-slate-600"></i>
+                                <p class="text-slate-500">No tickets found matching your filters.</p>
+                            </div>
                         </td>
-                    </form>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="9" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No tickets
-                        found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -168,24 +229,25 @@
 
 <!-- Reset Sequence Modal -->
 <div id="resetSequenceModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="glass-container" style="width: 400px; padding: 2rem; position: relative; border: 1px solid #ef4444;">
-        <button onclick="toggleResetSequenceModal()"
-            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
-        <h2 style="margin-top: 0; color: #ef4444;">⚠️ Danger Zone</h2>
-        <p style="color: #fda4af; font-weight: bold;">This action will PERMANENTLY DELETE ALL TICKETS and reset the ID
-            counter to PIXL00001.</p>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">This cannot be undone.</p>
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div class="glass-container relative w-full max-w-md border border-red-500/50 p-8">
+        <button onclick="toggleResetSequenceModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="h-6 w-6"></i>
+        </button>
+        <h2 class="mb-2 text-xl font-bold text-red-500">⚠️ Danger Zone</h2>
+        <p class="font-medium text-red-400">This action will PERMANENTLY DELETE ALL TICKETS and reset the ID counter to
+            PIXL00001.</p>
+        <p class="mb-6 mt-1 text-sm text-slate-400">This cannot be undone.</p>
 
         <form method="post" action="{% url 'reset_ticket_sequence' %}">
             {% csrf_token %}
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem;">Confirm Admin Password:</label>
+            <div class="mb-4">
+                <label class="mb-2 block text-sm font-medium text-slate-300">Confirm Admin Password:</label>
                 <input type="password" name="password" required
-                    style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900/50 p-3 text-white focus:border-red-500 focus:ring-1 focus:ring-red-500">
             </div>
             <button type="submit"
-                style="width: 100%; padding: 0.75rem; background: #ef4444; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer;">
+                class="w-full rounded-lg bg-red-600 py-3 font-bold text-white transition-colors hover:bg-red-700">
                 CONFIRM RESET
             </button>
         </form>
@@ -194,45 +256,40 @@
 
 {% block extra_js %}
 <!-- Access Management Modal -->
-<div id="accessModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="glass-container"
-        style="width: 500px; max-height: 80vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;">
+<div id="accessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left">
+        <div class="relative border-b border-slate-800 p-6">
+            <button onclick="toggleAccessModal()" class="absolute right-6 top-6 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+            <h2 class="text-xl font-bold text-white">Manage Ticket Admin Access</h2>
+            <p class="text-sm text-slate-400">Grant access to employees to view and manage tickets.</p>
 
-        <div
-            style="flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
-            <button onclick="toggleAccessModal()"
-                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
-            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Manage Ticket Admin Access</h2>
-            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Grant access to employees to view and
-                manage tickets.</p>
-
-            <!-- Search Access Input -->
             <input type="text" id="accessSearch" placeholder="Search user to grant access..."
                 onkeyup="filterAccessList()"
-                style="width: 100%; padding: 0.75rem; margin-top: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+                class="mt-4 w-full rounded-xl border border-slate-700 bg-slate-900/50 p-3 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
         </div>
 
-        <div style="flex-grow: 1; overflow-y: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tbody id="accessTableBody">
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <table class="w-full">
+                <tbody id="accessTableBody" class="divide-y divide-slate-800/50">
                     {% for item in users_with_access %}
-                    <tr class="access-row" data-username="{{ item.user.username|lower }}"
-                        data-has-access="{{ item.has_access|yesno:'true,false' }}"
-                        style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;">{{ item.user.username }}</td>
-                        <td style="padding: 1rem; text-align: right;">
-                            <form method="post" action="{% url 'manage_ticket_access' %}" style="margin: 0;">
+                    <tr class="access-row group transition-colors hover:bg-slate-800/30"
+                        data-username="{{ item.user.username|lower }}"
+                        data-has-access="{{ item.has_access|yesno:'true,false' }}">
+                        <td class="px-4 py-3 text-slate-300">{{ item.user.username }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <form method="post" action="{% url 'manage_ticket_access' %}" class="inline">
                                 {% csrf_token %}
                                 <input type="hidden" name="user_id" value="{{ item.user.id }}">
                                 {% if item.has_access %}
                                 <input type="hidden" name="action" value="revoke">
                                 <button type="submit"
-                                    style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;">Revoke</button>
+                                    class="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20">Revoke</button>
                                 {% else %}
                                 <input type="hidden" name="action" value="grant">
-                                <button type="submit" class="btn-primary"
-                                    style="padding: 0.25rem 0.75rem; width: auto; font-size: 0.9rem;">Grant</button>
+                                <button type="submit"
+                                    class="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-500">Grant</button>
                                 {% endif %}
                             </form>
                         </td>
@@ -245,121 +302,98 @@
 </div>
 
 <!-- Assignee Management Modal -->
-<div id="assigneeModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="glass-container"
-        style="width: 500px; max-height: 80vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;">
+<div id="assigneeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left">
+        <div class="relative border-b border-slate-800 p-6">
+            <button onclick="toggleAssigneeModal()" class="absolute right-6 top-6 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+            <h2 class="text-xl font-bold text-white">Manage Ticket Assignees</h2>
+            <p class="text-sm text-slate-400">Grant ability to be assigned to tickets.</p>
 
-        <div
-            style="flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
-            <button onclick="toggleAssigneeModal()"
-                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
-            <h2 style="margin-top: 0; margin-bottom: 0.5rem;">Manage Ticket Assignees</h2>
-            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Grant ability to be assigned to
-                tickets.</p>
-
-            <!-- Search Assignee Input -->
             <input type="text" id="assigneeSearch" placeholder="Search user to add as assignee..."
                 onkeyup="filterAssigneeList()"
-                style="width: 100%; padding: 0.75rem; margin-top: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white;">
+                class="mt-4 w-full rounded-xl border border-slate-700 bg-slate-900/50 p-3 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
         </div>
 
-        <div style="flex-grow: 1; overflow-y: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-
-                {% for item in users_with_assignee_role %}
-                <tr class="assignee-row" data-username="{{ item.user.username|lower }}"
-                    data-is-assignee="{{ item.is_assignee|yesno:'true,false' }}"
-                    style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 1rem;">{{ item.user.username }}</td>
-                    <td style="padding: 1rem; text-align: right;">
-                        <form method="post" action="{% url 'manage_ticket_assignees' %}" style="margin: 0;">
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ item.user.id }}">
-                            {% if item.is_assignee %}
-                            <input type="hidden" name="action" value="revoke">
-                            <button type="submit"
-                                style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;">Remove</button>
-                            {% else %}
-                            <input type="hidden" name="action" value="grant">
-                            <button type="submit" class="btn-primary"
-                                style="padding: 0.25rem 0.75rem; width: auto; font-size: 0.9rem;">Add</button>
-                            {% endif %}
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <table class="w-full">
+                <tbody class="divide-y divide-slate-800/50">
+                    {% for item in users_with_assignee_role %}
+                    <tr class="assignee-row group transition-colors hover:bg-slate-800/30"
+                        data-username="{{ item.user.username|lower }}"
+                        data-is-assignee="{{ item.is_assignee|yesno:'true,false' }}">
+                        <td class="px-4 py-3 text-slate-300">{{ item.user.username }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <form method="post" action="{% url 'manage_ticket_assignees' %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ item.user.id }}">
+                                {% if item.is_assignee %}
+                                <input type="hidden" name="action" value="revoke">
+                                <button type="submit"
+                                    class="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20">Remove</button>
+                                {% else %}
+                                <input type="hidden" name="action" value="grant">
+                                <button type="submit"
+                                    class="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-500">Add</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-</div>
-
-<!-- Reset Sequence Modal -->
-<div id="resetSequenceModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="glass-container" style="width: 400px; padding: 2rem; position: relative; border: 1px solid #ef4444;">
-        <button onclick="toggleResetSequenceModal()"
-            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">&times;</button>
-        <h2 style="margin-top: 0; color: #ef4444;">⚠️ Danger Zone</h2>
-        <p style="color: #fda4af; font-weight: bold;">This action will PERMANENTLY DELETE ALL TICKETS and reset the ID
-            counter to PIXL00001.</p>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">This cannot be undone.</p>
-
-        <form method="post" action="{% url 'reset_ticket_sequence' %}">
-            {% csrf_token %}
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem;">Confirm Admin Password:</label>
-                <input type="password" name="password" required
-                    style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
-            </div>
-            <button type="submit"
-                style="width: 100%; padding: 0.75rem; background: #ef4444; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer;">
-                CONFIRM RESET
-            </button>
-        </form>
     </div>
 </div>
 
 <script>
     function toggleAccessModal() {
         const modal = document.getElementById('accessModal');
-        if (modal.style.display === 'none') {
-            modal.style.display = 'flex';
-            filterAccessList(); // Reset filter/view on open
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            filterAccessList();
         } else {
-            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
     }
 
     function toggleAssigneeModal() {
         const modal = document.getElementById('assigneeModal');
-        if (modal.style.display === 'none') {
-            modal.style.display = 'flex';
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             filterAssigneeList();
         } else {
-            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    function toggleResetSequenceModal() {
+        const modal = document.getElementById('resetSequenceModal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
     }
 
     // Close modals when clicking outside
     document.getElementById('accessModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            toggleAccessModal();
-        }
+        if (e.target === this) toggleAccessModal();
     });
 
     document.getElementById('assigneeModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            toggleAssigneeModal();
-        }
+        if (e.target === this) toggleAssigneeModal();
     });
 
     document.getElementById('resetSequenceModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            toggleResetSequenceModal();
-        }
+        if (e.target === this) toggleResetSequenceModal();
     });
 
     function filterAccessList() {
@@ -395,10 +429,6 @@
         for (let i = 0; i < rows.length; i++) {
             const username = rows[i].getAttribute('data-username');
             const isAssignee = rows[i].getAttribute('data-is-assignee') === 'true';
-
-            // Logic:
-            // 1. If search is empty: Show ONLY isAssignee=true (similar to Access modal)
-            // 2. If search is NOT empty: Show if username matches
 
             if (filter === "") {
                 if (isAssignee) {
@@ -436,15 +466,15 @@
                 timeStr += `${minutes}m`;
 
                 timer.innerHTML = "⏳ " + timeStr;
-                timer.style.color = "#fbbf24";
+                timer.className = "deadline-timer text-xs font-medium text-amber-400"; // Reset class
 
                 if (days === 0 && hours < 4) {
-                    timer.style.color = "#ef4444";
+                    timer.classList.remove('text-amber-400');
+                    timer.classList.add('text-red-400');
                 }
             } else {
                 timer.innerHTML = "⚠️ BREACHED";
-                timer.style.color = "#ef4444";
-                timer.style.fontWeight = "bold";
+                timer.className = "deadline-timer text-xs font-bold text-red-500";
             }
         });
     }
@@ -453,19 +483,5 @@
     setInterval(updateCountdowns, 1000);
     // Initial call after small delay to let render finish
     setTimeout(updateCountdowns, 100);
-    function toggleResetSequenceModal() {
-        const modal = document.getElementById('resetSequenceModal');
-        if (modal.style.display === 'none') {
-            modal.style.display = 'flex';
-        } else {
-            modal.style.display = 'none';
-        }
-    }
-
-    document.getElementById('resetSequenceModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            toggleResetSequenceModal();
-        }
-    });
 </script>
 {% endblock %}

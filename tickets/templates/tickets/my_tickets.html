@@ -1,88 +1,118 @@
 {% extends 'core/base_modern.html' %}
 
 {% block content %}
-<div class="animate-fade-in">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style="margin:0;">My Tickets</h1>
-        <div style="display: flex; gap: 1rem;">
+<div class="animate-fade-in space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-3xl font-bold text-white">My Tickets</h1>
+        <div class="flex gap-3">
             {% if is_admin %}
-            <a href="{% url 'admin_ticket_panel' %}" class="btn-secondary">🔧 Admin Panel</a>
+            <a href="{% url 'admin_ticket_panel' %}"
+                class="rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white">
+                🔧 Admin Panel
+            </a>
             {% endif %}
-            <a href="{% url 'ticket_history' %}" class="btn-secondary">📜 History</a>
-            <a href="{% url 'create_ticket' %}" class="btn-primary">+ New Ticket</a>
+            <a href="{% url 'ticket_history' %}"
+                class="rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white">
+                📜 History
+            </a>
+            <a href="{% url 'create_ticket' %}"
+                class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/30">
+                + New Ticket
+            </a>
         </div>
     </div>
 
-    {% for ticket in tickets %}
-    <div class="ticket-card priority-{{ ticket.priority }}"
-        onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'" style="cursor: pointer;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div>
-                <span style="font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_id }}</span>
-                <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
-                    {{ ticket.created_at|date:"M d, H:i" }}
-                </span>
+    <div class="grid gap-4">
+        {% for ticket in tickets %}
+        <div onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'"
+            class="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-5 transition-all hover:border-blue-500/30 hover:bg-slate-900/80 hover:shadow-lg hover:shadow-blue-500/5
+            {% if ticket.priority == 'HIGH' or ticket.priority == 'CRITICAL' %}border-l-4 border-l-red-500{% elif ticket.priority == 'MEDIUM' %}border-l-4 border-l-amber-500{% else %}border-l-4 border-l-blue-500{% endif %}">
 
-                {% if ticket.deadline %}
-                <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
-                    style="color: #fbbf24; font-size: 0.9rem; font-weight: bold; margin-top: 0.25rem;">
-                    ⏳ Calculating...
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">{{
+                            ticket.ticket_id }}</span>
+                        <span class="rounded-lg bg-slate-800 px-2 py-1 text-xs font-medium text-slate-400">
+                            {{ ticket.created_at|date:"M d, H:i" }}
+                        </span>
+                    </div>
+
+                    {% if ticket.deadline %}
+                    <div class="deadline-timer mt-1 text-xs font-bold text-amber-500"
+                        data-deadline="{{ ticket.deadline|date:'c' }}">
+                        ⏳ Calculating...
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+                <span class="rounded-lg px-2.5 py-1 text-xs font-medium
+                    {% if ticket.status == 'PENDING' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
+                    {% elif ticket.status == 'IN_PROGRESS' %}bg-blue-500/10 text-blue-500 border border-blue-500/20
+                    {% elif ticket.status == 'COMPLETED' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
+                    {% else %}bg-slate-500/10 text-slate-500 border border-slate-500/20{% endif %}">
+                    {{ ticket.get_status_display }}
+                </span>
             </div>
-            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
-        </div>
 
-        <p style="margin: 0; color: var(--text-secondary); word-wrap: break-word; overflow-wrap: break-word;">
-            {{ ticket.issue }}
-        </p>
+            <p class="line-clamp-2 text-sm text-slate-400 group-hover:text-slate-300">
+                {{ ticket.issue }}
+            </p>
 
-        {% if ticket.status == 'COMPLETED' %}
-        <div style="margin-top: 1rem; font-size: 0.8rem; color: #4ade80;">
-            ✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}
+            {% if ticket.status == 'COMPLETED' %}
+            <div class="mt-2 text-xs font-medium text-emerald-500">
+                ✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+        {% empty %}
+        <div class="glass-container flex flex-col items-center justify-center p-12 text-center">
+            <div class="mb-4 rounded-full bg-slate-800/50 p-4">
+                <i data-lucide="ticket" class="h-8 w-8 text-slate-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-300">No active tickets</h3>
+            <p class="text-sm text-slate-500">Completed tickets disappear after 24 hours.</p>
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="glass-container" style="text-align: center; padding: 3rem;">
-        <p style="color: var(--text-secondary);">No active tickets.</p>
-        <p style="font-size: 0.9rem; opacity: 0.7;">Completed tickets disappear after 24 hours.</p>
-    </div>
-    {% endfor %}
 
     {% if assigned_tickets %}
-    <h2 style="margin-top: 3rem; margin-bottom: 1.5rem;">Assigned to Me</h2>
-    {% for ticket in assigned_tickets %}
-    <div class="ticket-card priority-{{ ticket.priority }}"
-        onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'" style="cursor: pointer;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div>
-                <span style="font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_id }}</span>
-                <span style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 0.5rem;">
-                    From: {{ ticket.user.username }} • {{ ticket.created_at|date:"M d, H:i" }}
-                </span>
+    <h2 class="mt-8 text-xl font-bold text-white">Assigned to Me</h2>
+    <div class="grid gap-4">
+        {% for ticket in assigned_tickets %}
+        <div onclick="location.href='{% url 'ticket_detail' ticket.ticket_id %}'"
+            class="group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-5 transition-all hover:border-purple-500/30 hover:bg-slate-900/80 hover:shadow-lg hover:shadow-purple-500/5 border-l-4 border-l-purple-500">
 
-                {% if ticket.deadline %}
-                <div class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
-                    style="color: #fbbf24; font-size: 0.9rem; font-weight: bold; margin-top: 0.25rem;">
-                    ⏳ Calculating...
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">{{
+                            ticket.ticket_id }}</span>
+                        <span class="text-xs text-slate-500">
+                            From: <strong class="text-slate-400">{{ ticket.user.username }}</strong>
+                        </span>
+                    </div>
+
+                    {% if ticket.deadline %}
+                    <div class="deadline-timer mt-1 text-xs font-bold text-amber-500"
+                        data-deadline="{{ ticket.deadline|date:'c' }}">
+                        ⏳ Calculating...
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+                <span class="rounded-lg px-2.5 py-1 text-xs font-medium
+                    {% if ticket.status == 'PENDING' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
+                    {% elif ticket.status == 'IN_PROGRESS' %}bg-blue-500/10 text-blue-500 border border-blue-500/20
+                    {% else %}bg-slate-500/10 text-slate-500 border border-slate-500/20{% endif %}">
+                    {{ ticket.get_status_display }}
+                </span>
             </div>
-            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
-        </div>
 
-        <p style="margin: 0; color: var(--text-secondary); word-wrap: break-word; overflow-wrap: break-word;">
-            {{ ticket.issue }}
-        </p>
-
-        {% if ticket.status == 'COMPLETED' %}
-        <div style="margin-top: 1rem; font-size: 0.8rem; color: #4ade80;">
-            ✓ Completed on {{ ticket.completed_at|date:"M d, H:i" }}
+            <p class="line-clamp-2 text-sm text-slate-400 group-hover:text-slate-300">
+                {{ ticket.issue }}
+            </p>
         </div>
-        {% endif %}
+        {% endfor %}
     </div>
-    {% endfor %}
     {% endif %}
 </div>
 {% endblock %}
@@ -108,17 +138,16 @@
                 timeStr += `${minutes}m remaining`;
 
                 timer.innerText = "⏳ " + timeStr;
-                timer.style.color = "#fbbf24"; // Warning color
 
                 // Critical (less than 4 hours)
                 if (days === 0 && hours < 4) {
-                    timer.style.color = "#ef4444"; // Red
-                    timer.style.animation = "pulse 1.5s infinite";
+                    timer.className = "deadline-timer mt-1 text-xs font-bold text-red-500 animate-pulse";
+                } else {
+                    timer.className = "deadline-timer mt-1 text-xs font-bold text-amber-500";
                 }
             } else {
                 timer.innerHTML = "⚠️ BREACHED";
-                timer.style.color = "#ef4444";
-                timer.style.fontWeight = "bold";
+                timer.className = "deadline-timer mt-1 text-xs font-bold text-red-500";
             }
         });
     }
@@ -128,20 +157,4 @@
     // Initial call
     updateCountdowns();
 </script>
-
-<style>
-    @keyframes pulse {
-        0% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.5;
-        }
-
-        100% {
-            opacity: 1;
-        }
-    }
-</style>
 {% endblock %}

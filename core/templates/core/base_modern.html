@@ -269,7 +269,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Fetch notifications on load to show badge if needed
-            fetchNotifications();
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+            setInterval(checkBellNotifications, 10000); // Poll every 10s
+            checkBellNotifications();
 
             // Click outside to close
             document.addEventListener('click', function (event) {
@@ -277,7 +281,6 @@
                 const bellBtn = document.getElementById('notification-btn');
 
                 // If click is on the button itself (or its children), ignore it. 
-                // The toggleNotifications() function will handle opening/closing.
                 if (bellBtn && bellBtn.contains(event.target)) {
                     return;
                 }
@@ -291,45 +294,311 @@
             });
         });
 
+        // --- Globals ---
+        let lastUnreadCount = 0;
+        let currentPage = 1;
+        // Ensure we can find the token
+        const csrfContainer = document.querySelector('#csrf-token-container input');
+        const csrfToken = csrfContainer ? csrfContainer.value : '';
+
         function toggleNotifications() {
             const el = document.getElementById('notification-dropdown');
-            if (el.style.display === 'none' || el.classList.contains('hidden') || !el.style.display) {
+            // Check if hidden by class or style
+            const isHidden = el.style.display === 'none' || el.classList.contains('hidden') || !el.style.display;
+
+            if (isHidden) {
                 el.style.display = 'block';
                 el.classList.remove('hidden');
-                fetchNotifications();
+                fetchNotifications(1);
             } else {
                 el.style.display = 'none';
                 el.classList.add('hidden');
             }
         }
 
-        function fetchNotifications() {
-            // Add cache buster to prevent browser caching of API response
+        function fetchNotifications(page) {
+            currentPage = page;
+            const list = document.getElementById('notification-list');
             const timestamp = new Date().getTime();
-            // Simplified fetch for demo - assuming existing api works
-            fetch(`/api/notifications/list/?t=${timestamp}`)
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return res.json();
-                })
+
+            if (page === 1) {
+                list.innerHTML = '';
+                // Header with Mark All Read
+                const header = document.createElement('div');
+                header.className = 'p-3 border-b border-slate-800 flex justify-between items-center';
+
+                const leftSpan = document.createElement('span');
+                leftSpan.className = 'text-xs text-slate-400';
+                leftSpan.innerText = 'Recent';
+                header.appendChild(leftSpan);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'flex gap-3';
+
+                const unreadLink = document.createElement('span');
+                unreadLink.innerText = 'Unread';
+                unreadLink.className = 'text-xs text-amber-500 cursor-pointer hover:underline';
+                unreadLink.onclick = (e) => { e.stopPropagation(); markAllUnread(); };
+
+                const readLink = document.createElement('span');
+                readLink.innerText = 'Read';
+                readLink.className = 'text-xs text-blue-500 cursor-pointer hover:underline';
+                readLink.onclick = (e) => { e.stopPropagation(); markAllRead(); };
+
+                const clearLink = document.createElement('span');
+                clearLink.innerText = 'Clear';
+                clearLink.className = 'text-xs text-red-500 cursor-pointer hover:underline';
+                clearLink.onclick = (e) => { e.stopPropagation(); clearAllNotifications(); };
+
+                actionsDiv.appendChild(unreadLink);
+                actionsDiv.appendChild(readLink);
+                actionsDiv.appendChild(clearLink);
+                header.appendChild(actionsDiv);
+
+                list.appendChild(header);
+            } else {
+                // Remove existing load more button if any
+                const existingBtn = document.getElementById('load-more-btn');
+                if (existingBtn) existingBtn.remove();
+            }
+
+            fetch(`/api/notifications/list/?page=${page}&t=${timestamp}`, { credentials: 'include' })
+                .then(res => res.json())
                 .then(data => {
-                    const list = document.getElementById('notification-list');
-                    if (data.notifications && data.notifications.length > 0) {
-                        list.innerHTML = data.notifications.map(n => `
-                            <div class="mb-2 pb-2 border-b border-slate-800 last:border-0">
-                                <p class="text-white font-medium text-xs">${n.title}</p>
-                                <p class="text-slate-400 text-xs">${n.message}</p>
-                            </div>
-                        `).join('');
-                        document.getElementById('header-notification-badge').style.display = 'block';
-                    } else {
-                        list.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">No notifications</div>';
-                        document.getElementById('header-notification-badge').style.display = 'none';
+                    if (page === 1 && data.notifications.length === 0) {
+                        list.innerHTML += '<div class="p-4 text-center text-sm text-slate-400">No notifications</div>';
+                        updateBadge(0);
+                        return;
                     }
+
+                    data.notifications.forEach(n => {
+                        const item = document.createElement('div');
+                        // Tailwind styling
+                        const bgClass = n.is_read ? 'bg-transparent' : 'bg-indigo-500/10';
+                        item.className = `p-3 border-b border-slate-800 relative transition-colors hover:bg-slate-800 ${bgClass}`;
+
+                        // Action Buttons Logic
+                        let actionHtml = '';
+                        if (n.is_read) {
+                            actionHtml = `
+                                <div class="absolute top-2 right-2 flex gap-2">
+                                    <span title="Mark as Unread" onclick="event.stopPropagation(); markUnread(${n.id})" class="cursor-pointer text-xs text-slate-500 hover:text-white">⭕</span>
+                                    <span title="Clear" onclick="event.stopPropagation(); deleteNotification(${n.id})" class="cursor-pointer text-xs text-red-500 hover:text-red-400">✕</span>
+                                </div>`;
+                        } else {
+                            actionHtml = `
+                                <div class="absolute top-2 right-2 flex gap-2">
+                                    <span title="Mark as Read" onclick="event.stopPropagation(); markRead(${n.id})" class="cursor-pointer text-xs text-blue-500 hover:text-blue-400">●</span>
+                                    <span title="Clear" onclick="event.stopPropagation(); deleteNotification(${n.id})" class="cursor-pointer text-xs text-red-500 hover:text-red-400">✕</span>
+                                </div>`;
+                        }
+
+                        // Main Click Navigate
+                        item.onclick = (e) => {
+                            // If clicking actions, stop prop is handled inline.
+                            // But just in case
+                            if (n.link && n.link !== '#') window.location.href = n.link;
+                        };
+
+                        item.innerHTML = `
+            ${actionHtml}
+            <div class="mr-8">
+                <div class="font-medium text-sm text-slate-200 mb-1 ${n.is_read ? '' : 'font-semibold'}">${n.title}</div>
+                <div class="text-xs text-slate-400 leading-relaxed">${n.message}</div>
+                <div class="text-[10px] text-slate-500 mt-2">${n.created_at}</div>
+            </div>
+            `;
+                        list.appendChild(item);
+                    });
+
+                    // Load More Button
+                    if (data.has_next) {
+                        const btnContainer = document.createElement('div');
+                        btnContainer.className = 'p-2 bg-slate-900/50 text-center';
+
+                        const btn = document.createElement('button');
+                        btn.id = 'load-more-btn';
+                        btn.className = 'text-xs text-blue-400 hover:text-white font-medium py-1 px-3 rounded transition-colors';
+                        btn.innerText = 'Load More';
+                        btn.onclick = (e) => {
+                            e.stopPropagation();
+                            fetchNotifications(page + 1);
+                        };
+
+                        btnContainer.appendChild(btn);
+                        list.appendChild(btnContainer);
+                    }
+
+                    // Re-init lucide icons if we added any (not currently using lucide in direct innerHTML but good practice)
+                    if (window.lucide) window.lucide.createIcons();
                 })
                 .catch(err => console.error('Error fetching notifications:', err));
+        }
+
+        function updateBadge(count) {
+            const badge = document.getElementById('header-notification-badge');
+            if (badge) {
+                if (count > 0) {
+                    badge.innerText = count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function markRead(id) {
+            fetch(`/api/notifications/mark-read/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        checkBellNotifications();
+                        // Refetch curent view
+                        fetchNotifications(1);
+                    }
+                });
+        }
+
+        function markUnread(id) {
+            fetch(`/api/notifications/mark-unread/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        checkBellNotifications();
+                        fetchNotifications(1);
+                    }
+                });
+        }
+
+        function deleteNotification(id) {
+            fetch(`/api/notifications/delete/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        checkBellNotifications();
+                        fetchNotifications(1);
+                    }
+                });
+        }
+
+        function clearAllNotifications() {
+            // Optimistic UI
+            document.getElementById('notification-list').innerHTML = '<div class="p-4 text-center text-sm text-slate-400">No notifications</div>';
+            updateBadge(0);
+
+            fetch('/api/notifications/clear-all/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        checkBellNotifications();
+                        showToast('Success', 'All notifications cleared');
+                    }
+                })
+                .catch(err => console.error('Clear all failed:', err));
+        }
+
+        function markAllRead() {
+            fetch('/api/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchNotifications(1);
+                        checkBellNotifications();
+                    }
+                });
+        }
+
+        function markAllUnread() {
+            fetch('/api/notifications/mark-all-unread/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        fetchNotifications(1);
+                        checkBellNotifications();
+                    }
+                });
+        }
+
+        function checkBellNotifications() {
+            const timestamp = new Date().getTime();
+            fetch(`/api/notifications/check/?t=${timestamp}`, { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                    updateBadge(data.unread_count);
+
+                    if (data.unread_count > lastUnreadCount) {
+                        fetchLatestAndToast();
+                    }
+                    lastUnreadCount = data.unread_count;
+                })
+                .catch(err => console.log('Notification check failed', err));
+        }
+
+        function fetchLatestAndToast() {
+            fetch('/api/notifications/list/', { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.notifications.length > 0) {
+                        const latest = data.notifications[0];
+                        // Only toast if unread
+                        if (!latest.is_read) {
+                            showToast(latest.title, latest.message);
+                        }
+                    }
+                });
+        }
+
+        function showToast(title, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(toast);
+
+            // Animation logic matching CSS
+            requestAnimationFrame(() => toast.classList.add('show'));
+
+            // Browser Notification
+            if (Notification.permission === "granted") {
+                // Assuming static path is known or we can just send title/body
+                new Notification(title, { body: message });
+            }
+
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
         }
     </script>
 

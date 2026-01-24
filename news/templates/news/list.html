@@ -1,7 +1,7 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_modern.html' %}
 {% load static %}
 
-{% block content %}
+{% block extra_head %}
 <style>
     /* Custom Scrollbar for Chat */
     .chat-container::-webkit-scrollbar {
@@ -105,9 +105,11 @@
         }
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="animate-fade-in"
-    style="height: calc(100vh - 140px); display: flex; flex-direction: column; background: #0b141a; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+    style="height: calc(100vh - 10rem); display: flex; flex-direction: column; background: #0b141a; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
 
     <!-- Chat Header -->
     <div
@@ -120,7 +122,8 @@
             <div style="font-weight: bold; color: #e9edef;">
                 Office Updates <span style="font-size: 0.7em; opacity: 0.5;">v2.0</span>
             </div>
-            <div id="status-text" style="font-size: 0.75rem; color: #4ade80; display: flex; align-items: center; gap: 4px;">
+            <div id="status-text"
+                style="font-size: 0.75rem; color: #4ade80; display: flex; align-items: center; gap: 4px;">
                 <span id="status-dot" class="animate-pulse"
                     style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; display: inline-block;"></span>
                 Live
@@ -228,52 +231,78 @@
             style="flex: 1; background: #2a3942; border: none; padding: 0.75rem 1rem; border-radius: 8px; color: #e9edef; font-size: 1rem; outline: none;">
 
         <!-- Send Button -->
+        <button type="submit"
+            style="background: #00a884; color: white; border: none; padding: 0.75rem; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 1rem;">➤</span>
         </button>
     </form>
 </div>
 
 <script>
-    // Store latest ID from server-rendered template
-    let lastMsgId = {% if news.first %}{{ news.first.id }}{% else %}0{% endif %};
+    // 0. Immediate Visual Confirmation
+    // Run immediately to prove script is parsed
+    (function () {
+        const st = document.getElementById('status-text');
+        if (st) {
+            st.innerText = "Connecting...";
+            st.style.color = '#fbbf24'; // Amber
+        }
+    })();
+
+    // 1. Initialize State Safe
+    // Use string parsing to avoid syntax errors if variable is empty
+    let lastMsgId = parseInt("{{ news.first.id|default:'0' }}") || 0;
     const currentUser = "{{ user.username }}";
 
-    // Elements
+    // 2. DOM Elements
     const statusDot = document.getElementById('status-dot');
     const statusText = document.getElementById('status-text');
     const msgWrapper = document.getElementById('messages-wrapper');
 
-    // Audio for new messages
+    // 3. Audio Setup
     const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2346/2346-preview.mp3');
 
+    // 4. Polling Function
     async function syncChat() {
         try {
             const now = new Date();
-            const timeString = now.toLocaleTimeString();
+            const response = await fetch(`/news/api/messages/?since_id=${lastMsgId}&t=${now.getTime()}`, {
+                credentials: 'include'
+            });
 
-            const response = await fetch(`/news/api/messages/?since_id=${lastMsgId}&t=${now.getTime()}`);
-
-            if (!response.ok) throw new Error("Network response was not ok");
+            if (!response.ok) {
+                console.error("Fetch failed", response.status);
+                throw new Error(`HTTP ${response.status}`);
+            }
 
             const data = await response.json();
 
-            // Update UI to show we are alive
-            if (statusDot) statusDot.style.background = '#4ade80'; // Green
-            if (statusText) statusText.innerText = `Live (Checked ${timeString})`;
+            // Success: Update Connection Status
+            if (statusDot) statusDot.style.background = '#4ade80';
+            if (statusText) {
+                statusText.innerHTML = `
+                    <span id="status-dot" class="animate-pulse" style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; display: inline-block;"></span>
+                    Live (${now.toLocaleTimeString()})
+                `;
+                statusText.style.color = '#4ade80';
+            }
 
-            if (data.messages.length > 0) {
-                // Play sound
-                notificationSound.play().catch(e => console.log("Audio play failed (user interaction needed)"));
+            // Process New Messages
+            if (data.messages && data.messages.length > 0) {
+                notificationSound.play().catch(e => console.log("Audio play failed"));
 
                 data.messages.forEach(msg => {
                     lastMsgId = Math.max(lastMsgId, msg.id);
 
-                    // Prevent duplicate
                     if (document.getElementById(`msg-${msg.id}`)) return;
 
                     const isMe = msg.is_me;
                     const rowClass = isMe ? 'me' : 'other';
                     const bubbleClass = isMe ? 'me' : 'other';
-                    const authorColor = msg.type === 'EVENT' ? '#f59e0b' : (msg.type === 'NOTIFICATION' ? '#ef4444' : '#53bdeb');
+
+                    let authorColor = '#53bdeb';
+                    if (msg.type === 'EVENT') authorColor = '#f59e0b';
+                    if (msg.type === 'NOTIFICATION') authorColor = '#ef4444';
 
                     let attachmentHtml = '';
                     if (msg.attachment_url) {
@@ -290,7 +319,7 @@
                         <div style="margin-top: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.2rem;">📎</span>
                             <a href="${msg.attachment_url}" target="_blank" style="color: #53bdeb; text-decoration: none; font-size: 0.9rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Attachment</a>
-                             <a href="${msg.attachment_url}" download style="margin-left: auto; text-decoration: none; font-size: 1.2rem;">⬇️</a>
+                            <a href="${msg.attachment_url}" download style="margin-left: auto; text-decoration: none; font-size: 1.2rem;">⬇️</a>
                         </div>`;
                     }
 
@@ -313,14 +342,19 @@
                     if (msgWrapper) msgWrapper.insertAdjacentHTML('afterbegin', html);
                 });
             }
+
         } catch (e) {
-            console.error("Sync error:", e);
-            if (statusDot) statusDot.style.background = '#ef4444'; // Red
-            if (statusText) statusText.innerText = "Connection Lost";
+            console.error("Polling error:", e);
+            if (statusDot) statusDot.style.background = '#ef4444';
+            if (statusText) {
+                statusText.innerText = `Error: ${e.message}`;
+                statusText.style.color = '#ef4444';
+            }
         }
     }
 
-    // Poll every 1.5 seconds
+    // 5. Start Polling
+    setTimeout(syncChat, 500); // Initial delay
     setInterval(syncChat, 1500);
 </script>
 {% endblock %}
