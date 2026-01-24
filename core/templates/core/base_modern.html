@@ -110,7 +110,8 @@
     <!-- Sidebar -->
     <div class="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950">
         <!-- Logo -->
-        <div class="flex items-center gap-3 border-b border-slate-800/50 p-6">
+        <a href="/"
+            class="flex items-center gap-3 border-b border-slate-800/50 p-6 transition-colors hover:bg-slate-900/50">
             <div
                 class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-500 to-purple-600">
                 <i data-lucide="rocket" class="h-5 w-5 text-white"></i>
@@ -118,7 +119,7 @@
             <span class="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-xl font-bold text-transparent">
                 Office Portal
             </span>
-        </div>
+        </a>
 
         <!-- Nav Items -->
         <nav class="flex-1 space-y-2 overflow-y-auto px-4 py-6 custom-scrollbar">
@@ -157,10 +158,10 @@
                 <span class="font-medium">Calendar</span>
             </a>
 
-            <a href="#"
-                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+            <a href="{% url 'contact_home' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'contacts' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
                 <i data-lucide="users" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
-                <span class="font-medium">Team</span>
+                <span class="font-medium">Directory</span>
             </a>
 
             <a href="{% url 'profile_view' %}"
