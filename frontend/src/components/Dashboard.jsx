@@ -45,20 +45,7 @@ const Dashboard = () => {
             color: 'from-purple-500 to-indigo-500',
             url: '/contacts/'
         },
-        {
-            title: 'Group Chat',
-            description: 'Team collaboration',
-            icon: '💬',
-            color: 'from-blue-400 to-indigo-500',
-            url: '/tools/chat/'
-        },
-        {
-            title: 'PDF to Word',
-            description: 'Convert PDF documents',
-            icon: '📄',
-            color: 'from-red-400 to-red-600',
-            url: '/tools/pdf-to-word/'
-        },
+
         {
             title: 'Image Compressor',
             description: 'Optimize image sizes',
