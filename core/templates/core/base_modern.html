@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Office Portal{% endblock %}</title>
+
+    <!-- React App CSS (Tailwind) -->
+    <link rel="stylesheet" crossorigin href="/static/react_dashboard/assets/index.css">
+
+    <!-- Existing Styles (for specific components not covered by Tailwind) -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1.5">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom scrollbar to match React app */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.8);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 1);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-slate-950 selection:bg-blue-500/30">
+
+    <!-- Sidebar -->
+    <div class="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 border-b border-slate-800/50 p-6">
+            <div
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-500 to-purple-600">
+                <i data-lucide="rocket" class="h-5 w-5 text-white"></i>
+            </div>
+            <span class="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-xl font-bold text-transparent">
+                Office Portal
+            </span>
+        </div>
+
+        <!-- Nav Items -->
+        <nav class="flex-1 space-y-2 overflow-y-auto px-4 py-6 custom-scrollbar">
+            {% if user.is_superuser %}
+            <a href="{% url 'admin_dashboard' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="layout-dashboard"
+                    class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Admin Dashboard</span>
+            </a>
+            {% endif %}
+
+            <a href="/"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="folder-kanban"
+                    class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Projects</span>
+            </a>
+
+            <!-- IT Support (Active Consideration) -->
+            <a href="{% url 'my_tickets' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'tickets' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
+                <i data-lucide="ticket" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">IT Support</span>
+            </a>
+
+            <a href="#"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="file-text" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Documents</span>
+            </a>
+
+            <a href="#"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="calendar" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Calendar</span>
+            </a>
+
+            <a href="#"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="users" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Team</span>
+            </a>
+
+            <a href="{% url 'profile_view' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="settings" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Settings</span>
+            </a>
+        </nav>
+
+        <!-- Bottom Actions -->
+        <div class="border-t border-slate-800/50 bg-slate-950 px-4 py-2">
+            <a href="{% url 'logout' %}"
+                class="group mb-2 flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-red-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-300">
+                <i data-lucide="log-out" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Logout</span>
+            </a>
+
+            <div class="rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-4">
+                <p class="text-xs text-slate-400">Logged in as</p>
+                <p class="truncate text-sm font-semibold text-white"
+                    title="{{ user.get_full_name|default:user.username }}">
+                    {{ user.get_full_name|default:user.username }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="relative ml-64">
+        <!-- Header -->
+        <header
+            class="fixed left-64 right-0 top-0 z-10 flex h-20 items-center justify-between border-b border-slate-800/50 bg-slate-950/80 px-8 backdrop-blur-md transition-all duration-300">
+            <!-- Search -->
+            <div class="relative w-96 font-sans">
+                <i data-lucide="search" class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" placeholder="Search tools, projects, documents..."
+                    class="w-full rounded-xl border border-slate-700 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 transition-all focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-6">
+                <button
+                    class="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
+                    <i data-lucide="calendar" class="h-5 w-5"></i>
+                </button>
+                <div class="relative">
+                    <button
+                        class="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                        onclick="toggleNotifications()">
+                        <i data-lucide="bell" class="h-5 w-5"></i>
+                        <span id="header-notification-badge"
+                            class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-slate-950"
+                            style="display: none;"></span>
+                    </button>
+                    <!-- Notification Dropdown Placeholder -->
+                    <div id="notification-dropdown"
+                        class="absolute right-0 top-full mt-2 hidden w-80 rounded-xl border border-slate-800 bg-slate-900 p-4 shadow-xl">
+                        <!-- Re-use existing notification logic if possible or keep simple -->
+                        <div id="notification-list" class="text-sm text-slate-400">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 border-l border-slate-800 pl-6">
+                    <div
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 text-sm font-bold text-white shadow-lg ring-2 ring-slate-800">
+                        {{ user.username|slice:":2"|upper }}
+                    </div>
+                    <div class="group flex cursor-pointer items-center gap-2">
+                        <span class="text-sm font-medium text-slate-200 group-hover:text-white">
+                            {{ user.username }}
+                        </span>
+                        <i data-lucide="chevron-down"
+                            class="h-4 w-4 text-slate-400 transition-transform group-hover:rotate-180 group-hover:text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="min-h-screen px-8 pb-8" style="padding-top: 7rem;">
+            {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                <div class="mb-2 rounded-lg border px-4 py-3 text-center text-sm
+                    {% if message.tags == 'success' %}border-emerald-700 bg-emerald-500/10 text-emerald-400
+                    {% elif message.tags == 'error' %}border-red-700 bg-red-500/10 text-red-400
+                    {% elif message.tags == 'warning' %}border-amber-700 bg-amber-500/10 text-amber-400
+                    {% else %}border-slate-700 bg-slate-800 text-slate-300{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+    <!-- Basic Notification Script Port -->
+    <script>
+        function toggleNotifications() {
+            const el = document.getElementById('notification-dropdown');
+            if (el.style.display === 'none' || el.classList.contains('hidden')) {
+                el.style.display = 'block';
+                el.classList.remove('hidden');
+                fetchNotifications();
+            } else {
+                el.style.display = 'none';
+                el.classList.add('hidden');
+            }
+        }
+
+        function fetchNotifications() {
+            // Simplified fetch for demo - assuming existing api works
+            fetch('/api/notifications/list/')
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('notification-list');
+                    if (data.notifications && data.notifications.length > 0) {
+                        list.innerHTML = data.notifications.map(n => `
+                            <div class="mb-2 pb-2 border-b border-slate-800 last:border-0">
+                                <p class="text-white font-medium text-xs">${n.title}</p>
+                                <p class="text-slate-400 text-xs">${n.message}</p>
+                            </div>
+                        `).join('');
+                        document.getElementById('header-notification-badge').style.display = 'block';
+                    } else {
+                        list.innerHTML = 'No notifications';
+                        document.getElementById('header-notification-badge').style.display = 'none';
+                    }
+                })
+                .catch(err => console.log(err));
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>
