@@ -34,11 +34,78 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: rgba(100, 116, 139, 1);
         }
+
+        /* Toast Styles */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-left: 4px solid #6366f1;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            min-width: 320px;
+            transform: translateX(120%);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-content {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .toast-close:hover {
+            color: white;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 
 <body class="bg-slate-950 selection:bg-blue-500/30">
+    <div id="toast-container"></div>
+    <div id="csrf-token-container" style="display: none;">{% csrf_token %}</div>
 
     <!-- Sidebar -->
     <div class="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-950">
@@ -140,7 +207,7 @@
                     <i data-lucide="calendar" class="h-5 w-5"></i>
                 </button>
                 <div class="relative">
-                    <button
+                    <button id="notification-btn"
                         class="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
                         onclick="toggleNotifications()">
                         <i data-lucide="bell" class="h-5 w-5"></i>
@@ -148,11 +215,12 @@
                             class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-slate-950"
                             style="display: none;"></span>
                     </button>
-                    <!-- Notification Dropdown Placeholder -->
+                    <!-- Notification Dropdown -->
                     <div id="notification-dropdown"
-                        class="absolute right-0 top-full mt-2 hidden w-80 rounded-xl border border-slate-800 bg-slate-900 p-4 shadow-xl">
-                        <!-- Re-use existing notification logic if possible or keep simple -->
-                        <div id="notification-list" class="text-sm text-slate-400">Loading...</div>
+                        class="absolute right-0 top-full mt-2 hidden w-80 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-xl z-50">
+                        <div id="notification-list" class="max-h-96 overflow-y-auto custom-scrollbar">
+                            <div class="p-4 text-center text-sm text-slate-400">Loading...</div>
+                        </div>
                     </div>
                 </div>
 
@@ -199,9 +267,33 @@
 
     <!-- Basic Notification Script Port -->
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fetch notifications on load to show badge if needed
+            fetchNotifications();
+
+            // Click outside to close
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('notification-dropdown');
+                const bellBtn = document.getElementById('notification-btn');
+
+                // If click is on the button itself (or its children), ignore it. 
+                // The toggleNotifications() function will handle opening/closing.
+                if (bellBtn && bellBtn.contains(event.target)) {
+                    return;
+                }
+
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    if (!dropdown.contains(event.target)) {
+                        dropdown.style.display = 'none';
+                        dropdown.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
         function toggleNotifications() {
             const el = document.getElementById('notification-dropdown');
-            if (el.style.display === 'none' || el.classList.contains('hidden')) {
+            if (el.style.display === 'none' || el.classList.contains('hidden') || !el.style.display) {
                 el.style.display = 'block';
                 el.classList.remove('hidden');
                 fetchNotifications();
@@ -212,9 +304,16 @@
         }
 
         function fetchNotifications() {
+            // Add cache buster to prevent browser caching of API response
+            const timestamp = new Date().getTime();
             // Simplified fetch for demo - assuming existing api works
-            fetch('/api/notifications/list/')
-                .then(res => res.json())
+            fetch(`/api/notifications/list/?t=${timestamp}`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return res.json();
+                })
                 .then(data => {
                     const list = document.getElementById('notification-list');
                     if (data.notifications && data.notifications.length > 0) {
@@ -226,11 +325,11 @@
                         `).join('');
                         document.getElementById('header-notification-badge').style.display = 'block';
                     } else {
-                        list.innerHTML = 'No notifications';
+                        list.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">No notifications</div>';
                         document.getElementById('header-notification-badge').style.display = 'none';
                     }
                 })
-                .catch(err => console.log(err));
+                .catch(err => console.error('Error fetching notifications:', err));
         }
     </script>
 
