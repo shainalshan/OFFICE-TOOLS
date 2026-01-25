@@ -70,8 +70,7 @@
                     <div>
                         <h1 class="text-3xl font-bold text-white">{{ ticket.ticket_id }}</h1>
                         <p class="mt-1 text-sm text-slate-400">
-                            Created by <span class="text-slate-300">{{ ticket.user.username }}</span> on {{
-                            ticket.created_at|date:"M d, Y H:i" }}
+                            Created by <span class="text-slate-300">{{ ticket.user.username }}</span> on {{ ticket.created_at|date:"M d, Y H:i" }}
                         </p>
                     </div>
                     <div class="flex items-center gap-3">
@@ -79,19 +78,15 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="status">
                             <select name="new_status" onchange="this.form.submit()"
-                                class="rounded-lg px-3 py-1.5 text-sm font-medium border-0 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all
-                                {% if ticket.status == 'PENDING' %}bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 focus:ring-amber-500
-                                {% elif ticket.status == 'IN_PROGRESS' %}bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 focus:ring-blue-500
-                                {% elif ticket.status == 'COMPLETED' %}bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 focus:ring-emerald-500
-                                {% else %}bg-slate-500/10 text-slate-500 hover:bg-slate-500/20 focus:ring-slate-500{% endif %}">
-                                <option value="PENDING" {% if ticket.status == 'PENDING' %}selected{% endif %}>Pending
-                                </option>
-                                <option value="IN_PROGRESS" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In
-                                    Progress</option>
-                                <option value="COMPLETED" {% if ticket.status == 'COMPLETED' %}selected{% endif %}>
-                                    Completed</option>
-                                <option value="CANCELLED" {% if ticket.status == 'CANCELLED' %}selected{% endif %}>
-                                    Cancelled</option>
+                                class="rounded-xl px-5 py-2.5 text-base font-bold border-0 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg appearance-none pr-10 relative
+                                {% if ticket.status == 'PENDING' %}bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 focus:ring-amber-500 shadow-amber-500/10
+                                {% elif ticket.status == 'IN_PROGRESS' %}bg-blue-500/20 text-blue-500 hover:bg-blue-500/30 focus:ring-blue-500 shadow-blue-500/10
+                                {% elif ticket.status == 'COMPLETED' %}bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30 focus:ring-emerald-500 shadow-emerald-500/10
+                                {% else %}bg-slate-500/20 text-slate-500 hover:bg-slate-500/30 focus:ring-slate-500 shadow-slate-500/10{% endif %}">
+                                <option value="PENDING" class="bg-slate-900 text-amber-500" {% if ticket.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="IN_PROGRESS" class="bg-slate-900 text-blue-500" {% if ticket.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                <option value="COMPLETED" class="bg-slate-900 text-emerald-500" {% if ticket.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                <option value="CANCELLED" class="bg-slate-900 text-slate-500" {% if ticket.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
                             </select>
                         </form>
                     </div>
@@ -144,8 +139,7 @@
                             </div>
                             <div
                                 class="rounded-r-xl rounded-bl-xl border border-slate-700/50 bg-slate-800/50 p-4 text-slate-300">
-                                <div class="whitespace-pre-wrap break-words leading-relaxed">{{
-                                    comment.text|linebreaksbr }}</div>
+                                <div class="whitespace-pre-wrap break-words leading-relaxed">{{ comment.text|linebreaksbr }}</div>
 
                                 <!-- Comment Attachments -->
                                 {% flag "ticket_attachments" %}
