@@ -1,11 +1,15 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_modern.html' %}
 
 {% block content %}
 <style>
     /* Global Overrides for Chat Page */
-    body {
-        background: radial-gradient(circle at 10% 20%, rgb(0, 0, 0) 0%, rgb(30, 30, 40) 90.2%);
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* Scoped to this container instead of body */
+    .chat-page-container {
+        /* background: radial-gradient(circle at 10% 20%, rgb(0, 0, 0) 0%, rgb(30, 30, 40) 90.2%); */
+        /* font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; */
+        /* Using base font and background, but we can add specific chat-theme overrides here if needed */
+        height: calc(100vh - 9rem);
+        /* Fit within the viewport minus header/padding */
     }
 
     /* Glass Container */
@@ -17,7 +21,8 @@
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         border-radius: 24px;
         overflow: hidden;
-        height: 80vh;
+        height: 100%;
+        /* Fill the container */
         display: flex;
         flex-direction: column;
     }
@@ -52,6 +57,20 @@
         flex-direction: column;
         gap: 20px;
         scroll-behavior: smooth;
+    }
+
+    /* Custom Scrollbar for Chat Area */
+    .chat-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-area::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .chat-area::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
     }
 
     /* Bubbles */
@@ -311,15 +330,13 @@
         fill: white;
     }
 
-    background: rgba(255, 255, 255, 0.15);
-    }
-
     .mode-toggles input[type="radio"] {
         accent-color: #00ddeb;
     }
 </style>
 
-<div class="container mt-4">
+<!-- Main Container to replace container class and fix positioning -->
+<div class="chat-page-container">
     <div class="glass-panel">
         <!-- Header -->
         <div class="chat-header">
@@ -332,7 +349,7 @@
                 <button onclick="restartEngine()" class="btn btn-sm btn-glass">⚡ Restart AI</button>
                 <a href="{% url 'knowledge_list' %}" class="btn btn-sm btn-glass">Manage Memory</a>
                 {% else %}
-                <a href="{% url 'home' %}" class="btn btn-sm btn-glass">Exit</a>
+                <!-- <a href="{% url 'home' %}" class="btn btn-sm btn-glass">Exit</a> -->
                 {% endif %}
             </div>
         </div>
