@@ -60,13 +60,7 @@ const Dashboard = () => {
             color: 'from-violet-400 to-fuchsia-500',
             url: '/3d/'
         },
-        {
-            title: 'Device Tracker',
-            description: 'Track assigned devices',
-            icon: '📍',
-            color: 'from-cyan-400 to-blue-500',
-            url: '/tracker/'
-        },
+
         {
             title: 'Background Remover',
             description: 'Remove image backgrounds',
