@@ -1,177 +1,72 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_modern.html' %}
 {% load static %}
 
 {% block title %}File Converter & Compressor{% endblock %}
 
 {% block content %}
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<div class="animate-fade-in">
+    <div class="max-w-2xl mx-auto">
+        <div
+            class="glass-card bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-8 text-center border-b border-slate-800/50">
+                <h3
+                    class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-2">
+                    File Wizard</h3>
+                <p class="text-slate-400 text-sm">Convert & Compress with ease</p>
+            </div>
 
-<style>
-    /* Override global font */
-    body {
-        font-family: 'Outfit', sans-serif;
-        /* Exact match from dashboard styles.css */
-        background-color: #0f172a !important;
-        background-image:
-            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-            radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%) !important;
-        background-attachment: fixed !important;
-        min-height: 100vh;
-        color: white;
-    }
+            <div class="p-8">
+                <form id="uploadForm" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="space-y-2">
+                        <label for="fileInput" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select
+                            File</label>
+                        <input type="file" id="fileInput" name="file" required
+                            class="w-full file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 bg-slate-950/50 border border-slate-700 rounded-xl text-slate-300 focus:outline-none transition-all cursor-pointer">
+                        <div class="text-xs text-slate-500">Max size: 500MB</div>
+                    </div>
 
-    /* Glass Effect Card - Matching Dashboard Cards */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.05);
-        /* --card-bg */
-        backdrop-filter: blur(16px) saturate(180%);
-        -webkit-backdrop-filter: blur(16px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        /* --glass-border */
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        border-radius: 16px;
-        overflow: hidden;
-    }
+                    <div class="space-y-2">
+                        <label for="operationSelect"
+                            class="text-xs font-bold text-slate-400 uppercase tracking-wider">Action</label>
+                        <select id="operationSelect" name="operation" required
+                            class="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none cursor-pointer">
+                            <option value="" selected disabled>Choose what to do...</option>
+                            <option value="pdf_to_docx">📄 PDF to Word</option>
+                            <option value="pdf_to_pptx">📊 PDF to PowerPoint</option>
+                            <option value="pptx_to_pdf">📑 PowerPoint to PDF</option>
+                            <option value="excel_to_pdf">📈 Excel to PDF</option>
+                            <option value="pdf_to_excel">📉 PDF to Excel</option>
+                            <option value="compress_pdf">🗜️ Compress PDF</option>
+                            <option value="compress_image">🖼️ Compress Image</option>
+                        </select>
+                    </div>
 
-    .card-header-custom {
-        background: transparent;
-        padding: 2rem 1rem 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                        Start Processing
+                    </button>
+                </form>
 
-    /* Inputs Matching Dashboard Forms */
-    .form-control,
-    .form-select {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white !important;
-        border-radius: 8px;
-        padding: 0.75rem;
-        font-size: 1rem;
-    }
+                <div id="progressSection" class="mt-8 space-y-4" style="display: none;">
+                    <div class="flex justify-between items-center">
+                        <h6 id="statusText" class="text-white font-medium">Initializing...</h6>
+                        <span id="percentText" class="text-slate-400 text-sm">0%</span>
+                    </div>
 
-    .form-control:focus,
-    .form-select:focus {
-        background: rgba(0, 0, 0, 0.3) !important;
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
-        color: white;
-    }
+                    <div class="h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="progressBar"
+                            class="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-300 ease-out"
+                            style="width: 0%"></div>
+                    </div>
 
-    /* File Input Styling */
-    input[type="file"]::file-selector-button {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: #e2e8f0;
-        padding: 8px 16px;
-        margin-right: 15px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* Primary Start Button - using --primary-gradient */
-    .btn-gradient {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        color: white;
-        padding: 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-
-    .btn-gradient:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-    }
-
-    /* Download Button */
-    .btn-download {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: none;
-        padding: 10px 24px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .btn-download:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-    }
-
-    h3 {
-        font-weight: 600;
-    }
-</style>
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
-            <div class="glass-card">
-                <div class="card-header-custom text-center">
-                    <h3 class="mb-0 text-white fw-bold">File Wizard</h3>
-                    <p class="text-white-50 mb-0 small">Convert & Compress with ease</p>
-                </div>
-                <div class="card-body p-4">
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-4">
-                            <label for="fileInput" class="form-label text-white-50 small text-uppercase fw-bold">Select
-                                File</label>
-                            <input type="file" class="form-control" id="fileInput" name="file" required>
-                            <div class="form-text text-white-50 ms-1">Max size: 500MB</div>
-                        </div>
-                        <div class="mb-4">
-                            <label for="operationSelect"
-                                class="form-label text-white-50 small text-uppercase fw-bold">Action</label>
-                            <select class="form-select" id="operationSelect" name="operation" required>
-                                <option value="" selected disabled>Choose what to do...</option>
-                                <option value="pdf_to_docx">📄 PDF to Word</option>
-                                <option value="pdf_to_pptx">📊 PDF to PowerPoint</option>
-                                <option value="pptx_to_pdf">📑 PowerPoint to PDF</option>
-                                <option value="excel_to_pdf">📈 Excel to PDF</option>
-                                <option value="pdf_to_excel">📉 PDF to Excel</option>
-                                <hr>
-                                <option value="compress_pdf">🗜️ Compress PDF</option>
-                                <option value="compress_image">🖼️ Compress Image</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-gradient w-100">Start Processing</button>
-                    </form>
-
-                    <div id="progressSection" class="mt-4" style="display: none;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 id="statusText" class="text-white mb-0">Initializing...</h6>
-                            <span id="percentText" class="text-white-50 small">0%</span>
-                        </div>
-
-                        <div class="progress"
-                            style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                                role="progressbar"
-                                style="width: 0%; background: linear-gradient(90deg, #ec4899, #8b5cf6);"></div>
-                        </div>
-
-                        <div id="resultSection" class="mt-4 text-center" style="display: none;">
-                            <div class="mb-3">
-                                <span style="font-size: 3rem;">✨</span>
-                            </div>
-                            <h5 class="text-white mb-3">Your file is ready!</h5>
-                            <a id="downloadLink" href="#" class="btn btn-download">Download Result</a>
-                        </div>
+                    <div id="resultSection" class="mt-8 text-center space-y-4 animate-fade-in" style="display: none;">
+                        <div class="text-4xl mb-4">✨</div>
+                        <h5 class="text-xl font-semibold text-white">Your file is ready!</h5>
+                        <a id="downloadLink" href="#"
+                            class="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-[1.05]">
+                            Download Result
+                        </a>
                     </div>
                 </div>
             </div>
@@ -199,7 +94,8 @@
         progressBar.style.width = '10%';
         percentText.innerText = '10%';
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+        // Updated standard spinner to simple text for now, or could use an icon if available.
+        submitBtn.innerHTML = 'Uploading...';
         statusText.innerText = "Uploading file...";
 
         fetch("{% url 'upload_file' %}", {
@@ -225,8 +121,8 @@
 
         function handleError(msg) {
             statusText.innerText = "Error: " + msg;
-            statusText.className = "text-danger fw-bold";
-            progressBar.className = "progress-bar bg-danger";
+            statusText.className = "text-red-400 font-bold";
+            progressBar.className = "h-full bg-red-500 transition-all duration-300 ease-out";
             progressBar.style.width = "100%";
             submitBtn.disabled = false;
             submitBtn.innerText = "Start Processing";
@@ -238,23 +134,19 @@
                     .then(response => response.json())
                     .then(data => {
                         statusText.innerText = data.message;
-                        statusText.className = "text-white mb-0";
+                        statusText.className = "text-white font-medium";
 
                         if (data.status === 'completed') {
                             clearInterval(intervalId);
                             progressBar.style.width = '100%';
                             percentText.innerText = '100%';
-                            progressBar.classList.remove('progress-bar-animated');
 
                             submitBtn.innerHTML = 'Start Processing';
-                            // Keeping submit disabled until they refresh or we reset? 
-                            // Better allow new upload.
                             submitBtn.disabled = false;
 
                             if (data.download_url) {
                                 downloadLink.href = data.download_url;
                                 resultSection.style.display = 'block';
-                                // statusText.innerText = "Completed!";
                             }
                         } else if (data.status === 'failed') {
                             clearInterval(intervalId);
@@ -269,7 +161,7 @@
                             }
                         }
                     });
-            }, 5000);
+            }, 2000); // Check every 2s
         }
     });
 </script>
