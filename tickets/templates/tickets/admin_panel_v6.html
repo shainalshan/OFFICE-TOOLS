@@ -163,8 +163,7 @@
                                     class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                     <option value="none">Unassigned</option>
                                     {% for user in users %}
-                                    <option value="{{ user.id }}" {% if ticket.assigned_to and
-                                        ticket.assigned_to.id==user.id %}selected{% endif %}>
+                                    <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                                         {{ user.username }}
                                     </option>
                                     {% endfor %}
@@ -230,7 +229,7 @@
 <!-- Reset Sequence Modal -->
 <div id="resetSequenceModal"
     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="glass-container relative w-full max-w-md border border-red-500/50 p-8">
+    <div class="glass-container relative w-full max-w-md border border-red-500/50 p-8" style="max-width: 28rem;">
         <button onclick="toggleResetSequenceModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
             <i data-lucide="x" class="h-6 w-6"></i>
         </button>
@@ -257,7 +256,7 @@
 {% block extra_js %}
 <!-- Access Management Modal -->
 <div id="accessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left">
+    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left" style="max-width: 36rem;">
         <div class="relative border-b border-slate-800 p-6">
             <button onclick="toggleAccessModal()" class="absolute right-6 top-6 text-slate-400 hover:text-white">
                 <i data-lucide="x" class="h-6 w-6"></i>
@@ -303,7 +302,7 @@
 
 <!-- Assignee Management Modal -->
 <div id="assigneeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left">
+    <div class="glass-container flex h-[80vh] w-full max-w-xl flex-col p-0 text-left" style="max-width: 36rem;">
         <div class="relative border-b border-slate-800 p-6">
             <button onclick="toggleAssigneeModal()" class="absolute right-6 top-6 text-slate-400 hover:text-white">
                 <i data-lucide="x" class="h-6 w-6"></i>
