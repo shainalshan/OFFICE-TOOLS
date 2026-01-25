@@ -14,9 +14,7 @@ def compress_image_view(request):
         
         # Validation: Max 5MB
         if uploaded_image.size > 5 * 1024 * 1024:
-            return render(request, 'image_compressor/compress.html', {
-                'error': 'Image is too large. Max allowed size is 5MB.'
-            })
+            return HttpResponse('Image is too large. Max allowed size is 5MB.', status=400)
 
         try:
             # Open Image
@@ -55,8 +53,6 @@ def compress_image_view(request):
             return response
 
         except Exception as e:
-            return render(request, 'image_compressor/compress.html', {
-                'error': f'Compression failed: {str(e)}'
-            })
+            return HttpResponse(f'Compression failed: {str(e)}', status=500)
 
-    return render(request, 'image_compressor/compress.html')
+    return render(request, 'core/react_dashboard.html')

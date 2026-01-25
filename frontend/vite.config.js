@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   base: '/static/react_dashboard/',
   build: {
-    outDir: 'dist',
+    outDir: '../core/static/react_dashboard',
     assetsDir: 'assets',
     manifest: true,
     rollupOptions: {

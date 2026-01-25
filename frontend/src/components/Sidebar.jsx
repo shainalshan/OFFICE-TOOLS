@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, FileText, Calendar, Users, Settings, Rocket, LogOut } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, FileText, Calendar, Users, Settings, Rocket, LogOut, Image } from 'lucide-react';
 
 const Sidebar = () => {
     const isAdmin = window.django?.user?.is_superuser;
@@ -8,6 +8,7 @@ const Sidebar = () => {
         ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Dashboard', url: '/dashboard/' }] : []),
         { icon: FolderKanban, label: 'Projects' },
         { icon: FileText, label: 'Documents' },
+        { icon: Image, label: 'Image Compressor', url: '/tools/compressor/' },
         { icon: Calendar, label: 'Calendar' },
         { icon: Users, label: 'Team' },
         { icon: Settings, label: 'Settings', url: '/profile/' },
