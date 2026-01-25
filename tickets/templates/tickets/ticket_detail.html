@@ -70,8 +70,7 @@
                     <div>
                         <h1 class="text-3xl font-bold text-white">{{ ticket.ticket_id }}</h1>
                         <p class="mt-1 text-sm text-slate-400">
-                            Created by <span class="text-slate-300">{{ ticket.user.username }}</span> on {{
-                            ticket.created_at|date:"M d, Y H:i" }}
+                            Created by <span class="text-slate-300">{{ ticket.user.username }}</span> on {{ ticket.created_at|date:"M d, Y H:i" }}
                         </p>
                     </div>
                     <span class="rounded-lg px-3 py-1.5 text-sm font-medium
