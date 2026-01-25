@@ -98,13 +98,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <main className="ml-64 pt-20 min-h-screen p-8 space-y-8 bg-slate-950 text-white relative overflow-hidden">
-            {/* Background elements */}
-            <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-0">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-3xl opacity-50"></div>
-                <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-3xl opacity-50"></div>
-            </div>
-
+        <div className="space-y-8 animate-fade-in">
             <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-5 shadow-2xl overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                 <div className="relative flex flex-col gap-1">
@@ -131,7 +125,7 @@ const Dashboard = () => {
                     ))}
                 </div>
             </div>
-        </main>
+        </div>
     );
 };
 

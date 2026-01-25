@@ -54,7 +54,7 @@ const SignatureGenerator = () => {
     };
 
     return (
-        <div className="ml-64 pt-20 min-h-screen p-8 bg-slate-950 text-white">
+        <div className="animate-fade-in">
             <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-8 space-y-2">
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
