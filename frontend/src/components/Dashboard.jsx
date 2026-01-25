@@ -75,13 +75,7 @@ const Dashboard = () => {
             color: 'from-orange-400 to-amber-500',
             url: '/tools/converter/'
         },
-        {
-            title: 'Backup & Restore',
-            description: 'System backups',
-            icon: '💾',
-            color: 'from-emerald-400 to-green-600',
-            url: '/backup/'
-        },
+
         {
             title: 'PIXL AI',
             description: 'AI Image Tools',

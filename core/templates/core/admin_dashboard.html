@@ -132,14 +132,7 @@
         </div>
         {% endif %}
 
-        <!-- Backup & Restore Card -->
-        {% flag "new_backup_tool" %}
-        <div class="tool-card" onclick="location.href='{% url 'backup_dashboard' %}'">
-            <div class="tool-icon">💾</div>
-            <div class="tool-title">Backup & Restore</div>
-            <div class="tool-desc">Manage system backups and restoration</div>
-        </div>
-        {% endflag %}
+
         <div class="tool-card" onclick="showSection('recovery-section')">
             <div class="tool-icon">♻️</div>
             <div class="tool-title">Recovery</div>
