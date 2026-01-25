@@ -1,21 +1,26 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_modern.html' %}
 
-{% block content %}
+{% block extra_head %}
+<!-- Cesium -->
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+{% endblock %}
 
+{% block content %}
 <div
-    style="position: relative; height: calc(100vh - 100px); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+    style="position: relative; height: calc(100vh - 9rem); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
     <div id="cesiumContainer" style="width: 100%; height: 100%;"></div>
 
     <!-- Controls Overlay -->
     <div
-        style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); width: 280px;">
-        <h3 style="margin-top: 0;">🌐 Project Layer</h3>
-        <p style="font-size: 0.9rem; color: #cbd5e1;">Loading models...</p>
+        style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); width: 280px; z-index: 10;">
+        <h3 style="margin-top: 0; color: white; font-weight: bold; margin-bottom: 0.5rem;">🌐 Project Layer</h3>
+        <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;" id="loading-text">Loading models...</p>
         <div id="project-list" style="max-height: 200px; overflow-y: auto;"></div>
-        <a href="{% url 'three_d_view:project_list' %}" class="btn-primary"
-            style="display: block; text-align: center; margin-top: 10px; background: #6366f1;">Manage / Upload</a>
+        <a href="{% url 'three_d_view:project_list' %}"
+            style="display: block; text-align: center; margin-top: 10px; background: #6366f1; color: white; padding: 0.5rem; border-radius: 8px; text-decoration: none; font-weight: 500;">
+            Manage / Upload
+        </a>
     </div>
 </div>
 
@@ -28,7 +33,12 @@
 
     // Initialize Viewer
     const viewer = new Cesium.Viewer('cesiumContainer', {
-        terrainProvider: Cesium.createWorldTerrain(),
+        imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
+            url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
+        }),
+        terrainProvider: new Cesium.ArcGISTiledElevationTerrainProvider({
+            url: 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer'
+        }),
         infoBox: false,
         selectionIndicator: false,
         timeline: false,
@@ -50,7 +60,9 @@
         .then(res => res.json())
         .then(data => {
             const listEl = document.getElementById('project-list');
-            listEl.innerHTML = ''; // Clear loading text
+            const loadingText = document.getElementById('loading-text');
+            listEl.innerHTML = '';
+            if (loadingText) loadingText.style.display = 'none';
 
             if (data.projects.length === 0) {
                 listEl.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8;">No projects found. Upload one!</div>';
@@ -62,7 +74,10 @@
                 item.style.padding = '8px';
                 item.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
                 item.style.cursor = 'pointer';
+                item.style.color = '#e2e8f0';
                 item.innerHTML = `<strong>${proj.name}</strong>`;
+                item.onmouseover = () => item.style.background = 'rgba(255,255,255,0.1)';
+                item.onmouseout = () => item.style.background = 'transparent';
                 item.onclick = () => {
                     viewer.camera.flyTo({
                         destination: Cesium.Cartesian3.fromDegrees(proj.lon, proj.lat, proj.alt + 500),

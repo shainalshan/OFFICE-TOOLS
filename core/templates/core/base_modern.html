@@ -125,7 +125,7 @@
         <nav class="flex-1 space-y-2 overflow-y-auto px-4 py-6 custom-scrollbar">
             {% if user.is_superuser %}
             <a href="{% url 'admin_dashboard' %}"
-                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'dashboard' in request.path %}bg-slate-900 text-white{% endif %}">
                 <i data-lucide="layout-dashboard"
                     class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">Admin Dashboard</span>
@@ -139,17 +139,32 @@
                 <span class="font-medium">Projects</span>
             </a>
 
-            <!-- IT Support (Active Consideration) -->
-            <a href="{% url 'my_tickets' %}"
-                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'tickets' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
-                <i data-lucide="ticket" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
-                <span class="font-medium">IT Support</span>
-            </a>
-
+            <!-- Documents -->
             <a href="#"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
                 <i data-lucide="file-text" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">Documents</span>
+            </a>
+
+            <!-- Image Compressor -->
+            <a href="/tools/compressor/"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="image" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">Image Compressor</span>
+            </a>
+
+            <!-- 3D Viewer -->
+            <a href="/3d/"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+                <i data-lucide="globe" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">3D Viewer</span>
+            </a>
+
+            <!-- IT Support -->
+            <a href="{% url 'my_tickets' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'tickets' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
+                <i data-lucide="ticket" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
+                <span class="font-medium">IT Support</span>
             </a>
 
             <a href="#"
@@ -161,7 +176,7 @@
             <a href="{% url 'contact_home' %}"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'contacts' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
                 <i data-lucide="users" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
-                <span class="font-medium">Directory</span>
+                <span class="font-medium">Team</span>
             </a>
 
             <a href="{% url 'profile_view' %}"

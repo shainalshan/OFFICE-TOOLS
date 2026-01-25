@@ -20,7 +20,8 @@
         email: "{{ user.email|default:'' }}",
         is_superuser: "{{ user.is_superuser|yesno:'true,false' }}" === "true",
         is_authenticated: "{{ user.is_authenticated|yesno:'true,false' }}" === "true"
-      }
+      },
+      cesium_token: "{{ cesium_token|default:'' }}"
     };
   </script>
 </body>
