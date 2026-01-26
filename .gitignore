@@ -42,3 +42,5 @@ PixlAI/
 *.bin
 pixl_memory.db
 media/knowledge_base/
+media/documents/
+media/attachments/

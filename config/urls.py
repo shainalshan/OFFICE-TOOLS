@@ -33,6 +33,7 @@ urlpatterns = [
     path('tools/background-remover/', include('background_changer.urls')),
     path('tools/converter/', include('file_converter.urls')),
     path('pixl_ai/', include('pixl_core.urls')),
+    path('documents/', include('documents.urls')),
 
 
     # APIs

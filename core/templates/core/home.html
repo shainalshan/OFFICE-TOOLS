@@ -100,6 +100,14 @@
             <div class="tool-desc">{{ tool.description }}</div>
         </a>
 
+        {% elif tool.slug == 'documents' %}
+        <a href="{% url 'doc_index' %}" class="tool-card glass-container">
+            <div class="tool-icon">📂</div>
+            <div class="tool-title">{{ tool.name }}</div>
+            <div class="tool-desc">{{ tool.description }}</div>
+        </a>
+
+
 
 
         {% else %}

@@ -7,7 +7,7 @@ const Sidebar = () => {
     const navItems = [
         ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Dashboard', url: '/dashboard/' }] : []),
         { icon: FolderKanban, label: 'Projects' },
-        { icon: FileText, label: 'Documents' },
+        { icon: FileText, label: 'Documents', url: '/documents/' },
         { icon: Image, label: 'Image Compressor', url: '/tools/compressor/' },
         { icon: Globe, label: '3D Viewer', url: '/3d/' },
         { icon: Calendar, label: 'Calendar' },

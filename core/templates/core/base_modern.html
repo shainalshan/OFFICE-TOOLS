@@ -146,8 +146,8 @@
             </a>
 
             <!-- Documents -->
-            <a href="#"
-                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
+            <a href="{% url 'doc_index' %}"
+                class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'documents' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
                 <i data-lucide="file-text" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">Documents</span>
             </a>
