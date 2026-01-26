@@ -184,6 +184,25 @@ const Header = () => {
         } catch (err) { console.error(err); }
     };
 
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatTime = (date) => {
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+        return `${hours}:${strMinutes} ${ampm}`;
+    };
+
     return (
         <header className="h-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 flex items-center justify-between px-8 fixed top-0 left-64 right-0 z-50 transition-all duration-300">
             <div className="relative w-96 font-sans">
@@ -196,6 +215,10 @@ const Header = () => {
             </div>
 
             <div className="flex items-center gap-6">
+                <div className="text-sm font-medium text-slate-200" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatTime(currentTime)}
+                </div>
+
                 <button className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
                     <CalendarIcon className="w-5 h-5" />
                 </button>

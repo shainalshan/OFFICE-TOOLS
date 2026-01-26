@@ -224,6 +224,10 @@
 
             <!-- Right Actions -->
             <div class="flex items-center gap-6">
+                <!-- Clock -->
+                <div id="header-clock" class="text-sm font-medium text-slate-200"
+                    style="font-variant-numeric: tabular-nums;"></div>
+
                 <button
                     class="relative rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
                     <i data-lucide="calendar" class="h-5 w-5"></i>
@@ -622,6 +626,30 @@
                 setTimeout(() => toast.remove(), 400);
             }, 5000);
         }
+    </script>
+
+    <!-- Clock Script -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+
+            const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+            const strTime = hours + ':' + strMinutes + ' ' + ampm;
+
+            const clockElement = document.getElementById('header-clock');
+            if (clockElement) {
+                clockElement.innerText = strTime;
+            }
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); // initial call
     </script>
 
     {% block extra_js %}{% endblock %}
