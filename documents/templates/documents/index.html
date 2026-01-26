@@ -37,16 +37,16 @@
         </div>
 
         <!-- Grid View -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="flex flex-wrap gap-4">
             <!-- Back Button if not root -->
             {% if current_folder %}
             <a href="{% if current_folder.parent %}{% url 'doc_index_folder' current_folder.parent.id %}{% else %}{% url 'doc_index' %}{% endif %}"
-                class="group flex flex-col items-center gap-3 p-4 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50">
-                <div class="w-16 h-16 flex items-center justify-center text-slate-500 group-hover:text-slate-400">
+                class="group flex flex-col items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50 w-[75px] h-[113px]">
+                <div class="flex-1 flex items-center justify-center text-slate-500 group-hover:text-slate-400">
                     <i data-lucide="arrow-left" class="h-8 w-8"></i>
                 </div>
                 <span
-                    class="text-sm font-medium text-slate-400 group-hover:text-slate-300 text-center truncate w-full">Back</span>
+                    class="text-[10px] font-medium text-slate-400 group-hover:text-slate-300 text-center truncate w-full">Back</span>
             </a>
             {% endif %}
 
@@ -54,12 +54,12 @@
             {% for folder in folders %}
             <div class="relative group">
                 <a href="{% url 'doc_index_folder' folder.id %}"
-                    class="flex flex-col items-center gap-3 p-4 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50">
-                    <div class="w-16 h-16 flex items-center justify-center text-amber-400 drop-shadow-lg">
-                        <i data-lucide="folder" class="h-12 w-12 fill-amber-400/20"></i>
+                    class="flex flex-col items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50 w-[75px] h-[113px]">
+                    <div class="flex-1 flex items-center justify-center text-amber-400 drop-shadow-lg">
+                        <i data-lucide="folder" class="h-8 w-8 fill-amber-400/20"></i>
                     </div>
                     <span
-                        class="text-sm font-medium text-slate-300 group-hover:text-white text-center truncate w-full">{{
+                        class="text-[10px] font-medium text-slate-300 group-hover:text-white text-center truncate w-full">{{
                         folder.name }}</span>
                 </a>
                 <button onclick="confirmDeleteFolder('{{ folder.id }}')"
@@ -74,21 +74,22 @@
             {% for doc in documents %}
             <div class="relative group">
                 <div onclick="openPreview('{{ doc.id }}', '{{ doc.title|escapejs }}', '{{ doc.file_type }}', '{% url 'view_document' doc.id %}', '{% url 'download_document' doc.id %}')"
-                    class="flex flex-col items-center gap-3 p-4 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50">
-                    <div class="w-16 h-16 flex items-center justify-center text-blue-400 drop-shadow-lg">
+                    class="flex flex-col items-center justify-between p-2 rounded-xl hover:bg-slate-800/50 transition-all cursor-pointer border border-transparent hover:border-slate-700/50 w-[75px] h-[113px]">
+                    <div class="flex-1 flex items-center justify-center text-blue-400 drop-shadow-lg">
                         {% if doc.file_type in 'jpg,jpeg,png,gif,webp' %}
-                        <i data-lucide="image" class="h-12 w-12 text-purple-400"></i>
+                        <i data-lucide="image" class="h-8 w-8 text-purple-400"></i>
                         {% elif doc.file_type == 'pdf' %}
-                        <i data-lucide="file-text" class="h-12 w-12 text-red-400"></i>
+                        <i data-lucide="file-text" class="h-8 w-8 text-red-400"></i>
                         {% elif doc.file_type in 'xls,xlsx,csv' %}
-                        <i data-lucide="table" class="h-12 w-12 text-emerald-400"></i>
+                        <i data-lucide="table" class="h-8 w-8 text-emerald-400"></i>
                         {% elif doc.file_type in 'doc,docx' %}
-                        <i data-lucide="file-type" class="h-12 w-12 text-blue-400"></i>
+                        <i data-lucide="file-type" class="h-8 w-8 text-blue-400"></i>
                         {% else %}
-                        <i data-lucide="file" class="h-12 w-12 text-slate-400"></i>
+                        <i data-lucide="file" class="h-8 w-8 text-slate-400"></i>
                         {% endif %}
                     </div>
-                    <span class="text-sm font-medium text-slate-300 group-hover:text-white text-center truncate w-full"
+                    <span
+                        class="text-[10px] font-medium text-slate-300 group-hover:text-white text-center truncate w-full"
                         title="{{ doc.title }}">{{ doc.title }}</span>
                 </div>
                 <button onclick="confirmDeleteDoc('{{ doc.id }}')"
@@ -111,7 +112,7 @@
 
 <!-- Upload Modal -->
 <div id="uploadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="glass-container w-full max-w-md p-6">
+    <div class="glass-container w-[350px] p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-white">Upload Document</h3>
             <button onclick="document.getElementById('uploadModal').classList.add('hidden')"
@@ -141,7 +142,7 @@
 
 <!-- New Folder Modal -->
 <div id="folderModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="glass-container w-full max-w-md p-6">
+    <div class="glass-container w-[350px] p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-white">New Folder</h3>
             <button onclick="document.getElementById('folderModal').classList.add('hidden')"
