@@ -86,35 +86,10 @@ def send_ticket_notification(event_type, ticket, affected_user=None, extra_conte
 
 @receiver(post_save, sender=Ticket)
 def ticket_lifecycle_notification(sender, instance, created, **kwargs):
-    if created:
-        send_ticket_notification('TICKET_CREATED', instance)
-    else:
-        # Check for changes
-        # We need identifying what changed; usually requires a pre_save signal or tracking fields
-        # However, for simple post_save, we can infer some things or just send status updates if status changed
-        # Since we don't have easy 'previous state' here without extra overhead, we'll check fields if possible
-        # Or simpler: Just send a generic "Status/Info Changed" or specifically check status if we could.
-        # But `post_save` doesn't give old values.
-        
-        # NOTE: To do this properly, we usually use `__init__` tracking or `pre_save`.
-        # For this implementation, I will rely on the fact that if it's saved and not created, it's an update.
-        # BUT, sending emails on *every* save might be spammy.
-        # Let's try to see if we can detect status change? 
-        # Actually, for this iteration, let's just trigger 'TICKET_STATUS_CHANGED' if it's an update.
-        # Ideally we should check if status actually changed. 
-        # For now, I will assume significant updates (Status, Assignment) trigger this.
-        
-        # Let's inspect tracker if available, or just send 'TICKET_STATUS_CHANGED' which covers general updates.
-        send_ticket_notification('TICKET_STATUS_CHANGED', instance)
-        
-        # Note: 'TICKET_ASSIGNED' is technically a status change or update. 
-        # Providing specific ASSIGNED event might require checking if `assigned_to` changed.
-        # I will leave ASSIGNED as specific manual trigger or inferred.
-        # Actually, if I can't check changes, I will just stick to STATUS_CHANGED for all updates unless I implement a tracking model.
-        # Let's keep it simple: Any update -> Status Changed Notification.
+    # DISABLED: Redundant. Views now handle notifications via core.notifications
+    pass
 
 @receiver(post_save, sender=TicketComment)
 def ticket_comment_notification(sender, instance, created, **kwargs):
-    if created:
-        context = f"Comment by {instance.user.username}:\n{instance.text}"
-        send_ticket_notification('TICKET_COMMENTED', instance.ticket, extra_context=context)
+    # DISABLED: Redundant. Views now handle notifications via core.notifications
+    pass

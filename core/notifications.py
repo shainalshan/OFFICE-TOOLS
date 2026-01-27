@@ -46,42 +46,44 @@ def send_event_notification(event_type, context, functional_recipients=None):
     # 3. Generate Content
     subject, message, in_app_message, link = generate_content(event_type, context)
     
-    # 4. Send Emails
-    recipient_emails = [u.email for u in all_recipients]
-    
-    # -- Dynamic Email Config Check --
-    # We fetch request from context if available, or just check flag globally? 
-    # Waffle request-flag check usually needs request object. 
-    # For now, we'll try-catch or assume static if no request.
-    # Actually, we can check if EmailConfiguration exists.
-    
-    try:
-        if EmailConfiguration.objects.exists():
-             # Use dynamic sender
-             send_dynamic_email(subject, message, recipient_emails)
-        else:
-            # Fallback to Django settings
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                recipient_emails,
-                fail_silently=True
-            )
-        logger.info(f"Sent {event_type} notification to {len(recipient_emails)} recipients.")
-    except Exception as e:
-        logger.error(f"Failed to send email for {event_type}: {e}")
+    # Define Async Worker
+    import threading
+    def _send_async():
+        # 4. Send Emails
+        recipient_emails = [u.email for u in all_recipients]
+        
+        try:
+            if EmailConfiguration.objects.exists():
+                 # Use dynamic sender
+                 send_dynamic_email(subject, message, recipient_emails)
+            else:
+                # Fallback to Django settings
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    recipient_emails,
+                    fail_silently=True
+                )
+            logger.info(f"Sent {event_type} notification to {len(recipient_emails)} recipients.")
+        except Exception as e:
+            logger.error(f"Failed to send email for {event_type}: {e}")
 
-    # 5. Create System Notifications (In-App)
-    # Different logic: Subscribers might want in-app? Functional users definitely want in-app.
-    # Let's send to all for now.
-    for user in all_recipients:
-        SystemNotification.objects.create(
-            recipient=user,
-            title=subject, # Or a shorter title?
-            message=in_app_message,
-            link=link
-        )
+        # 5. Create System Notifications (In-App)
+        # We do this in thread too so it doesn't block, assuming DB connection is fine (Django handles new connection per thread usually if configured, creates on access)
+        try:
+            for user in all_recipients:
+                SystemNotification.objects.create(
+                    recipient=user,
+                    title=subject,
+                    message=in_app_message,
+                    link=link
+                )
+        except Exception as e:
+            logger.error(f"Failed to create system notification: {e}")
+
+    # Start Background Thread
+    threading.Thread(target=_send_async).start()
 
 def generate_content(event_type, context):
     """
