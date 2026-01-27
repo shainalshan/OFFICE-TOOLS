@@ -170,7 +170,8 @@
                                     class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                     <option value="none">Unassigned</option>
                                     {% for user in users %}
-                                    <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                    <option value="{{ user.id }}" {% if ticket.assigned_to and
+                                        ticket.assigned_to.id==user.id %}selected{% endif %}>
                                         {{ user.username }}
                                     </option>
                                     {% endfor %}
@@ -479,6 +480,7 @@
         if (modal.classList.contains('hidden')) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            filterAssigneeList();
         } else {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
