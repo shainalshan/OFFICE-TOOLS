@@ -94,7 +94,7 @@ for tool_data in tools_data:
 
 # Create Superuser if not exists
 if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
-    print("Created superuser: admin / admin123")
+    User.objects.create_superuser('admin', 'shainaldof@gmail.com', 'Heartland7sha$#')
+    print("Created superuser: admin / Heartland7sha$#")
 else:
     print("Superuser 'admin' already exists")
