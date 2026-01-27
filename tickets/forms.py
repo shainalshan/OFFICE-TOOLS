@@ -32,6 +32,7 @@ class TicketForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        approver_queryset = kwargs.pop('approver_queryset', None)
         super(TicketForm, self).__init__(*args, **kwargs)
         
         # Enable assigned_to for all users
@@ -41,6 +42,12 @@ class TicketForm(forms.ModelForm):
             Q(groups__name='Ticket Admin') | Q(groups__name='Ticket Support')
         ).distinct()
         
-        # Enable approver for all users
-        self.fields['approver'].queryset = User.objects.all().order_by('username')
+        # Enable approver based on passed queryset or default to all
+        if approver_queryset is not None:
+            self.fields['approver'].queryset = approver_queryset
+            
+            # Optional: Hide if empty and using restricted list? 
+            # For now, just let it be empty so they know they need to add approvers.
+        else:
+            self.fields['approver'].queryset = User.objects.all().order_by('username')
 

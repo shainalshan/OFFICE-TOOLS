@@ -27,8 +27,19 @@ def is_ticket_admin(user):
 @login_required
 @check_tool_access('ticketing')
 def create_ticket(request):
+    # --- Safety Mode: Manage Approvers ---
+    approver_queryset = None
+    if waffle.flag_is_active(request, 'manage_approvers'):
+        # If flag is ON: Only show users in 'Ticket Approver' group
+        approver_queryset = User.objects.filter(groups__name='Ticket Approver').order_by('username')
+        # If no approvers exist yet, the queryset is empty, which is correct behavior (admin needs to add them).
+    else:
+        # If flag is OFF: Default behavior (All users)
+        approver_queryset = User.objects.all().order_by('username')
+    # -------------------------------------
+
     if request.method == 'POST':
-        form = TicketForm(request.POST, user=request.user)
+        form = TicketForm(request.POST, user=request.user, approver_queryset=approver_queryset)
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.user = request.user
@@ -67,7 +78,7 @@ def create_ticket(request):
             messages.success(request, f'Ticket {ticket.ticket_id} created successfully.')
             return redirect('my_tickets')
     else:
-        form = TicketForm(user=request.user)
+        form = TicketForm(user=request.user, approver_queryset=approver_queryset)
     return render(request, 'tickets/create_ticket.html', {'form': form})
 
 @login_required
@@ -333,6 +344,19 @@ def admin_ticket_panel(request):
             'user': user,
             'is_assignee': is_assignee
         })
+        
+    # --- Safety Mode: Manage Approvers ---
+    users_with_approver_role = []
+    manage_approvers_active = waffle.flag_is_active(request, 'manage_approvers')
+    if manage_approvers_active:
+        ticket_approver_group, _ = Group.objects.get_or_create(name='Ticket Approver')
+        for user in all_users_for_access:
+            is_approver = ticket_approver_group in user.groups.all()
+            users_with_approver_role.append({
+                'user': user,
+                'is_approver': is_approver
+            })
+    # -------------------------------------
 
     # SIMPLIFICATION: In Admin Panel, show ALL users as potential assignees.
     # This avoids issues where a valid assignee is hidden because they aren't in a specific group.
@@ -354,6 +378,8 @@ def admin_ticket_panel(request):
         'users': all_users,
         'users_with_access': users_with_access,
         'users_with_assignee_role': users_with_assignee_role,
+        'users_with_approver_role': users_with_approver_role,
+        'manage_approvers_active': manage_approvers_active,
         'now': timezone.now()
     })
 
@@ -427,6 +453,33 @@ def manage_ticket_assignees(request):
             elif action == 'revoke':
                 user.groups.remove(group)
                 messages.success(request, f'Assignee role revoked from {user.username}')
+                
+        except User.DoesNotExist:
+            messages.error(request, 'User not found.')
+            
+    return redirect('admin_ticket_panel')
+
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='Ticket Admin').exists())
+def manage_ticket_approvers(request):
+    # Safety Check: Feature Flag
+    if not waffle.flag_is_active(request, 'manage_approvers'):
+        messages.error(request, "Feature not available.")
+        return redirect('admin_ticket_panel')
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action') 
+        
+        try:
+            user = User.objects.get(id=user_id)
+            group, created = Group.objects.get_or_create(name='Ticket Approver')
+            
+            if action == 'grant':
+                user.groups.add(group)
+                messages.success(request, f'Approver role granted to {user.username}')
+            elif action == 'revoke':
+                user.groups.remove(group)
+                messages.success(request, f'Approver role revoked from {user.username}')
                 
         except User.DoesNotExist:
             messages.error(request, 'User not found.')
