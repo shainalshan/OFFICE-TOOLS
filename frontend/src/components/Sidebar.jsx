@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, FolderKanban, FileText, Calendar, Users, Settings, Rocket, LogOut, Image, Globe } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, FileText, Calendar, Users, Settings, Rocket, LogOut, Image, Globe, PenTool, Ticket, Package, Megaphone, Activity, Scissors, RefreshCw, Sparkles } from 'lucide-react';
 
 const Sidebar = () => {
     const user = window.django?.user;
@@ -8,13 +8,22 @@ const Sidebar = () => {
 
     const allNavItems = [
         ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Dashboard', url: '/dashboard/' }] : []),
-        { icon: FolderKanban, label: 'Projects', slug: 'projects' }, // Assuming 'projects' tool
+        { icon: PenTool, label: 'Signature Generator', url: '/signature/', slug: 'signature' },
+        { icon: Ticket, label: 'IT Tickets', url: '/tickets/', slug: 'ticketing' },
+        { icon: Package, label: 'Asset Manager', url: '/assets/', slug: 'assets' },
+        { icon: Megaphone, label: 'Office News', url: '/news/', slug: 'news' },
+        { icon: Activity, label: 'System Monitor', url: '/monitor/', slug: 'monitor' },
+        { icon: Users, label: 'Contact Manager', url: '/contacts/', slug: 'manage-contacts' },
+        { icon: FolderKanban, label: 'Projects', slug: 'projects' },
         { icon: FileText, label: 'Documents', url: '/documents/', slug: 'documents' },
         { icon: Image, label: 'Image Compressor', url: '/tools/compressor/', slug: 'image-compressor' },
         { icon: Globe, label: '3D Viewer', url: '/3d/', slug: '3d-view' },
-        { icon: Calendar, label: 'Calendar', slug: 'calendar' }, // Assuming 'calendar' tool
-        { icon: Users, label: 'Team', slug: 'team' }, // Assuming 'team' tool
-        { icon: Settings, label: 'Settings', url: '/profile/' }, // Profile is usually generic
+        { icon: Scissors, label: 'Background Remover', url: '/tools/background-remover/', slug: 'background-changer' },
+        { icon: RefreshCw, label: 'File Converter', url: '/tools/converter/', slug: 'converter' },
+        { icon: Sparkles, label: 'PIXL AI', url: '/pixl_ai/', slug: 'pixl_ai' },
+        { icon: Calendar, label: 'Calendar', slug: 'calendar' },
+        { icon: Users, label: 'Team', slug: 'team' },
+        { icon: Settings, label: 'Settings', url: '/profile/' },
     ];
 
     const navItems = allNavItems.filter(item => {
