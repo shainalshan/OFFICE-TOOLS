@@ -45,7 +45,11 @@ def home(request):
         except UserToolAccess.DoesNotExist:
             tools = []
 
-    return render(request, 'core/react_dashboard.html')
+    allowed_tools = [tool.slug for tool in tools]
+
+    return render(request, 'core/react_dashboard.html', {
+        'allowed_tools': allowed_tools
+    })
 
 @login_required
 def set_user_tools(request):

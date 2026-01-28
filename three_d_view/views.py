@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Project3D
 from django.conf import settings
+from core.decorators import check_tool_access
 
 @login_required
+@check_tool_access('3d-view')
 def project_list(request):
     if request.method == 'POST':
         name = request.POST.get('name')

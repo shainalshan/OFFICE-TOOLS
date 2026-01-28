@@ -4,9 +4,11 @@ from django.http import HttpResponse, FileResponse
 from django.conf import settings
 from .models import Folder, Document
 from .forms import FolderForm, DocumentForm
+from core.decorators import check_tool_access
 import os
 
 @login_required
+@check_tool_access('documents')
 def doc_index(request, folder_id=None):
     current_folder = None
     if folder_id:

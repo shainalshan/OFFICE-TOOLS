@@ -7,6 +7,7 @@ from .models import KnowledgeBaseItem, AIFeedback
 from assets.models import Asset
 from contacts.models import Contact
 from tickets.models import Ticket
+from core.decorators import check_tool_access
 import requests
 import re
 import json
@@ -15,6 +16,14 @@ import json
 AI_ENGINE_URL = "http://127.0.0.1:8001"
 
 def get_smart_context(query):
+    # ... (omitted for brevity, keep existing code) ...
+    # This part of file content replacement tool is tricky if I can't simple prepend imports.
+    # I should use multiple `replace_file_content` or `multi_replace` to be cleaner, 
+    # OR since the file is small enough, I can try to replace sections.
+    # Actually, let's use `multi_replace_file_content` to be safe/clean.
+    # Oh wait, I am being asked to use `replace_file_content`? 
+    # I will switch to `multi_replace_file_content` since I need to touch multiple functions.
+    pass
     """
     Retrieve context from SQL database (Assets, Contacts, Tickets) based on keywords.
     """
@@ -87,6 +96,7 @@ def get_smart_context(query):
     return "\n".join(context_parts)
 
 @login_required
+@check_tool_access('pixl_ai')
 def ask_ai(request):
     """
     Proxy request to the local AI Engine with Smart SQL Context.
@@ -181,6 +191,7 @@ def ask_ai(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
+@check_tool_access('pixl_ai')
 def ai_chat(request):
     """
     Render the Chat UI.
@@ -222,6 +233,7 @@ def submit_ai_feedback(request):
         return JsonResponse({'error': str(e)}, status=400)
 
 @login_required
+@check_tool_access('pixl_ai')
 def knowledge_list(request):
     items = KnowledgeBaseItem.objects.all().order_by('-updated_at')
     return render(request, 'pixl_core/knowledge_list.html', {'items': items})

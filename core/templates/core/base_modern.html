@@ -153,25 +153,31 @@
             </a>
 
             <!-- Image Compressor -->
+            {% if 'image-compressor' in allowed_tools %}
             <a href="/tools/compressor/"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
                 <i data-lucide="image" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">Image Compressor</span>
             </a>
+            {% endif %}
 
             <!-- 3D Viewer -->
+            {% if '3d-view' in allowed_tools %}
             <a href="/3d/"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
                 <i data-lucide="globe" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">3D Viewer</span>
             </a>
+            {% endif %}
 
             <!-- IT Support -->
+            {% if 'ticketing' in allowed_tools %}
             <a href="{% url 'my_tickets' %}"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'tickets' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
                 <i data-lucide="ticket" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">IT Support</span>
             </a>
+            {% endif %}
 
             <a href="#"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-slate-400 transition-all duration-200 hover:bg-slate-900 hover:text-white">
@@ -179,11 +185,13 @@
                 <span class="font-medium">Calendar</span>
             </a>
 
+            {% if 'contacts' in allowed_tools %}
             <a href="{% url 'contact_home' %}"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'contacts' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">
                 <i data-lucide="users" class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"></i>
                 <span class="font-medium">Team</span>
             </a>
+            {% endif %}
 
             <a href="{% url 'profile_view' %}"
                 class="group flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 hover:bg-slate-900 hover:text-white {% if 'profile' in request.path %}bg-slate-900 text-white{% else %}text-slate-400{% endif %}">

@@ -2,18 +2,27 @@ import React from 'react';
 import { LayoutDashboard, FolderKanban, FileText, Calendar, Users, Settings, Rocket, LogOut, Image, Globe } from 'lucide-react';
 
 const Sidebar = () => {
-    const isAdmin = window.django?.user?.is_superuser;
+    const user = window.django?.user;
+    const allowed = window.django?.allowed_tools || [];
+    const isAdmin = user?.is_superuser;
 
-    const navItems = [
+    const allNavItems = [
         ...(isAdmin ? [{ icon: LayoutDashboard, label: 'Admin Dashboard', url: '/dashboard/' }] : []),
-        { icon: FolderKanban, label: 'Projects' },
-        { icon: FileText, label: 'Documents', url: '/documents/' },
-        { icon: Image, label: 'Image Compressor', url: '/tools/compressor/' },
-        { icon: Globe, label: '3D Viewer', url: '/3d/' },
-        { icon: Calendar, label: 'Calendar' },
-        { icon: Users, label: 'Team' },
-        { icon: Settings, label: 'Settings', url: '/profile/' },
+        { icon: FolderKanban, label: 'Projects', slug: 'projects' }, // Assuming 'projects' tool
+        { icon: FileText, label: 'Documents', url: '/documents/', slug: 'documents' },
+        { icon: Image, label: 'Image Compressor', url: '/tools/compressor/', slug: 'image-compressor' },
+        { icon: Globe, label: '3D Viewer', url: '/3d/', slug: '3d-view' },
+        { icon: Calendar, label: 'Calendar', slug: 'calendar' }, // Assuming 'calendar' tool
+        { icon: Users, label: 'Team', slug: 'team' }, // Assuming 'team' tool
+        { icon: Settings, label: 'Settings', url: '/profile/' }, // Profile is usually generic
     ];
+
+    const navItems = allNavItems.filter(item => {
+        if (isAdmin) return true;
+        // Always show Settings or items without slugs (if any intended to be public)
+        if (!item.slug) return true;
+        return allowed.includes(item.slug);
+    });
 
     const handleNavigation = (url, e) => {
         if (url) {

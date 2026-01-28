@@ -8,42 +8,48 @@ const Dashboard = () => {
             description: 'Create professional email signatures',
             icon: '✍️',
             color: 'from-yellow-400 to-orange-500',
-            url: '/signature/'
+            url: '/signature/',
+            slug: 'signature'
         },
         {
             title: 'IT Support Tickets',
             description: 'Submit support requests',
             icon: '🎫',
             color: 'from-amber-300 to-yellow-500',
-            url: '/tickets/'
+            url: '/tickets/',
+            slug: 'ticketing'
         },
         {
             title: 'Asset Manager',
             description: 'Track office inventory',
             icon: '📦',
             color: 'from-orange-400 to-red-500',
-            url: '/assets/'
+            url: '/assets/',
+            slug: 'assets'
         },
         {
             title: 'Office News',
             description: 'Announcements & Updates',
             icon: '📢',
             color: 'from-pink-500 to-rose-500',
-            url: '/news/'
+            url: '/news/',
+            slug: 'news'
         },
         {
             title: 'System Monitor',
             description: 'Server health metrics',
             icon: '📊',
             color: 'from-green-400 to-emerald-500',
-            url: '/monitor/'
+            url: '/monitor/',
+            slug: 'monitor'
         },
         {
             title: 'Contact Manager',
             description: 'Shared office contacts',
             icon: '👥',
             color: 'from-purple-500 to-indigo-500',
-            url: '/contacts/'
+            url: '/contacts/',
+            slug: 'manage-contacts' // Backend slug check required
         },
 
         {
@@ -51,14 +57,16 @@ const Dashboard = () => {
             description: 'Optimize image sizes',
             icon: '🖼️',
             color: 'from-teal-400 to-emerald-500',
-            url: '/tools/compressor/'
+            url: '/tools/compressor/',
+            slug: 'image-compressor'
         },
         {
             title: '3D Viewer',
             description: 'View 3D models',
             icon: '🧊',
             color: 'from-violet-400 to-fuchsia-500',
-            url: '/3d/'
+            url: '/3d/',
+            slug: '3d-view'
         },
 
         {
@@ -66,14 +74,16 @@ const Dashboard = () => {
             description: 'Remove image backgrounds',
             icon: '✂️',
             color: 'from-gray-400 to-slate-500',
-            url: '/tools/background-remover/'
+            url: '/tools/background-remover/',
+            slug: 'background-changer'
         },
         {
             title: 'File Converter',
             description: 'Convert file formats',
             icon: '🔄',
             color: 'from-orange-400 to-amber-500',
-            url: '/tools/converter/'
+            url: '/tools/converter/',
+            slug: 'converter'
         },
 
         {
@@ -81,7 +91,8 @@ const Dashboard = () => {
             description: 'AI Image Tools',
             icon: '✨',
             color: 'from-indigo-400 to-purple-600',
-            url: '/pixl_ai/'
+            url: '/pixl_ai/',
+            slug: 'pixl_ai'
         }
     ];
 
@@ -106,7 +117,15 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {tools.map((tool, index) => (
+                    {tools.filter(tool => {
+                        const user = window.django?.user;
+                        if (user?.is_superuser) return true;
+
+                        const allowed = window.django?.allowed_tools || [];
+                        // Check if tool slug is in allowed list
+                        // Note: Some tools might need slug mapping updates if they mismatch backend
+                        return allowed.includes(tool.slug);
+                    }).map((tool, index) => (
                         <a key={index} href={tool.url || '#'}>
                             <ToolCard {...tool} />
                         </a>

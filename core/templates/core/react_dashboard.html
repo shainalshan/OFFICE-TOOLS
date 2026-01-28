@@ -6,8 +6,8 @@
   <link rel="icon" type="image/svg+xml" href="/static/react_dashboard/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Office Portal</title>
-  <script type="module" crossorigin src="/static/react_dashboard/assets/index.js?v=3"></script>
-  <link rel="stylesheet" crossorigin href="/static/react_dashboard/assets/index.css?v=3">
+  <script type="module" crossorigin src="/static/react_dashboard/assets/index.js?v=4"></script>
+  <link rel="stylesheet" crossorigin href="/static/react_dashboard/assets/index.css?v=4">
 </head>
 
 <body>
@@ -21,7 +21,8 @@
         is_superuser: "{{ user.is_superuser|yesno:'true,false' }}" === "true",
         is_authenticated: "{{ user.is_authenticated|yesno:'true,false' }}" === "true"
       },
-      cesium_token: "{{ cesium_token|default:'' }}"
+      cesium_token: "{{ cesium_token|default:'' }}",
+      allowed_tools: {{ allowed_tools | safe }}
     };
   </script>
 </body>
