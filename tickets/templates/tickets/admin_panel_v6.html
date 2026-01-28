@@ -134,7 +134,8 @@
                                     class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-400">
                                     {{ ticket.user.username|slice:":1"|upper }}
                                 </div>
-                                <span class="text-slate-300" title="{{ ticket.user.username }}">{{ ticket.user.username }}</span>
+                                <span class="text-slate-300" title="{{ ticket.user.username }}">{{ ticket.user.username
+                                    }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
@@ -184,7 +185,8 @@
                             <td class="px-6 py-4">
                                 {% if ticket.deadline %}
                                 <div class="deadline-timer text-xs font-medium"
-                                    data-deadline="{{ ticket.deadline|date:'c' }}">
+                                    data-deadline="{{ ticket.deadline|date:'c' }}" data-status="{{ ticket.status }}"
+                                    data-completed-at="{{ ticket.completed_at|date:'c' }}">
                                     {{ ticket.deadline|date:"M d, H:i" }}
                                 </div>
                                 {% else %}
@@ -555,6 +557,20 @@
 
         timers.forEach(timer => {
             const deadline = new Date(timer.dataset.deadline);
+            const status = timer.dataset.status;
+            const completedAtStr = timer.dataset.completedAt;
+
+            // Check if completed on time
+            if (status === 'COMPLETED' && completedAtStr) {
+                const completedAt = new Date(completedAtStr);
+                if (completedAt <= deadline) {
+                    // Completed on time - show checkmark or just standard appearance
+                    timer.innerHTML = "✅ On Time";
+                    timer.className = "deadline-timer text-xs font-medium text-emerald-500";
+                    return; // Skip normal countdown
+                }
+            }
+
             const diff = deadline - now;
 
             if (diff > 0) {

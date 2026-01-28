@@ -143,8 +143,9 @@
                             </div>
                         </td>
 
-                        <td style="padding: 1rem; color: {% if ticket.deadline %}{% if ticket.deadline < now %}#ef4444{% else %}#fbbf24{% endif %}{% else %}var(--text-secondary){% endif %}; font-size: 0.9rem;"
-                            class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}">
+                        <td style="padding: 1rem; color: {% if ticket.deadline %}{% if ticket.deadline < now and ticket.status != 'COMPLETED' %}#ef4444{% else %}#fbbf24{% endif %}{% else %}var(--text-secondary){% endif %}; font-size: 0.9rem;"
+                            class="deadline-timer" data-deadline="{{ ticket.deadline|date:'c' }}"
+                            data-status="{{ ticket.status }}" data-completed-at="{{ ticket.completed_at|date:'c' }}">
                             {% if ticket.deadline %}
                             {{ ticket.deadline|date:"M d, H:i" }}
                             {% else %}
@@ -286,6 +287,20 @@
         const now = new Date();
         timers.forEach(timer => {
             const deadline = new Date(timer.dataset.deadline);
+            const status = timer.dataset.status;
+            const completedAtStr = timer.dataset.completedAt;
+
+            // Check if completed on time
+            if (status === 'COMPLETED' && completedAtStr) {
+                const completedAt = new Date(completedAtStr);
+                if (completedAt <= deadline) {
+                    timer.innerHTML = "✅ On Time";
+                    timer.style.color = "#10b981"; // Emerald-500 equivalent
+                    timer.style.fontWeight = "bold";
+                    return;
+                }
+            }
+
             const diff = deadline - now;
             if (diff > 0) {
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));

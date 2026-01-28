@@ -31,7 +31,8 @@
             <div class="flex items-start justify-between">
                 <div>
                     <div class="flex items-center gap-3">
-                        <span class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">{{ ticket.ticket_id }}</span>
+                        <span class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">{{
+                            ticket.ticket_id }}</span>
                         <span class="rounded-lg bg-slate-800 px-2 py-1 text-xs font-medium text-slate-400">
                             {{ ticket.created_at|date:"M d, H:i" }}
                         </span>
@@ -39,7 +40,8 @@
 
                     {% if ticket.deadline %}
                     <div class="deadline-timer mt-1 text-xs font-bold text-amber-500"
-                        data-deadline="{{ ticket.deadline|date:'c' }}">
+                        data-deadline="{{ ticket.deadline|date:'c' }}" data-status="{{ ticket.status }}"
+                        data-completed-at="{{ ticket.completed_at|date:'c' }}">
                         ⏳ Calculating...
                     </div>
                     {% endif %}
@@ -84,7 +86,8 @@
             <div class="flex items-start justify-between">
                 <div>
                     <div class="flex items-center gap-3">
-                        <span class="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">{{ ticket.ticket_id }}</span>
+                        <span class="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">{{
+                            ticket.ticket_id }}</span>
                         <span class="text-xs text-slate-500">
                             From: <strong class="text-slate-400">{{ ticket.user.username }}</strong>
                         </span>
@@ -92,7 +95,8 @@
 
                     {% if ticket.deadline %}
                     <div class="deadline-timer mt-1 text-xs font-bold text-amber-500"
-                        data-deadline="{{ ticket.deadline|date:'c' }}">
+                        data-deadline="{{ ticket.deadline|date:'c' }}" data-status="{{ ticket.status }}"
+                        data-completed-at="{{ ticket.completed_at|date:'c' }}">
                         ⏳ Calculating...
                     </div>
                     {% endif %}
@@ -123,6 +127,20 @@
 
         timers.forEach(timer => {
             const deadline = new Date(timer.dataset.deadline);
+            const status = timer.dataset.status;
+            const completedAtStr = timer.dataset.completedAt;
+
+            // Check if completed on time
+            if (status === 'COMPLETED' && completedAtStr) {
+                const completedAt = new Date(completedAtStr);
+                if (completedAt <= deadline) {
+                    // Completed on time - show checkmark
+                    timer.innerHTML = "✅ On Time";
+                    timer.className = "deadline-timer mt-1 text-xs font-bold text-emerald-500";
+                    return;
+                }
+            }
+
             const diff = deadline - now;
 
             if (diff > 0) {
