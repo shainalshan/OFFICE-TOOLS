@@ -121,6 +121,9 @@ const Dashboard = () => {
                         const user = window.django?.user;
                         if (user?.is_superuser) return true;
 
+                        // Always show 'documents'
+                        if (tool.slug === 'documents') return true;
+
                         const allowed = window.django?.allowed_tools || [];
                         // Check if tool slug is in allowed list
                         // Note: Some tools might need slug mapping updates if they mismatch backend

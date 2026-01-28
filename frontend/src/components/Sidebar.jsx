@@ -20,7 +20,8 @@ const Sidebar = () => {
     const navItems = allNavItems.filter(item => {
         if (isAdmin) return true;
         // Always show Settings or items without slugs (if any intended to be public)
-        if (!item.slug) return true;
+        // Also always show 'documents' as requested
+        if (!item.slug || item.slug === 'documents') return true;
         return allowed.includes(item.slug);
     });
 
