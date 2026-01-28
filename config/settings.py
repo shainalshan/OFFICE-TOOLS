@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'file_converter',
     'pixl_core',
     'documents',
+    'pixl_ai', # AI App
 ]
 
 MIDDLEWARE = [
