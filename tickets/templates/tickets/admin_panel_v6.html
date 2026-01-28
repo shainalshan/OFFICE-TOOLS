@@ -134,8 +134,9 @@
                                     class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-400">
                                     {{ ticket.user.username|slice:":1"|upper }}
                                 </div>
-                                <span class="text-slate-300" title="{{ ticket.user.username }}">{{ ticket.user.username
-                                    }}</span>
+                                <span class="text-slate-300" title="{{ ticket.user.username }}">
+                                    {{ ticket.user.username }}
+                                </span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
@@ -170,9 +171,15 @@
                                     class="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-2 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                                     <option value="none">Unassigned</option>
                                     {% for user in users %}
-                                    <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                    {% if ticket.assigned_to_id == user.id %}
+                                    <option value="{{ user.id }}" selected>
                                         {{ user.username }}
                                     </option>
+                                    {% else %}
+                                    <option value="{{ user.id }}">
+                                        {{ user.username }}
+                                    </option>
+                                    {% endif %}
                                     {% endfor %}
                                 </select>
                             </td>
